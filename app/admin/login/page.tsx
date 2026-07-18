@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, Loader2 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import { motion } from 'framer-motion';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -34,7 +35,12 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-brand-dark flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#FFFFFF] rounded-3xl shadow-2xl overflow-hidden relative">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md bg-[#FFFFFF] rounded-3xl shadow-2xl overflow-hidden relative"
+      >
         <div className="p-8 text-center border-b border-brand-dark/10">
           <img src="/bsd-logo.png" alt="Logo" className="w-16 h-16 mx-auto mb-4 drop-shadow-md" />
           <h2 className="font-display text-2xl font-bold text-brand-dark">Admin Portal</h2>
@@ -43,7 +49,7 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleLogin} className="p-8 space-y-6">
           {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm text-center border border-red-100">
+            <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm text-center border border-red-100 animate-pulse">
               {error}
             </div>
           )}
@@ -86,7 +92,7 @@ export default function AdminLoginPage() {
             {loading ? <Loader2 className="animate-spin" size={20} /> : 'Sign In'}
           </button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

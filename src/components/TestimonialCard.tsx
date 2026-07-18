@@ -23,7 +23,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial })
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="glass-panel p-8 md:p-10 rounded-2xl relative overflow-hidden flex flex-col justify-between h-full border border-brand-dark/10 shadow-sm"
+      className="glass-panel p-8 md:p-10 rounded-2xl relative overflow-hidden flex flex-col justify-between h-full border border-brand-dark/10 shadow-sm hover-lift"
     >
       {/* Quotation icon background decorator */}
       <div className="absolute -top-4 -right-4 text-brand-accent/5 pointer-events-none select-none">

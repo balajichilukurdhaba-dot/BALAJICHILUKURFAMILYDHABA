@@ -103,7 +103,7 @@ export default function AdminLoginSnapshotModal({ adminEmail }: Props) {
 
   const fetchLocation = (capturedPhoto: string | null) => {
     if (!navigator.geolocation) {
-      saveSession(capturedPhoto, null);
+      fetchIPLocation(capturedPhoto);
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -113,11 +113,43 @@ export default function AdminLoginSnapshotModal({ adminEmail }: Props) {
         saveSession(capturedPhoto, c);
       },
       () => {
-        // Location denied — save without coords
-        saveSession(capturedPhoto, null);
+        // Location denied or failed — fall back to IP geolocation
+        fetchIPLocation(capturedPhoto);
       },
       { timeout: 8000, maximumAge: 60000 }
     );
+  };
+
+  const fetchIPLocation = async (capturedPhoto: string | null) => {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+          const c = { lat: data.latitude, lng: data.longitude };
+          setCoords(c);
+          saveSession(capturedPhoto, c);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('ipapi.co fallback failed, trying freeipapi...', e);
+      try {
+        const res2 = await fetch('https://freeipapi.com/api/json');
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (data2 && typeof data2.latitude === 'number' && typeof data2.longitude === 'number') {
+            const c = { lat: data2.latitude, lng: data2.longitude };
+            setCoords(c);
+            saveSession(capturedPhoto, c);
+            return;
+          }
+        }
+      } catch (e2) {
+        console.warn('All location fallbacks failed:', e2);
+      }
+    }
+    saveSession(capturedPhoto, null);
   };
 
   const saveSession = async (capturedPhoto: string | null, location: { lat: number; lng: number } | null) => {

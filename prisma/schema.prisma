@@ -216,6 +216,8 @@ model AuditLog {
   userEmail  String   @map("user_email")
   action     String   
   target     String   
+  details    String?  
+  ipAddress  String?  @map("ip_address")
   prevValue  Json?    @map("prev_value")
   newValue   Json?    @map("new_value")
   createdAt  DateTime @default(now()) @map("created_at")

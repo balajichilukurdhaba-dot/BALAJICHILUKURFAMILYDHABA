@@ -77,7 +77,7 @@ export const ContactPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email) return;
+    if (!formData.name || !formData.email || !formData.phone) return;
 
     setIsSubmitting(true);
     try {
@@ -158,7 +158,7 @@ export const ContactPage: React.FC = () => {
                   <h3 className="font-display font-bold text-lg text-brand-dark mt-4">{b.name}</h3>
                   <p className="text-xs text-brand-dark/65 mt-1 leading-relaxed">
                     {isMoinabad 
-                      ? 'Flagship outlet near the holy Chilkur Balaji Temple.'
+                      ? 'Our premier flagship location offering an exceptional pure vegetarian dining experience.'
                       : 'Authentic pure vegetarian store location.'
                     }
                   </p>
@@ -270,10 +270,11 @@ export const ContactPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-widest text-brand-dark/65 mb-2">Phone</label>
+                    <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-widest text-brand-dark/65 mb-2">Phone *</label>
                     <input 
                       type="tel" 
                       id="phone"
+                      required
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full bg-brand-bg border border-brand-dark/15 rounded-xl px-4 py-3 text-sm font-sans focus:outline-none focus:border-brand-accent transition-colors"

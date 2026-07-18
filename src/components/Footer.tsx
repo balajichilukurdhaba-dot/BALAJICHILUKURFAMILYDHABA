@@ -165,7 +165,7 @@ export const Footer: React.FC = () => {
                     rel="noreferrer"
                     className="hover:text-brand-gold transition-colors block text-left group-hover:translate-x-0.5 transition-transform duration-300"
                   >
-                    <p className="font-bold text-[#FFFFFF] text-sm leading-none">Pragathi Nagar Branch</p>
+                    <p className="font-bold text-[#FFFFFF] text-sm leading-none">PRAGATHI NAGAR BRANCH</p>
                     <p className="text-xs mt-1.5 text-[#FFFFFF]/60 leading-relaxed">Opposite Pragathi Nagar Lake, Pragathi Nagar, Kukatpally</p>
                   </a>
                 </li>

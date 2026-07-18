@@ -220,6 +220,7 @@ const HOME_BRANCHES = [
 export const Home: React.FC = () => {
   const navigate = useRouter();
   const [activeBranch, setActiveBranch] = useState(0);
+  const [showFounderModal, setShowFounderModal] = useState(false);
   const activeCategory = 'Starters';
 
   // CMS Dynamic States
@@ -733,7 +734,7 @@ export const Home: React.FC = () => {
               <div
                 key={offer.id}
                 onClick={() => navigate.push(offer.link)}
-                className="relative rounded-3xl overflow-hidden min-h-[320px] flex items-center bg-zinc-950 text-[#FFFFFF] group cursor-pointer border border-brand-gold/10 hover:border-brand-gold/25 transition-all duration-500 shadow-md"
+                className="relative rounded-3xl overflow-hidden min-h-[320px] flex items-center bg-zinc-950 text-[#FFFFFF] group cursor-pointer border border-brand-gold/10 hover:border-brand-gold/25 transition-all duration-500 shadow-md hover-lift"
               >
                 {/* Offer Image */}
                 <div className="absolute inset-0 z-0">
@@ -826,6 +827,34 @@ export const Home: React.FC = () => {
                     />
                   ))}
                 </div>
+
+                {/* Animated Founder Trigger Badge */}
+                <motion.div
+                  className="absolute bottom-4 right-4 z-20 cursor-pointer"
+                  animate={{
+                    y: [0, -6, 0],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <motion.button
+                    onClick={() => setShowFounderModal(true)}
+                    className="group relative flex items-center space-x-2 bg-brand-accent/95 hover:bg-brand-accent text-white px-4 py-2.5 rounded-full shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 active:scale-95 select-none"
+                    whileHover={{
+                      boxShadow: "0 0 20px rgba(46, 204, 113, 0.4)",
+                    }}
+                  >
+                    {/* Animated Steam Pot icon */}
+                    <span className="relative flex h-6 w-6 items-center justify-center text-lg filter drop-shadow">
+                      🍲
+                      <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[9px] animate-bounce opacity-75">💨</span>
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-wider font-display">Meet the Founder</span>
+                  </motion.button>
+                </motion.div>
               </div>
             </motion.div>
 
@@ -844,10 +873,10 @@ export const Home: React.FC = () => {
 
               <div className="space-y-4 mt-6">
                 <p className="text-brand-dark/95 font-display text-lg md:text-xl font-medium leading-relaxed">
-                  Located near the famous Chilkur Balaji Temple, our Dhaba has become a cherished destination for devotees, families, and travelers seeking authentic North & South Indian vegetarian cuisine.
+                  Crafted with passion and a deep respect for heritage, our restaurant stands as a premier destination for those who appreciate the true artistry of pure vegetarian dining. We invite families, travelers, and food connoisseurs to embark on a flavorful journey featuring the finest North and South Indian culinary traditions.
                 </p>
                 <p className="text-brand-dark/70 font-sans text-xs md:text-sm leading-loose">
-                  For over two decades, our kitchen has celebrated the rich heritage of traditional recipes. By sourcing premium ingredients and house-grinding spices daily, we ensure that every clay-oven naan and slow-cooked curry we serve is a testament to pure quality and hospitality.
+                  For over two decades, our kitchen has been dedicated to preserving the rich, authentic heritage of traditional recipes. By sourcing the finest seasonal ingredients and hand-grinding our signature spice blends daily, we ensure that every clay-oven specialty and slow-simmered curry is a masterpiece of taste, quality, and hospitality.
                 </p>
               </div>
 
@@ -858,7 +887,7 @@ export const Home: React.FC = () => {
                   { icon: '🌿', label: 'Fresh Ingredients' },
                   { icon: '👨‍👩‍👧', label: 'Family Friendly' },
                   { icon: '🚗', label: 'Spacious Parking' },
-                  { icon: '📍', label: 'Near Chilkur Balaji Temple' },
+                  { icon: '✨', label: 'Premium Dining Experience' },
                   { icon: '⭐', label: 'Highly Rated' }
                 ].map((h, i) => (
                   <motion.div
@@ -886,6 +915,87 @@ export const Home: React.FC = () => {
               </div>
             </motion.div>
           </div>
+
+          {/* Founder Story Modal */}
+          <AnimatePresence>
+            {showFounderModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-lg select-none"
+                onClick={() => setShowFounderModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.8, opacity: 0, y: 50 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  className="bg-[#FAF6EE] max-w-lg w-full rounded-3xl overflow-hidden shadow-2xl border border-brand-gold/25 relative"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header decoration */}
+                  <div className="bg-[#1E4D2B] p-6 text-center relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#FFF_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                    
+                    {/* Animated veg bowl floating out */}
+                    <motion.div
+                      initial={{ y: 30, scale: 0.5, rotate: -45 }}
+                      animate={{ y: 0, scale: 1, rotate: 0 }}
+                      transition={{ type: "spring", delay: 0.1, duration: 0.8 }}
+                      className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-3xl mx-auto border border-white/20 shadow-inner"
+                    >
+                      🍲
+                    </motion.div>
+                    <h3 className="font-display font-black text-xl text-[#FFFFFF] mt-4 tracking-wider uppercase">Our Founder's Vision</h3>
+                    <p className="text-[#90EE90] font-sans text-xs uppercase tracking-widest mt-1 font-bold">The Journey of Flavor Since 2018</p>
+                  </div>
+
+                  {/* Modal content */}
+                  <div className="p-8 space-y-6">
+                    <div className="space-y-4">
+                      <p className="text-brand-dark/95 font-display text-base md:text-lg font-medium leading-relaxed text-center italic">
+                        "A passionate dream born in 2018, realized as a sanctuary of pure vegetarian heritage in 2021."
+                      </p>
+                      <p className="text-brand-dark/75 font-sans text-xs md:text-sm leading-relaxed text-center">
+                        Our founder’s deep passion for starting a restaurant began in 2018, fueled by a desire to create welcoming spaces where families and friends could bond over pure, traditional flavors. After years of careful planning, dedication, and culinary research, he successfully launched his own restaurant in 2021.
+                      </p>
+                    </div>
+
+                    {/* Creative Timeline */}
+                    <div className="relative border-t border-brand-dark/5 pt-6 grid grid-cols-2 gap-4">
+                      <div className="text-center relative">
+                        <div className="w-10 h-10 bg-brand-gold/10 text-brand-gold rounded-full flex items-center justify-center mx-auto text-lg font-bold font-display border border-brand-gold/20 shadow-sm mb-2">
+                          2018
+                        </div>
+                        <h4 className="font-display font-bold text-xs text-brand-dark">The Passion Begins</h4>
+                        <p className="text-[10px] text-brand-dark/60 mt-1 leading-snug">Inspired to build a premium pure veg dining concept.</p>
+                      </div>
+                      
+                      <div className="text-center relative">
+                        <div className="absolute left-0 top-5 -translate-x-1/2 w-4 h-0.5 bg-brand-gold/25 hidden md:block"></div>
+                        <div className="w-10 h-10 bg-brand-accent/10 text-[#1E4D2B] rounded-full flex items-center justify-center mx-auto text-lg font-bold font-display border border-brand-accent/20 shadow-sm mb-2">
+                          2021
+                        </div>
+                        <h4 className="font-display font-bold text-xs text-[#1E4D2B]">The Foundation</h4>
+                        <p className="text-[10px] text-brand-dark/60 mt-1 leading-snug">Launched the flagship Balaji Chilkur Family Dhaba.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal footer */}
+                  <div className="px-8 pb-8 pt-2 flex justify-center">
+                    <button
+                      onClick={() => setShowFounderModal(false)}
+                      className="px-6 py-2.5 bg-brand-dark hover:bg-brand-dark/95 text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                    >
+                      Close Story
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </section>
       )}
 

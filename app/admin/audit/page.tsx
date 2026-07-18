@@ -646,8 +646,8 @@ function LoginHistoryCards({ sessions }: { sessions: any[] }) {
 
                     <div className="flex items-start gap-1.5">
                       <Monitor size={10} className="text-brand-accent shrink-0 mt-0.5" />
-                      <span className="truncate" title={s.userAgent || ''}>
-                        {s.userAgent ? s.userAgent.slice(0, 60) + (s.userAgent.length > 60 ? '…' : '') : 'Unknown device'}
+                      <span className="truncate font-semibold text-brand-dark" title={s.userAgent || ''}>
+                        {s.userAgent ? formatDevice(s.userAgent) : 'Unknown device'}
                       </span>
                     </div>
 
@@ -665,4 +665,33 @@ function LoginHistoryCards({ sessions }: { sessions: any[] }) {
       ))}
     </div>
   );
+}
+
+// Format raw User-Agent to clean browser and OS string
+function formatDevice(uaString: string): string {
+  if (!uaString) return 'Unknown Device';
+  
+  let os = 'Unknown OS';
+  let browser = 'Unknown Browser';
+  
+  const ua = uaString.toLowerCase();
+  
+  // Detect OS
+  if (ua.includes('windows phone')) os = 'Windows Phone';
+  else if (ua.includes('win') || ua.includes('windows nt')) os = 'Windows';
+  else if (ua.includes('macintosh') || ua.includes('mac os x') || ua.includes('mac_powerpc')) os = 'macOS';
+  else if (ua.includes('iphone') || ua.includes('ipod')) os = 'iPhone';
+  else if (ua.includes('ipad')) os = 'iPad';
+  else if (ua.includes('android')) os = 'Android';
+  else if (ua.includes('linux')) os = 'Linux';
+  
+  // Detect Browser
+  if (ua.includes('edg/')) browser = 'Edge';
+  else if (ua.includes('opr/') || ua.includes('opera')) browser = 'Opera';
+  else if (ua.includes('chrome') && !ua.includes('chromium')) browser = 'Chrome';
+  else if (ua.includes('firefox')) browser = 'Firefox';
+  else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
+  else if (ua.includes('trident') || ua.includes('msie')) browser = 'Internet Explorer';
+  
+  return `${os} (${browser})`;
 }

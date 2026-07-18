@@ -7,8 +7,8 @@ import { Search, SlidersHorizontal, Star, Flame, X, ChevronLeft, ChevronRight, L
 import type { Dish } from '../components/DishCard';
 
 // Balaji Santosh Dhaba restaurant page URLs on delivery platforms
-const SWIGGY_URL = 'https://www.swiggy.com/search?query=Balaji+Santosh+Family+Dhaba+Moinabad';
-const ZOMATO_URL = 'https://www.zomato.com/hyderabad/restaurants?q=Balaji+Santosh+Family+Dhaba';
+const SWIGGY_URL = 'https://www.swiggy.com/menu/1035562?source=sharing';
+const ZOMATO_URL = 'https://link.zomato.com/xqzv/rshare?id=143313079bc5b9bbd';
 
 // ─── Order Platform Modal ──────────────────────────────────────────────────────
 interface OrderModalProps {
@@ -26,8 +26,8 @@ const OrderModal: React.FC<OrderModalProps> = ({ dish, onClose }) => {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const swiggyItemUrl = `https://www.swiggy.com/search?query=${encodeURIComponent('Balaji Chilkur Family Dhaba ' + dish.name)}`;
-  const zomatoItemUrl = `https://www.zomato.com/search?q=${encodeURIComponent('Balaji Chilkur Family Dhaba ' + dish.name)}`;
+  const swiggyItemUrl = `https://www.swiggy.com/search?query=${encodeURIComponent('Balaji Family Dhaba Moinabad ' + dish.name)}`;
+  const zomatoItemUrl = `https://www.zomato.com/search?q=${encodeURIComponent('Balaji Chilkur Family Dhaba Moinabad ' + dish.name)}`;
 
   const numericPrice = useMemo(() => {
     if (typeof dish.price === 'number') return dish.price;
@@ -276,7 +276,7 @@ My Details:
                   required
                   value={areaDetails}
                   onChange={(e) => setAreaDetails(e.target.value)}
-                  placeholder="e.g. Chilkur Balaji Temple Road, Moinabad"
+                  placeholder="e.g. Aziz Nagar, Moinabad"
                   className="w-full px-3 py-2.5 bg-[#FAF6EE] border border-brand-dark/15 rounded-xl font-semibold text-brand-dark text-xs focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all"
                 />
               </div>

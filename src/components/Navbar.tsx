@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu as MenuIcon, X, Phone, ShoppingBag, Calendar } from 'lucide-react';
+import { Menu as MenuIcon, X, Phone, ShoppingBag, Calendar, Home, UtensilsCrossed, Info, Image as ImageIcon, Star } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -113,12 +113,12 @@ export const Navbar: React.FC = () => {
   };
 
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Menu', path: '/menu' },
-    { name: 'About', path: '/about' },
-    { name: 'Gallery', path: '/gallery' },
-    { name: 'Reviews', path: '/#reviews' },
-    { name: 'Contact', path: '/contact' }
+    { name: 'Home', path: '/', icon: Home },
+    { name: 'Menu', path: '/menu', icon: UtensilsCrossed },
+    { name: 'About', path: '/about', icon: Info },
+    { name: 'Gallery', path: '/gallery', icon: ImageIcon },
+    { name: 'Reviews', path: '/#reviews', icon: Star },
+    { name: 'Contact', path: '/contact', icon: Phone }
   ];
 
   const handleLinkClick = (path: string) => {
@@ -250,56 +250,112 @@ export const Navbar: React.FC = () => {
       {/* Mobile Drawer Menu */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 top-[70px] z-40 bg-brand-bg/95 backdrop-blur-xl lg:hidden flex flex-col justify-between p-8"
-          >
-            <div className="flex flex-col space-y-6 mt-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.path}
-                  onClick={() => handleLinkClick(link.path)}
-                  className={`font-display text-2xl font-bold tracking-wide transition-colors ${
-                    isLinkActive(link.path) ? 'text-brand-accent' : 'text-brand-dark'
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
+          <>
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm lg:hidden"
+            />
 
-            <div className="flex flex-col space-y-4 mb-8">
-              <a 
-                href="tel:+919347104569" 
-                className="w-full flex justify-center items-center space-x-2 text-brand-dark border border-brand-dark/30 py-3.5 rounded-full font-bold uppercase tracking-wider"
-              >
-                <Phone size={16} className="text-brand-accent" />
-                <span>Call +91 93471 04569</span>
-              </a>
-              
-                <Link 
-                  href="/reserve" 
-                  onClick={() => setIsOpen(false)}
-                  className="w-full flex justify-center items-center space-x-2 bg-brand-gold text-brand-dark py-4 rounded-full font-bold uppercase tracking-wider shadow-lg shadow-brand-gold/20"
-                >
-                  <Calendar size={16} />
-                  <span>Book a Table</span>
-                </Link>
+            {/* Slide-out Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="fixed top-0 right-0 h-full w-[320px] max-w-[85vw] z-[100] bg-brand-dark text-white flex flex-col justify-between p-6 shadow-2xl overflow-y-auto lg:hidden"
+            >
+              <div className="flex flex-col h-full justify-between">
+                <div>
+                  {/* Drawer Header */}
+                  <div className="flex items-center justify-between pb-6 border-b border-white/10">
+                    <div className="flex items-center space-x-2.5">
+                      <img 
+                        src="/bsd-logo.png" 
+                        alt="Logo" 
+                        className="w-12 h-12 object-contain"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-display text-xs font-bold tracking-wider uppercase text-brand-gold">
+                          Balaji Chilkur
+                        </span>
+                        <span className="font-sans text-[10px] text-white/60 tracking-widest uppercase">
+                          Family Dhaba
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                      aria-label="Close menu"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
 
-              <Link 
-                href="/menu" 
-                onClick={() => setIsOpen(false)}
-                className="w-full flex justify-center items-center space-x-2 bg-brand-accent text-brand-bg py-4 rounded-full font-bold uppercase tracking-wider shadow-lg shadow-brand-accent/20"
-              >
-                <ShoppingBag size={16} />
-                <span>Order Online</span>
-              </Link>
-            </div>
-          </motion.div>
+                  {/* Navigation Links */}
+                  <div className="flex flex-col space-y-2 mt-8">
+                    {navLinks.map((link) => {
+                      const Icon = link.icon;
+                      const active = isLinkActive(link.path);
+                      return (
+                        <Link
+                          key={link.name}
+                          href={link.path}
+                          onClick={() => handleLinkClick(link.path)}
+                          className={`flex items-center space-x-4 px-4 py-3 rounded-xl transition-all duration-300 ${
+                            active
+                              ? 'bg-white/15 text-brand-gold font-semibold shadow-inner'
+                              : 'text-white/80 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          <Icon size={18} className={active ? 'text-brand-gold' : 'text-white/50'} />
+                          <span className="font-sans text-base tracking-wide">{link.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Bottom Actions and Info */}
+                <div className="flex flex-col space-y-3.5 mt-8 pt-6 border-t border-white/10">
+                  <a 
+                    href="tel:+919347104569" 
+                    className="w-full flex justify-center items-center space-x-2 text-white border border-white/20 hover:border-white/50 py-3 rounded-xl font-sans text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:bg-white/5"
+                  >
+                    <Phone size={14} className="text-brand-gold animate-pulse" />
+                    <span>Call +91 93471 04569</span>
+                  </a>
+                  
+                  <Link 
+                    href="/reserve" 
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex justify-center items-center space-x-2 bg-brand-gold text-brand-dark py-3.5 rounded-xl font-sans text-sm font-bold uppercase tracking-wider shadow-lg hover:bg-white transition-all duration-300 hover:scale-[1.02]"
+                  >
+                    <Calendar size={14} />
+                    <span>Book a Table</span>
+                  </Link>
+
+                  <Link 
+                    href="/menu" 
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex justify-center items-center space-x-2 bg-white/10 hover:bg-white/20 text-white py-3.5 rounded-xl font-sans text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02]"
+                  >
+                    <ShoppingBag size={14} />
+                    <span>Order Online</span>
+                  </Link>
+                  
+                  <p className="text-[10px] text-center text-white/40 font-sans tracking-wide pt-2">
+                    Aziz Nagar - Himayat Nagar Route, Hyderabad
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

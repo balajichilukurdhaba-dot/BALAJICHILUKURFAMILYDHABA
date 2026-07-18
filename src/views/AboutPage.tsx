@@ -30,10 +30,10 @@ export const AboutPage: React.FC = () => {
             </h2>
             <div className="space-y-6 text-sm md:text-base text-brand-dark/75 font-sans leading-relaxed">
               <p>
-                Located near the famous Chilkur Balaji Temple, Balaji Chilkur Family Dhaba has become a favourite stop for families, travellers, and devotees looking for authentic North and South Indian vegetarian cuisine. Founded with a commitment to pure vegetarian ethics, our kitchen serves as a culinary sanctuary on the Aziz Nagar - Himayat Nagar route.
+                Established with a vision to elevate traditional dining, Balaji Chilkur Family Dhaba stands as a premier destination for authentic North and South Indian vegetarian cuisine. Guided by a steadfast commitment to pure vegetarian principles, our kitchen offers a refined culinary sanctuary where fresh, flavorful creations are crafted daily on the Aziz Nagar - Himayat Nagar route.
               </p>
               <p>
-                We believe that true flavor begins with standard ingredients and respect for traditional recipes. Every morning, our chefs hand-grind whole spices, clay-bake tandoori roti and naans, and simmer fresh curries to order. Our focus is on serving clean, delicious, and homely meals that bring families together after their visits to the temple.
+                We believe that true culinary excellence begins with the finest ingredients and a deep reverence for heritage recipes. Every day, our chefs hand-grind premium spices, bake artisanal tandoori specialties in traditional clay ovens, and slow-cook rich, aromatic curries to order. Our mission is to provide an exceptional dining experience that brings families and friends together over a shared love for wholesome, delicious food.
               </p>
               <div className="border-l-4 border-brand-accent pl-6 py-2 my-8">
                 <p className="font-display italic text-brand-dark/90 font-medium">

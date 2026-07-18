@@ -177,13 +177,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.path}
                   href={item.path}
-                  className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 font-sans text-[11px] font-bold uppercase tracking-wider border relative group ${
+                  className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-250 font-sans text-[11px] font-bold uppercase tracking-wider border relative group ${
                     isActive 
-                      ? 'bg-[#1E4D2B] text-white shadow-sm border-[#1E4D2B]/30' 
+                      ? 'text-white border-white/20 z-10' 
                       : 'text-[#FAF6EE]/75 border-transparent hover:bg-[#FAF6EE]/10 hover:text-white'
                   }`}
                 >
-                  <Icon size={14} className={isActive ? 'text-white' : 'text-[#FAF6EE]/50 group-hover:text-[#1E4D2B] transition-colors'} />
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeAdminNav"
+                      className="absolute inset-0 bg-[#FAF6EE]/15 rounded-xl border border-white/20 -z-10 shadow-inner"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <Icon size={14} className={isActive ? 'text-white' : 'text-[#FAF6EE]/50 group-hover:text-white transition-colors'} />
                   <span>{item.name}</span>
                   {badgeCount > 0 && (
                     <span className="ml-auto bg-[#1E4D2B] text-white text-[9px] font-black px-2 py-0.5 rounded-full min-w-[18px] text-center shadow-md animate-pulse border border-white/10">
@@ -228,9 +235,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Content Area */}
           <main className="flex-grow overflow-y-auto p-6 md:p-10 pb-28 lg:pb-10 relative">
             <div className="absolute inset-0 noise-overlay opacity-[0.01] pointer-events-none" />
-            <div className="relative z-10 max-w-7xl mx-auto">
-              {children}
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="relative z-10 max-w-7xl mx-auto w-full flex-grow"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
           </main>
         </div>
 
@@ -261,12 +277,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       key={item.path}
                       href={item.path}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-5 py-3.5 rounded-xl transition-all font-bold uppercase tracking-wider text-xs border ${
+                      className={`flex items-center justify-between px-5 py-3.5 rounded-xl transition-all font-bold uppercase tracking-wider text-xs border relative ${
                         isActive 
-                          ? 'bg-[#1E4D2B] text-white border-[#1E4D2B]/30' 
+                          ? 'text-white border-white/20 z-10' 
                           : 'text-[#FAF6EE]/75 border-transparent hover:bg-[#FAF6EE]/10 hover:text-white'
                       }`}
                     >
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeAdminNavMobile"
+                          className="absolute inset-0 bg-[#FAF6EE]/15 rounded-xl border border-white/20 -z-10 shadow-inner"
+                        />
+                      )}
                       <div className="flex items-center gap-4">
                         <Icon size={16} />
                         <span>{item.name}</span>

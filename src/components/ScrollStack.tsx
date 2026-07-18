@@ -68,7 +68,7 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
   const getScrollData = useCallback(() => {
     if (useWindowScroll) {
       return {
-        scrollTop: lenisRef.current ? lenisRef.current.scroll : window.scrollY,
+        scrollTop: window.scrollY,
         containerHeight: window.innerHeight,
         scrollContainer: document.documentElement
       };
@@ -266,9 +266,7 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     if (!scroller) return;
 
     const cards = Array.from(
-      useWindowScroll
-        ? document.querySelectorAll('.scroll-stack-card')
-        : scroller.querySelectorAll('.scroll-stack-card')
+      scroller.querySelectorAll('.scroll-stack-card')
     ) as HTMLElement[];
 
     cardsRef.current = cards;
@@ -287,11 +285,18 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       (card.style as any).webkitPerspective = '1000px';
     });
 
+    if (useWindowScroll) {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
     setupLenis();
 
     updateCardTransforms();
 
     return () => {
+      if (useWindowScroll) {
+        window.removeEventListener('scroll', handleScroll);
+      }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -304,6 +309,7 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       isUpdatingRef.current = false;
     };
   }, [
+    children,
     itemDistance,
     itemScale,
     itemStackDistance,

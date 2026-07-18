@@ -1,5 +1,6 @@
 import { createClient } from '../utils/supabase/server';
 import prisma from './prisma';
+import { headers } from 'next/headers';
 
 export interface AdminUser {
   id: string;
@@ -43,12 +44,25 @@ export async function logAdminAction(
   newValue?: any
 ) {
   try {
+    let ipAddress = '127.0.0.1';
+    try {
+      const headersList = await headers();
+      ipAddress =
+        headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+        headersList.get('x-real-ip') ||
+        '127.0.0.1';
+    } catch (hErr) {
+      // headers() might fail outside of Next.js server requests (e.g. prisma seeding)
+    }
+
     await prisma.auditLog.create({
       data: {
         userId,
         userEmail,
         action,
         target,
+        details: target,
+        ipAddress,
         prevValue: prevValue ? JSON.parse(JSON.stringify(prevValue)) : undefined,
         newValue: newValue ? JSON.parse(JSON.stringify(newValue)) : undefined,
       }

@@ -29,11 +29,11 @@ async function main() {
     }
   });
 
-  const chinthalBranch = await prisma.branch.upsert({
+  const pragathiBranch = await prisma.branch.upsert({
     where: { id: 'a2ae6a0f-daee-40f5-aa0e-ac44e17d325f' },
     update: {
-      name: 'Chinthal Branch',
-      address: '1 2nd floor, HMT Rd, above The Kakatiya Co-operative Bank, Chinthal, Quthbullapur, Hyderabad, Telangana 500037',
+      name: 'PRAGATHI NAGAR BRANCH',
+      address: 'Opposite Pragathi Nagar Lake, Pragathi Nagar, Kukatpally, Hyderabad, Telangana 500090',
       phone: '+91 93471 04569',
       totalTables: 15,
       openingTime: '11:00',
@@ -41,8 +41,8 @@ async function main() {
     },
     create: {
       id: 'a2ae6a0f-daee-40f5-aa0e-ac44e17d325f',
-      name: 'Chinthal Branch',
-      address: '1 2nd floor, HMT Rd, above The Kakatiya Co-operative Bank, Chinthal, Quthbullapur, Hyderabad, Telangana 500037',
+      name: 'PRAGATHI NAGAR BRANCH',
+      address: 'Opposite Pragathi Nagar Lake, Pragathi Nagar, Kukatpally, Hyderabad, Telangana 500090',
       phone: '+91 93471 04569',
       totalTables: 15,
       openingTime: '11:00',
@@ -50,7 +50,7 @@ async function main() {
     }
   });
 
-  console.log(`✅ Branches seeded: ${moinabadBranch.name}, ${chinthalBranch.name}`);
+  console.log(`✅ Branches seeded: ${moinabadBranch.name}, ${pragathiBranch.name}`);
 
   // 2. Seed Categories & Dishes
   console.log('Seeding categories and dishes...');
@@ -211,7 +211,7 @@ async function main() {
       key: 'seo_settings',
       value: JSON.stringify({
         title: 'Balaji Chilkur Family Dhaba | Pure Vegetarian Indian Restaurant',
-        description: 'Enjoy authentic pure vegetarian Indian food at Balaji Chilkur Family Dhaba near Moinabad & Chinthal. Serving delicious biryani, paneer, starters, and family combos.',
+        description: 'Enjoy authentic pure vegetarian Indian food at Balaji Chilkur Family Dhaba near Moinabad & Pragathi Nagar. Serving delicious biryani, paneer, starters, and family combos.',
         keywords: 'vegetarian restaurant, pure veg dhaba, Moinabad veg food, Hyderabad dhaba, Paneer Butter Masala, Veg Biryani near me, Chilkur family restaurant'
       })
     },
