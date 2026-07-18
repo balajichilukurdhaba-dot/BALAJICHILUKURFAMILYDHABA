@@ -78,8 +78,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Fetch the current admin's email for the snapshot modal
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) setAdminEmail(user.email);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) setAdminEmail(user.email);
+      } catch (e) {
+        // Supabase auth unavailable (network or bad key) — silently ignore
+      }
     })();
   }, []);
 

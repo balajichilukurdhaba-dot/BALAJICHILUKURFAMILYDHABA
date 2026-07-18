@@ -19,17 +19,23 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        router.push('/admin');
+        router.refresh();
+      }
+    } catch (err: any) {
+      // Network error, invalid Supabase key, etc.
+      setError('Unable to connect to authentication server. Please check your internet connection and try again.');
       setLoading(false);
-    } else {
-      router.push('/admin');
-      router.refresh();
     }
   };
 

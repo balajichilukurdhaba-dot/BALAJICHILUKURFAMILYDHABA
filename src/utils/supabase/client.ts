@@ -35,22 +35,31 @@ export function createClient() {
   console.log('- Sanitized URL used:', sanitizedUrl);
   const isValidUrl = sanitizedUrl.startsWith('http://') || sanitizedUrl.startsWith('https://');
 
+  // Silent dummy client for missing or invalid env vars
+  const dummyClient = {
+    auth: {
+      getUser: async () => ({ data: { user: null }, error: null }),
+      getSession: async () => ({ data: { session: null }, error: null }),
+      signOut: async () => ({ error: null }),
+      signInWithPassword: async () => ({ data: {}, error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    }
+  } as any;
+
   if (!sanitizedUrl || !anonKey || !isValidUrl) {
     console.warn('[Supabase Client] Missing or invalid URL or Anon Key. Returning dummy client for build-time prerendering.');
-    return {
-      auth: {
-        getUser: async () => ({ data: { user: null }, error: null }),
-        getSession: async () => ({ data: { session: null }, error: null }),
-        signOut: async () => ({ error: null }),
-        signInWithPassword: async () => ({ data: {}, error: null }),
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-      }
-    } as any;
+    return dummyClient;
   }
 
-  return createBrowserClient(
-    sanitizedUrl,
-    anonKey
-  )
+  // Also wrap actual client creation in case the key format causes immediate errors
+  try {
+    return createBrowserClient(
+      sanitizedUrl,
+      anonKey
+    );
+  } catch (e) {
+    console.warn('[Supabase Client] Failed to create browser client:', e);
+    return dummyClient;
+  }
 }
 
