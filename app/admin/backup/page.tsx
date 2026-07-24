@@ -12,9 +12,10 @@ export default function BackupCMS() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
-  // File restore state
+  // File restore & modal states
   const [restoreFile, setRestoreFile] = useState<File | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
 
   const handleConfirmCredentials = async (selectedTypes: string[]) => {
     setIsConfirmModalOpen(false);
@@ -182,8 +183,6 @@ export default function BackupCMS() {
                 <span>Download Database JSON Backup</span>
               </button>
             </div>
-
-
           </div>
         </div>
 
@@ -249,6 +248,35 @@ export default function BackupCMS() {
 
       </div>
 
+      {/* Danger Zone: Data Privacy & Permanent Purge */}
+      <div className="bg-red-50/60 border border-red-200/80 rounded-3xl p-8 shadow-sm space-y-4">
+        <div className="flex items-center gap-3 text-red-700">
+          <ShieldAlert size={24} className="text-red-600 animate-pulse" />
+          <div>
+            <h3 className="font-display font-black text-lg text-red-900">
+              Data Privacy & Permanent Deletion
+            </h3>
+            <p className="text-xs text-red-700/80 mt-0.5">
+              Permanently wipe sensitive records (Bookings, WhatsApp Orders, Audit Logs) to preserve storage and user privacy.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-red-200/60">
+          <div className="text-xs text-red-950 font-medium">
+            🔒 High Privacy Notice: Deleting records is permanent. You will be prompted to enter your <strong className="font-bold">Admin ID and Password</strong> to confirm identity.
+          </div>
+          <button
+            onClick={() => setIsPurgeModalOpen(true)}
+            disabled={loading}
+            className="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-wider text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 min-w-[220px]"
+          >
+            <AlertTriangle size={15} />
+            <span>Purge Data Options</span>
+          </button>
+        </div>
+      </div>
+
       {/* Admin confirm credentials modal before downloading */}
       <AdminConfirmCredentialsModal
         isOpen={isConfirmModalOpen}
@@ -256,6 +284,16 @@ export default function BackupCMS() {
         onConfirm={handleConfirmCredentials}
         title="Confirm Credentials"
         message="Please verify your administrator credentials to download the database backup snapshot."
+      />
+
+      {/* High Privacy Data Purge Verification Modal */}
+      <AdminPurgeModal
+        isOpen={isPurgeModalOpen}
+        onClose={() => setIsPurgeModalOpen(false)}
+        onSuccess={(msg) => {
+          setSuccessMsg(msg);
+          setIsPurgeModalOpen(false);
+        }}
       />
     </div>
   );
@@ -422,6 +460,167 @@ function AdminConfirmCredentialsModal({ isOpen, onClose, onConfirm, title, messa
               className="px-4 py-2 rounded-lg bg-[#1E4D2B] hover:bg-[#1E4D2B]/90 text-white text-[11px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5 justify-center min-w-[110px] disabled:opacity-50"
             >
               {loading ? "Verifying..." : "Download"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+interface AdminPurgeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: (message: string) => void;
+}
+
+function AdminPurgeModal({ isOpen, onClose, onSuccess }: AdminPurgeModalProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(['reservations', 'orders', 'audits']);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  if (!isOpen) return null;
+
+  const purgeOptions = [
+    { key: 'reservations', label: 'Bookings & Table Reservations' },
+    { key: 'orders', label: 'WhatsApp Customer Orders' },
+    { key: 'audits', label: 'Audit Trail Logs & Admin Sessions' },
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedTypes.length === 0) {
+      setError('Please select at least one dataset type to purge.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/cms/clear-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          dataTypes: selectedTypes
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        onSuccess(data.message || 'Selected records permanently purged.');
+        setEmail('');
+        setPassword('');
+      } else {
+        setError(data.error || 'Authentication or deletion failed.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Network error occurred during purge.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-md animate-fadeIn">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-red-200 space-y-4">
+        <div className="flex items-center gap-3 border-b border-red-100 pb-3">
+          <div className="p-2 bg-red-100 text-red-700 rounded-xl">
+            <ShieldAlert size={22} />
+          </div>
+          <div>
+            <h3 className="font-display font-black text-lg text-red-900">Privacy & Data Purge</h3>
+            <p className="text-xs text-red-700/80">Confirm identity to permanently wipe database records</p>
+          </div>
+        </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200 font-semibold flex items-center gap-2">
+            <AlertTriangle size={16} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+          <div className="space-y-2">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-red-900/70">
+              1. Select Data Categories to Permanently Delete
+            </label>
+            <div className="grid grid-cols-1 gap-2 border border-red-100 rounded-2xl p-4 bg-red-50/40">
+              {purgeOptions.map(opt => {
+                const isChecked = selectedTypes.includes(opt.key);
+                return (
+                  <label key={opt.key} className="flex items-center gap-2.5 text-xs font-bold text-red-950 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => {
+                        if (isChecked) {
+                          setSelectedTypes(prev => prev.filter(t => t !== opt.key));
+                        } else {
+                          setSelectedTypes(prev => [...prev, opt.key]);
+                        }
+                      }}
+                      className="rounded border-red-300 text-red-600 focus:ring-red-500 h-4 w-4"
+                    />
+                    <span>{opt.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-1">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/70">
+              2. Privacy Verification (Enter Admin Credentials)
+            </label>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/50 mb-1">Admin ID / Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-brand-bg border border-brand-dark/10 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-red-500 transition-colors text-zinc-800"
+                placeholder="admin@restaurant.com"
+                autoComplete="off"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/50 mb-1">Admin Password</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-brand-bg border border-brand-dark/10 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-red-500 transition-colors text-zinc-800"
+                placeholder="••••••••"
+                autoComplete="new-password"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-brand-dark/5">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="px-4 py-2.5 rounded-xl border border-brand-dark/10 hover:bg-brand-dark/5 text-brand-dark text-xs font-bold uppercase tracking-wider"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || selectedTypes.length === 0}
+              className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-2 justify-center disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="animate-spin" size={14} /> : <AlertTriangle size={14} />}
+              <span>{loading ? "Wiping Records..." : "Confirm Permanent Delete"}</span>
             </button>
           </div>
         </form>
