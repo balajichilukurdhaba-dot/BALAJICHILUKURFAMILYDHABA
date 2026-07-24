@@ -138,7 +138,7 @@ export default function BackupCMS() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         {/* Export Snapshot Card */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm space-y-5">
+        <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 space-y-5">
           <div>
             <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2">
               <Download size={16} className="text-slate-600" />
@@ -156,7 +156,7 @@ export default function BackupCMS() {
             <button
               onClick={() => setIsConfirmModalOpen(true)}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg shadow-sm disabled:opacity-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-medium text-xs rounded-lg shadow-sm disabled:opacity-50 transition-all duration-150 cursor-pointer"
             >
               {loading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} />}
               <span>Generate Backup Snapshot</span>
@@ -165,7 +165,7 @@ export default function BackupCMS() {
         </div>
 
         {/* Upload Snapshot Card */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm space-y-5">
+        <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 space-y-5">
           <div>
             <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2">
               <Upload size={16} className="text-slate-600" />
@@ -175,10 +175,10 @@ export default function BackupCMS() {
           </div>
 
           <form onSubmit={handleRestoreBackup} className="space-y-4">
-            <div className="border border-dashed border-slate-300 hover:border-slate-400 rounded-lg p-6 text-center bg-slate-50 relative cursor-pointer transition-colors">
+            <div className="border border-dashed border-slate-300 hover:border-slate-500 rounded-lg p-6 text-center bg-slate-50 hover:bg-slate-100/50 relative cursor-pointer transition-all duration-200 group">
               {restoreFile ? (
                 <div className="space-y-2 flex flex-col items-center">
-                  <Database className="text-slate-700" size={28} />
+                  <Database className="text-slate-700 group-hover:scale-110 transition-transform" size={28} />
                   <span className="text-xs font-medium text-slate-800 truncate max-w-[200px]">
                     {restoreFile.name}
                   </span>
@@ -192,7 +192,7 @@ export default function BackupCMS() {
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <Upload className="mx-auto text-slate-400" size={24} />
+                  <Upload className="mx-auto text-slate-400 group-hover:text-slate-700 group-hover:scale-110 transition-all" size={24} />
                   <span className="block text-xs font-medium text-slate-700">
                     Select JSON Snapshot File
                   </span>
@@ -210,7 +210,7 @@ export default function BackupCMS() {
             <button
               type="submit"
               disabled={loading || !restoreFile}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg shadow-sm disabled:opacity-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-medium text-xs rounded-lg shadow-sm disabled:opacity-50 transition-all duration-150 cursor-pointer"
             >
               {loading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
               <span>Restore System State</span>
@@ -220,7 +220,7 @@ export default function BackupCMS() {
       </div>
 
       {/* Data Retention & Purge Panel */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-sm space-y-4">
+      <div className="bg-white border border-slate-200/80 hover:border-slate-300 hover:shadow-md rounded-xl p-6 shadow-sm space-y-4 transition-all duration-200">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
             <ShieldCheck size={20} />

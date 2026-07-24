@@ -2,7 +2,7 @@ import React from 'react';
 import prisma from '@/lib/prisma';
 import { 
   Users, Calendar as CalendarIcon, CheckCircle2, Clock, ArrowRight, 
-  UtensilsCrossed, MessageSquare, Mail, ShieldCheck 
+  UtensilsCrossed, MessageSquare, Mail, ShieldCheck, ChevronRight 
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -53,7 +53,7 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6 sm:space-y-8 w-full max-w-full">
       {/* Executive Welcome Banner */}
-      <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-all">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold px-2.5 py-0.5 rounded-full">
@@ -68,7 +68,7 @@ export default async function AdminDashboard() {
         <div className="flex items-center gap-3">
           <Link 
             href="/admin/scanner" 
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 py-2.5 rounded-lg shadow-sm transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 py-2.5 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
           >
             <span>QR Voucher Verification</span>
             <ArrowRight size={14} />
@@ -76,87 +76,129 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* Primary KPI Grid (Fully Responsive Column Stacking) */}
+      {/* Primary Interactive KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex items-center gap-3.5 sm:gap-4 min-w-0">
-          <div className="p-2.5 sm:p-3 rounded-lg bg-slate-100 text-slate-700 shrink-0">
-            <Clock size={20} />
+        <Link 
+          href="/admin/reservations" 
+          className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-center justify-between min-w-0"
+        >
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="p-2.5 sm:p-3 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-all duration-200 shrink-0">
+              <Clock size={20} className="group-hover:scale-110 transition-transform duration-200" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-slate-500 truncate group-hover:text-slate-900 transition-colors">Today's Bookings</p>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{todayReservations}</p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-slate-500 truncate">Today's Bookings</p>
-            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{todayReservations}</p>
-          </div>
-        </div>
+          <ChevronRight size={16} className="text-slate-300 group-hover:text-slate-700 group-hover:translate-x-1 transition-all" />
+        </Link>
 
-        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex items-center gap-3.5 sm:gap-4 min-w-0">
-          <div className="p-2.5 sm:p-3 rounded-lg bg-slate-100 text-slate-700 shrink-0">
-            <Users size={20} />
+        <Link 
+          href="/admin/reservations" 
+          className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-center justify-between min-w-0"
+        >
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="p-2.5 sm:p-3 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-all duration-200 shrink-0">
+              <Users size={20} className="group-hover:scale-110 transition-transform duration-200" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-slate-500 truncate group-hover:text-slate-900 transition-colors">Total Reservations</p>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{totalReservations}</p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-slate-500 truncate">Total Reservations</p>
-            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{totalReservations}</p>
-          </div>
-        </div>
+          <ChevronRight size={16} className="text-slate-300 group-hover:text-slate-700 group-hover:translate-x-1 transition-all" />
+        </Link>
 
-        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex items-center gap-3.5 sm:gap-4 min-w-0 sm:col-span-2 lg:col-span-1">
-          <div className="p-2.5 sm:p-3 rounded-lg bg-emerald-50 text-emerald-700 shrink-0">
-            <CheckCircle2 size={20} />
+        <Link 
+          href="/admin/reservations" 
+          className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-center justify-between min-w-0 sm:col-span-2 lg:col-span-1"
+        >
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="p-2.5 sm:p-3 rounded-lg bg-emerald-50 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-200 shrink-0">
+              <CheckCircle2 size={20} className="group-hover:scale-110 transition-transform duration-200" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-slate-500 truncate group-hover:text-slate-900 transition-colors">Verified Vouchers</p>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{verifiedDiscounts}</p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-slate-500 truncate">Verified Vouchers</p>
-            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{verifiedDiscounts}</p>
-          </div>
-        </div>
+          <ChevronRight size={16} className="text-slate-300 group-hover:text-slate-700 group-hover:translate-x-1 transition-all" />
+        </Link>
       </div>
 
-      {/* System Modules Quick Metrics */}
+      {/* System Modules Interactive Cards */}
       <div className="space-y-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">System Modules</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link href="/admin/menu" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group min-w-0">
-            <div className="p-2.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-200 transition-colors shrink-0">
-              <UtensilsCrossed size={18} />
+          <Link 
+            href="/admin/menu" 
+            className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex items-center justify-between group min-w-0 cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="p-2.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-all duration-200 shrink-0">
+                <UtensilsCrossed size={18} className="group-hover:scale-110 transition-transform duration-200" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[11px] font-medium text-slate-500 truncate group-hover:text-slate-900 transition-colors">Menu Dishes</span>
+                <span className="font-semibold text-slate-900 text-sm truncate block">{dishCount} Items</span>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <span className="block text-[11px] font-medium text-slate-500 truncate">Menu Dishes</span>
-              <span className="font-semibold text-slate-900 text-sm truncate block">{dishCount} Items</span>
-            </div>
+            <ChevronRight size={15} className="text-slate-300 group-hover:text-slate-700 group-hover:translate-x-1 transition-all" />
           </Link>
 
-          <Link href="/admin/gallery" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group min-w-0">
-            <div className="p-2.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-200 transition-colors shrink-0">
-              <CalendarIcon size={18} />
+          <Link 
+            href="/admin/gallery" 
+            className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex items-center justify-between group min-w-0 cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="p-2.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white transition-all duration-200 shrink-0">
+                <CalendarIcon size={18} className="group-hover:scale-110 transition-transform duration-200" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[11px] font-medium text-slate-500 truncate group-hover:text-slate-900 transition-colors">Gallery Media</span>
+                <span className="font-semibold text-slate-900 text-sm truncate block">{photoCount} Assets</span>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <span className="block text-[11px] font-medium text-slate-500 truncate">Gallery Media</span>
-              <span className="font-semibold text-slate-900 text-sm truncate block">{photoCount} Assets</span>
-            </div>
+            <ChevronRight size={15} className="text-slate-300 group-hover:text-slate-700 group-hover:translate-x-1 transition-all" />
           </Link>
 
-          <Link href="/admin/testimonials" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group min-w-0">
-            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-700 shrink-0">
-              <MessageSquare size={18} />
+          <Link 
+            href="/admin/testimonials" 
+            className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex items-center justify-between group min-w-0 cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="p-2.5 rounded-lg bg-amber-50 text-amber-700 group-hover:bg-amber-600 group-hover:text-white transition-all duration-200 shrink-0">
+                <MessageSquare size={18} className="group-hover:scale-110 transition-transform duration-200" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[11px] font-medium text-slate-500 truncate group-hover:text-slate-900 transition-colors">Pending Reviews</span>
+                <span className="font-semibold text-slate-900 text-sm truncate block">{pendingTestimonials} Reviews</span>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <span className="block text-[11px] font-medium text-slate-500 truncate">Pending Reviews</span>
-              <span className="font-semibold text-slate-900 text-sm truncate block">{pendingTestimonials} Reviews</span>
-            </div>
+            <ChevronRight size={15} className="text-slate-300 group-hover:text-slate-700 group-hover:translate-x-1 transition-all" />
           </Link>
 
-          <Link href="/admin/messages" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group min-w-0">
-            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-700 shrink-0">
-              <Mail size={18} />
+          <Link 
+            href="/admin/messages" 
+            className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex items-center justify-between group min-w-0 cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="p-2.5 rounded-lg bg-blue-50 text-blue-700 group-hover:bg-blue-600 group-hover:text-white transition-all duration-200 shrink-0">
+                <Mail size={18} className="group-hover:scale-110 transition-transform duration-200" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[11px] font-medium text-slate-500 truncate group-hover:text-slate-900 transition-colors">Inbox Queries</span>
+                <span className="font-semibold text-slate-900 text-sm truncate block">{messageCount} Messages</span>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <span className="block text-[11px] font-medium text-slate-500 truncate">Inbox Queries</span>
-              <span className="font-semibold text-slate-900 text-sm truncate block">{messageCount} Messages</span>
-            </div>
+            <ChevronRight size={15} className="text-slate-300 group-hover:text-slate-700 group-hover:translate-x-1 transition-all" />
           </Link>
         </div>
       </div>
 
-      {/* Recent Reservations Table */}
+      {/* Recent Reservations Table with Row Hovers */}
       <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="p-4 sm:p-5 border-b border-slate-200/80 flex items-center justify-between gap-2">
           <div>
@@ -165,7 +207,7 @@ export default async function AdminDashboard() {
           </div>
           <Link 
             href="/admin/reservations" 
-            className="text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors shrink-0"
+            className="text-xs font-semibold text-slate-700 hover:text-slate-900 hover:underline transition-all shrink-0"
           >
             View Console →
           </Link>
@@ -189,7 +231,7 @@ export default async function AdminDashboard() {
                 </tr>
               ) : (
                 recentReservations.map((res) => (
-                  <tr key={res.id} className="hover:bg-slate-50/70 transition-colors">
+                  <tr key={res.id} className="hover:bg-slate-100/70 transition-colors cursor-pointer">
                     <td className="px-4 sm:px-5 py-3.5 font-mono font-semibold text-slate-900">{res.bookingRef}</td>
                     <td className="px-4 sm:px-5 py-3.5">
                       <div className="font-semibold text-slate-900">{res.customerName}</div>
