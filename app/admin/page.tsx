@@ -51,9 +51,9 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 w-full max-w-full">
       {/* Executive Welcome Banner */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold px-2.5 py-0.5 rounded-full">
@@ -61,14 +61,14 @@ export default async function AdminDashboard() {
               Operational Online
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mt-2">Executive Overview</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-2">Executive Overview</h1>
           <p className="text-xs text-slate-500 mt-1">Real-time metrics and operational status for Balaji Dhaba.</p>
         </div>
         
         <div className="flex items-center gap-3">
           <Link 
             href="/admin/scanner" 
-            className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 py-2.5 rounded-lg shadow-sm transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 py-2.5 rounded-lg shadow-sm transition-colors"
           >
             <span>QR Voucher Verification</span>
             <ArrowRight size={14} />
@@ -76,35 +76,35 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* Primary KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-slate-100 text-slate-700">
+      {/* Primary KPI Grid (Fully Responsive Column Stacking) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex items-center gap-3.5 sm:gap-4 min-w-0">
+          <div className="p-2.5 sm:p-3 rounded-lg bg-slate-100 text-slate-700 shrink-0">
             <Clock size={20} />
           </div>
-          <div>
-            <p className="text-xs font-medium text-slate-500">Today's Bookings</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{todayReservations}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-slate-500 truncate">Today's Bookings</p>
+            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{todayReservations}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-slate-100 text-slate-700">
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex items-center gap-3.5 sm:gap-4 min-w-0">
+          <div className="p-2.5 sm:p-3 rounded-lg bg-slate-100 text-slate-700 shrink-0">
             <Users size={20} />
           </div>
-          <div>
-            <p className="text-xs font-medium text-slate-500">Total Reservations</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{totalReservations}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-slate-500 truncate">Total Reservations</p>
+            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{totalReservations}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-emerald-50 text-emerald-700">
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex items-center gap-3.5 sm:gap-4 min-w-0 sm:col-span-2 lg:col-span-1">
+          <div className="p-2.5 sm:p-3 rounded-lg bg-emerald-50 text-emerald-700 shrink-0">
             <CheckCircle2 size={20} />
           </div>
-          <div>
-            <p className="text-xs font-medium text-slate-500">Verified Vouchers</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{verifiedDiscounts}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-slate-500 truncate">Verified Vouchers</p>
+            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{verifiedDiscounts}</p>
           </div>
         </div>
       </div>
@@ -114,43 +114,43 @@ export default async function AdminDashboard() {
         <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">System Modules</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link href="/admin/menu" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group">
-            <div className="p-2.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-200 transition-colors">
+          <Link href="/admin/menu" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group min-w-0">
+            <div className="p-2.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-200 transition-colors shrink-0">
               <UtensilsCrossed size={18} />
             </div>
-            <div>
-              <span className="block text-[11px] font-medium text-slate-500">Menu Dishes</span>
-              <span className="font-semibold text-slate-900 text-sm">{dishCount} Items</span>
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] font-medium text-slate-500 truncate">Menu Dishes</span>
+              <span className="font-semibold text-slate-900 text-sm truncate block">{dishCount} Items</span>
             </div>
           </Link>
 
-          <Link href="/admin/gallery" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group">
-            <div className="p-2.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-200 transition-colors">
+          <Link href="/admin/gallery" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group min-w-0">
+            <div className="p-2.5 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-slate-200 transition-colors shrink-0">
               <CalendarIcon size={18} />
             </div>
-            <div>
-              <span className="block text-[11px] font-medium text-slate-500">Gallery Media</span>
-              <span className="font-semibold text-slate-900 text-sm">{photoCount} Assets</span>
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] font-medium text-slate-500 truncate">Gallery Media</span>
+              <span className="font-semibold text-slate-900 text-sm truncate block">{photoCount} Assets</span>
             </div>
           </Link>
 
-          <Link href="/admin/testimonials" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group">
-            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-700">
+          <Link href="/admin/testimonials" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group min-w-0">
+            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-700 shrink-0">
               <MessageSquare size={18} />
             </div>
-            <div>
-              <span className="block text-[11px] font-medium text-slate-500">Pending Reviews</span>
-              <span className="font-semibold text-slate-900 text-sm">{pendingTestimonials} Reviews</span>
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] font-medium text-slate-500 truncate">Pending Reviews</span>
+              <span className="font-semibold text-slate-900 text-sm truncate block">{pendingTestimonials} Reviews</span>
             </div>
           </Link>
 
-          <Link href="/admin/messages" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group">
-            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-700">
+          <Link href="/admin/messages" className="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 shadow-sm flex items-center gap-3.5 transition-colors group min-w-0">
+            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-700 shrink-0">
               <Mail size={18} />
             </div>
-            <div>
-              <span className="block text-[11px] font-medium text-slate-500">Inbox Queries</span>
-              <span className="font-semibold text-slate-900 text-sm">{messageCount} Messages</span>
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] font-medium text-slate-500 truncate">Inbox Queries</span>
+              <span className="font-semibold text-slate-900 text-sm truncate block">{messageCount} Messages</span>
             </div>
           </Link>
         </div>
@@ -158,28 +158,28 @@ export default async function AdminDashboard() {
 
       {/* Recent Reservations Table */}
       <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-200/80 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-200/80 flex items-center justify-between gap-2">
           <div>
             <h2 className="font-semibold text-sm text-slate-900">Recent Booking Requests</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Live stream of customer table reservations</p>
+            <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">Live stream of customer table reservations</p>
           </div>
           <Link 
             href="/admin/reservations" 
-            className="text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+            className="text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors shrink-0"
           >
             View Console →
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 bg-slate-50">
-                <th className="px-5 py-3">Booking Ref</th>
-                <th className="px-5 py-3">Customer Details</th>
-                <th className="px-5 py-3">Schedule</th>
-                <th className="px-5 py-3">Party Size</th>
-                <th className="px-5 py-3">Voucher Status</th>
+                <th className="px-4 sm:px-5 py-3">Booking Ref</th>
+                <th className="px-4 sm:px-5 py-3">Customer Details</th>
+                <th className="px-4 sm:px-5 py-3">Schedule</th>
+                <th className="px-4 sm:px-5 py-3">Party Size</th>
+                <th className="px-4 sm:px-5 py-3">Voucher Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200/80 text-xs">
@@ -190,17 +190,17 @@ export default async function AdminDashboard() {
               ) : (
                 recentReservations.map((res) => (
                   <tr key={res.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="px-5 py-3.5 font-mono font-semibold text-slate-900">{res.bookingRef}</td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 sm:px-5 py-3.5 font-mono font-semibold text-slate-900">{res.bookingRef}</td>
+                    <td className="px-4 sm:px-5 py-3.5">
                       <div className="font-semibold text-slate-900">{res.customerName}</div>
                       <div className="text-[11px] text-slate-500">{res.phone}</div>
                     </td>
-                    <td className="px-5 py-3.5 text-slate-700">
+                    <td className="px-4 sm:px-5 py-3.5 text-slate-700">
                       <div className="font-medium">{res.date.toLocaleDateString()}</div>
                       <div className="text-[11px] text-slate-500">{res.time}</div>
                     </td>
-                    <td className="px-5 py-3.5 font-medium text-slate-900">{res.guests} Guests</td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 sm:px-5 py-3.5 font-medium text-slate-900">{res.guests} Guests</td>
+                    <td className="px-4 sm:px-5 py-3.5">
                       {res.discountVerified ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold rounded-md">
                           <CheckCircle2 size={11} /> Verified

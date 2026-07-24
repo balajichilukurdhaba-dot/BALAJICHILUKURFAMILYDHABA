@@ -294,7 +294,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.98 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
-                      className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 py-3 z-50 text-slate-800"
+                      className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-xs sm:max-w-sm bg-white rounded-xl shadow-xl border border-slate-200 py-3 z-50 text-slate-800"
                     >
                       <div className="px-4 pb-2.5 border-b border-slate-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
