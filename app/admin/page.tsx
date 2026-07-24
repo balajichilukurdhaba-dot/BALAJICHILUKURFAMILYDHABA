@@ -111,7 +111,7 @@ export default async function AdminDashboard() {
         </Link>
 
         <Link 
-          href="/admin/reservations" 
+          href="/admin/checkout" 
           className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-center justify-between min-w-0 sm:col-span-2 lg:col-span-1"
         >
           <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
