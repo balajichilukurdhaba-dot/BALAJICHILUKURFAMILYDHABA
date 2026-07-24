@@ -5,6 +5,7 @@ import {
   AlertTriangle, ShieldAlert, FileText
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 export default function BackupCMS() {
