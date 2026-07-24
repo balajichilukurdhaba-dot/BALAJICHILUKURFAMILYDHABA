@@ -1352,7 +1352,7 @@ We look forward to serving you again.`;
       </Modal>
 
       {/* Global CSS for Window Print */}
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           body * {
             visibility: hidden !important;
@@ -1375,7 +1375,7 @@ We look forward to serving you again.`;
             margin: 0;
           }
         }
-      `}</style>
+      ` }} />
     </div>
   );
 }
