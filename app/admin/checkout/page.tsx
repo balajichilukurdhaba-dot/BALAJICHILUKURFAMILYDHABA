@@ -596,46 +596,30 @@ We look forward to serving you again.`;
               </div>
             ) : null}
 
-            {/* ACTION BUTTONS GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
-              <div className="sm:col-span-4">
-                <button
-                  type="button"
-                  onClick={() => setShowPrintModal(true)}
-                  className="w-full py-3 px-3 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 select-none"
-                >
-                  <Printer size={15} />
-                  <span>Print Receipt</span>
-                </button>
-              </div>
-
-              <div className="sm:col-span-8">
-                {/* HIGH-CONTRAST PRIMARY BUTTON */}
-                <motion.button 
-                  type="submit"
-                  whileHover={{ y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  disabled={generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10}
-                  className={`w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 select-none shadow-sm ${
-                    generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10
-                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
-                      : 'bg-[#1E4D2B] hover:bg-[#163a20] text-white shadow-emerald-900/10'
-                  }`}
-                >
-                  {generating ? (
-                    <>
-                      <Loader2 className="animate-spin" size={16} />
-                      <span>Committing to Ledger...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={16} />
-                      <span>Generate Voucher QR</span>
-                    </>
-                  )}
-                </motion.button>
-              </div>
-            </div>
+            {/* HIGH-CONTRAST PRIMARY BUTTON */}
+            <motion.button 
+              type="submit"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10}
+              className={`w-full py-3.5 px-4 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 select-none shadow-sm ${
+                generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+                  : 'bg-[#1E4D2B] hover:bg-[#163a20] text-white shadow-emerald-900/10'
+              }`}
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} />
+                  <span>Committing to Ledger...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
+                  <span>Generate Voucher QR</span>
+                </>
+              )}
+            </motion.button>
           </form>
         </div>
 
