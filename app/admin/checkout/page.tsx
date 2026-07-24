@@ -1169,6 +1169,8 @@ We look forward to serving you again.`;
             )}
           </div>
         )}
+      </Modal>
+
       {/* ONLINE BILL PRINTING MODAL FOR ALL PAPER SIZES */}
       <Modal
         open={showPrintModal}
