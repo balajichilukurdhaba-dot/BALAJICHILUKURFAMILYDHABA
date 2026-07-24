@@ -123,8 +123,40 @@ export default function BackupCMS() {
     }
   };
 
+  const triggerSuccessToast = (msg: string) => {
+    setSuccessMsg(msg);
+    setTimeout(() => {
+      setSuccessMsg(null);
+    }, 2000);
+  };
+
   return (
-    <div className="space-y-8 animate-fadeIn max-w-4xl">
+    <div className="space-y-8 animate-fadeIn max-w-4xl relative">
+      {/* Professional Top Center Pop-up Notification (Auto dismisses in 2 secs) */}
+      <AnimatePresence>
+        {successMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -50, scale: 0.9 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-[300] bg-[#1E4D2B] text-white px-6 py-4 rounded-2xl shadow-2xl border border-emerald-400/40 flex items-center gap-4 min-w-[320px] max-w-xl backdrop-blur-md"
+          >
+            <div className="p-2.5 bg-emerald-500/25 text-emerald-400 rounded-xl border border-emerald-400/30">
+              <Sparkles size={20} />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300">
+                Data Deleted Successfully
+              </span>
+              <span className="text-xs font-bold text-white/95 leading-tight mt-0.5">
+                {successMsg}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-3xl shadow-sm border border-brand-dark/5">
         <div>
@@ -140,13 +172,6 @@ export default function BackupCMS() {
           </p>
         </div>
       </div>
-
-      {successMsg && (
-        <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-2xl flex items-center gap-3 animate-slideDown">
-          <Check size={18} className="text-green-600" />
-          <span className="text-xs font-bold uppercase tracking-wider">{successMsg}</span>
-        </div>
-      )}
 
       {errorMsg && (
         <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-2xl flex items-center gap-3 animate-slideDown">
@@ -291,8 +316,8 @@ export default function BackupCMS() {
         isOpen={isPurgeModalOpen}
         onClose={() => setIsPurgeModalOpen(false)}
         onSuccess={(msg) => {
-          setSuccessMsg(msg);
           setIsPurgeModalOpen(false);
+          triggerSuccessToast(msg);
         }}
       />
     </div>
