@@ -3,7 +3,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Ticket, AlertTriangle, ArrowLeft, Search, RefreshCw, BookmarkCheck } from 'lucide-react';
+import { CheckCircle2, Ticket, AlertTriangle, ArrowLeft, Search, RefreshCw, BookmarkCheck, PlusCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 function SuccessContent() {
@@ -149,21 +149,28 @@ function SuccessContent() {
           </p>
         </div>
 
-        <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 w-full">
-          <button
-            onClick={() => setShowLookupModal(true)}
-            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5"
-          >
-            <Search size={14} />
-            <span>Look Up Another Booking</span>
-          </button>
-
-          <Link 
+        <div className="mt-8 space-y-3 w-full">
+          {/* Hand-Crafted Primary "Book Another Table" Button */}
+          <Link
             href="/reserve"
-            className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors text-center"
+            className="w-full py-3.5 px-6 bg-[#12301A] hover:bg-[#1b4325] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-[0_4px_14px_rgba(18,48,26,0.25)] hover:shadow-[0_6px_18px_rgba(18,48,26,0.35)] transition-all flex items-center justify-between group border border-emerald-800/40"
           >
-            Book Another Table
+            <div className="flex items-center gap-2">
+              <PlusCircle size={16} className="text-[#E0B252] group-hover:scale-110 transition-transform" />
+              <span>Book Another Table</span>
+            </div>
+            <ArrowRight size={14} className="text-[#E0B252] group-hover:translate-x-1 transition-transform" />
           </Link>
+
+          {/* Secondary Lookup Action */}
+          <button
+            type="button"
+            onClick={() => setShowLookupModal(true)}
+            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200/80"
+          >
+            <Search size={14} className="text-slate-500" />
+            <span>Look Up Existing Booking</span>
+          </button>
         </div>
       </div>
 
