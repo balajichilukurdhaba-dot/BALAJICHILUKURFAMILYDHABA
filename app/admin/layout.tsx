@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -11,18 +11,19 @@ import {
   LogOut, 
   Menu as MenuIcon, 
   X,
-  User,
   Home,
   UtensilsCrossed,
-  Image,
+  Image as ImageIcon,
   Tag,
   MessageSquare,
   Inbox,
-  Users,
-  ShieldAlert,
+  ShieldCheck,
   Database,
   Award,
-  Bell
+  Bell,
+  CheckCircle2,
+  ChevronRight,
+  UserCheck
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,7 +35,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const supabase = createClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [adminEmail, setAdminEmail] = useState<string>('');
+  const notifRef = useRef<HTMLDivElement>(null);
+
   const [counts, setCounts] = useState<{
     whatsapp_orders: number;
     reservations: number;
@@ -46,7 +50,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     testimonials: 0,
     queries: 0
   });
-
 
   const fetchNotificationCounts = async () => {
     try {
@@ -75,14 +78,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch the current admin's email for the snapshot modal
+  // Close notification popover on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setNotifDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fetch current admin user
   useEffect(() => {
     (async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user?.email) setAdminEmail(user.email);
       } catch (e) {
-        // Supabase auth unavailable (network or bad key) — silently ignore
+        // Auth fallback
       }
     })();
   }, []);
@@ -121,91 +135,84 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Reservations', path: '/admin/reservations', icon: Calendar, badgeKey: 'reservations' },
     { name: 'WhatsApp Orders', path: '/admin/orders', icon: MessageCircle, badgeKey: 'whatsapp_orders' },
-    { name: 'Checkout Rewards', path: '/admin/checkout', icon: Award },
+    { name: 'Rewards & Vouchers', path: '/admin/checkout', icon: Award },
     { name: 'QR Scanner', path: '/admin/scanner', icon: QrCode },
-    { name: 'Homepage CMS', path: '/admin/homepage', icon: Home },
-    { name: 'Menu Editor CMS', path: '/admin/menu', icon: UtensilsCrossed },
-    { name: 'Gallery CMS', path: '/admin/gallery', icon: Image },
-    { name: 'Offers CMS', path: '/admin/offers', icon: Tag },
-    { name: 'Reviews CMS', path: '/admin/testimonials', icon: MessageSquare, badgeKey: 'testimonials' },
-    { name: 'Customer Inbox', path: '/admin/messages', icon: Inbox, badgeKey: 'queries' },
-    { name: 'Audit Trail', path: '/admin/audit', icon: ShieldAlert },
-    { name: 'Backups & Seed', path: '/admin/backup', icon: Database },
+    { name: 'Page CMS', path: '/admin/homepage', icon: Home },
+    { name: 'Menu Catalog', path: '/admin/menu', icon: UtensilsCrossed },
+    { name: 'Media Gallery', path: '/admin/gallery', icon: ImageIcon },
+    { name: 'Promotions', path: '/admin/offers', icon: Tag },
+    { name: 'Customer Reviews', path: '/admin/testimonials', icon: MessageSquare, badgeKey: 'testimonials' },
+    { name: 'Inbox & Queries', path: '/admin/messages', icon: Inbox, badgeKey: 'queries' },
+    { name: 'Audit & Access Logs', path: '/admin/audit', icon: ShieldCheck },
+    { name: 'System Maintenance', path: '/admin/backup', icon: Database },
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 
   const totalNotifications = Object.values(counts).reduce((a, b) => a + b, 0);
 
-  // Do not render sidebar on login page
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
   return (
-    <>
     <AntdProvider>
-      <div className="flex h-screen bg-[#FFFFFF] overflow-hidden font-sans selection:bg-[#1E4D2B] selection:text-[#FFFFFF]">
-        {/* Desktop Sidebar (Deep Chocolate-Charcoal #1E4D2B) */}
-        <aside className="w-72 bg-[#1E4D2B] text-zinc-150 flex flex-col border-r border-brand-dark/10 shadow-md z-30 hidden lg:flex font-sans">
-          {/* Header Branding */}
-          <div className="p-6 border-b border-white/10 flex items-center gap-4">
-            <div className="relative p-1 bg-[#1E4D2B]/15 rounded-full border border-[#1E4D2B]/25 shadow-md">
-              <img src="/bsd-logo.png" alt="Logo" className="w-10 h-10 object-contain" />
-            </div>
-            <div>
-              <span className="font-display font-black uppercase tracking-wider text-sm leading-tight text-[#FAF6EE] drop-shadow-sm">
-                Balaji Chilkur
-              </span>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-[#1E4D2B]/80 mt-0.5">
-                Admin Portal
-              </p>
+      <div className="flex h-screen bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans antialiased">
+        {/* Enterprise Desktop Sidebar */}
+        <aside className="w-64 bg-[#0F172A] text-slate-300 flex flex-col border-r border-slate-800 z-30 hidden lg:flex select-none">
+          {/* Workspace Branding Header */}
+          <div className="h-16 px-5 border-b border-slate-800/80 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700/80 flex items-center justify-center p-1">
+                <img src="/bsd-logo.png" alt="BSD" className="w-full h-full object-contain" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-semibold text-xs tracking-tight text-white leading-none">
+                  Balaji Dhaba
+                </span>
+                <span className="text-[10px] font-medium text-slate-400 mt-1">
+                  Management Portal
+                </span>
+              </div>
             </div>
           </div>
 
-
-          
-          {/* Navigation */}
-          <nav className="flex-1 py-5 px-4 flex flex-col gap-1.5 overflow-y-auto">
+          {/* Navigation Links */}
+          <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto custom-scrollbar">
             {navItems.map((item) => {
               const isActive = pathname === item.path;
               const Icon = item.icon;
               
-              // Get current count from API
               const baseCount = item.badgeKey ? (counts[item.badgeKey as keyof typeof counts] || 0) : 0;
-              
-              // Testimonials seen offset
               let badgeCount = baseCount;
               if (item.badgeKey === 'testimonials') {
                 const seenCount = typeof window !== 'undefined' ? Number(localStorage.getItem('last_seen_testimonials_count') || 0) : 0;
                 badgeCount = Math.max(0, baseCount - seenCount);
               }
-
-              // If currently viewing this page, hide the badge (seen)
-              if (isActive) {
-                badgeCount = 0;
-              }
+              if (isActive) badgeCount = 0;
 
               return (
                 <Link
                   key={item.path}
                   href={item.path}
-                  className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-250 font-sans text-[11px] font-bold uppercase tracking-wider border relative group ${
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors relative group ${
                     isActive 
-                      ? 'text-white border-white/20 z-10' 
-                      : 'text-[#FAF6EE]/75 border-transparent hover:bg-[#FAF6EE]/10 hover:text-white'
+                      ? 'text-white bg-slate-800/90 font-semibold' 
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                   }`}
                 >
                   {isActive && (
                     <motion.div
-                      layoutId="activeAdminNav"
-                      className="absolute inset-0 bg-[#FAF6EE]/15 rounded-xl border border-white/20 -z-10 shadow-inner"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      layoutId="activeSideNav"
+                      className="absolute inset-y-1.5 left-0 w-1 bg-emerald-500 rounded-r-full"
+                      transition={{ type: 'spring', stiffness: 400, damping: 35 }}
                     />
                   )}
-                  <Icon size={14} className={isActive ? 'text-white' : 'text-[#FAF6EE]/50 group-hover:text-white transition-colors'} />
-                  <span>{item.name}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon size={16} className={isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-200 transition-colors'} />
+                    <span>{item.name}</span>
+                  </div>
                   {badgeCount > 0 && (
-                    <span className="ml-auto bg-[#1E4D2B] text-white text-[9px] font-black px-2 py-0.5 rounded-full min-w-[18px] text-center shadow-md animate-pulse border border-white/10">
+                    <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold px-2 py-0.5 rounded-full">
                       {badgeCount}
                     </span>
                   )}
@@ -213,48 +220,181 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               );
             })}
           </nav>
-          
-          {/* User Session Footer */}
-          <div className="p-4 border-t border-white/10 bg-black/20">
-            <button 
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-lg bg-black/25 text-[#FAF6EE]/70 border border-white/10 hover:bg-[#1E4D2B] hover:text-white transition-all duration-200 font-bold uppercase tracking-wider text-[10px]"
-            >
-              <LogOut size={14} />
-              <span>Sign Out</span>
-            </button>
+
+          {/* User Profile Footer */}
+          <div className="p-3 border-t border-slate-800/80 bg-slate-900/60">
+            <div className="flex items-center justify-between px-2 py-1.5">
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 text-slate-300 flex items-center justify-center text-xs font-semibold uppercase">
+                  {adminEmail ? adminEmail[0] : 'A'}
+                </div>
+                <div className="flex flex-col truncate">
+                  <span className="text-[11px] font-medium text-slate-200 truncate">
+                    {adminEmail || 'Administrator'}
+                  </span>
+                  <span className="text-[9px] text-slate-500">System Admin</span>
+                </div>
+              </div>
+              <button 
+                onClick={handleLogout}
+                title="Sign Out"
+                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-md transition-colors"
+              >
+                <LogOut size={15} />
+              </button>
+            </div>
           </div>
         </aside>
 
-        {/* Main Container */}
-        <div className="flex-grow flex flex-col overflow-hidden relative">
-          {/* Mobile Header Bar */}
-          <header className="lg:hidden w-full bg-[#1E4D2B] text-zinc-150 px-6 py-4 flex justify-between items-center border-b border-white/10 z-30">
+        {/* Main Content & Top Header Area */}
+        <div className="flex-grow flex flex-col overflow-hidden">
+          {/* Enterprise Top Header Bar */}
+          <header className="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between z-20 shadow-sm">
             <div className="flex items-center gap-3">
-              <img src="/bsd-logo.png" alt="Logo" className="w-8 h-8 object-contain p-0.5 bg-[#1E4D2B]/10 rounded-full border border-[#1E4D2B]/25" />
-              <span className="font-display font-black uppercase text-xs tracking-wider text-[#FAF6EE]">
-                BSD Admin
-              </span>
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <MenuIcon size={18} />
+              </button>
+              <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 font-medium">
+                <span>Management</span>
+                <ChevronRight size={14} className="text-slate-400" />
+                <span className="text-slate-900 font-semibold capitalize">
+                  {pathname.split('/')[2] || 'Dashboard'}
+                </span>
+              </div>
             </div>
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-zinc-300 hover:bg-[#1E4D2B]/15 rounded-lg transition-colors"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <MenuIcon size={20} />}
-            </button>
+
+            {/* Notification Center Trigger & Admin Controls */}
+            <div className="flex items-center gap-3" ref={notifRef}>
+              <div className="relative">
+                <button
+                  onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                  className={`p-2 rounded-lg border transition-colors relative flex items-center justify-center ${
+                    notifDropdownOpen 
+                      ? 'bg-slate-100 border-slate-300 text-slate-900' 
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                  title="Notification Center"
+                >
+                  <Bell size={17} />
+                  {totalNotifications > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full border-2 border-white min-w-[16px] text-center">
+                      {totalNotifications}
+                    </span>
+                  )}
+                </button>
+
+                {/* Professional Notification Popover */}
+                <AnimatePresence>
+                  {notifDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 py-3 z-50 text-slate-800"
+                    >
+                      <div className="px-4 pb-2.5 border-b border-slate-100 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-xs text-slate-900">Notification Center</span>
+                          {totalNotifications > 0 && (
+                            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                              {totalNotifications} new
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="py-2 px-2 max-h-72 overflow-y-auto space-y-1">
+                        {counts.reservations > 0 && (
+                          <Link
+                            href="/admin/reservations"
+                            onClick={() => setNotifDropdownOpen(false)}
+                            className="flex items-center justify-between p-2.5 hover:bg-slate-50 rounded-lg text-xs transition-colors border border-transparent hover:border-slate-200"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
+                                <Calendar size={14} />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium text-slate-900">Pending Reservations</span>
+                                <span className="text-[10px] text-slate-500">{counts.reservations} new customer requests</span>
+                              </div>
+                            </div>
+                            <ChevronRight size={14} className="text-slate-400" />
+                          </Link>
+                        )}
+
+                        {counts.whatsapp_orders > 0 && (
+                          <Link
+                            href="/admin/orders"
+                            onClick={() => setNotifDropdownOpen(false)}
+                            className="flex items-center justify-between p-2.5 hover:bg-slate-50 rounded-lg text-xs transition-colors border border-transparent hover:border-slate-200"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-md">
+                                <MessageCircle size={14} />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium text-slate-900">WhatsApp Orders</span>
+                                <span className="text-[10px] text-slate-500">{counts.whatsapp_orders} recent order submissions</span>
+                              </div>
+                            </div>
+                            <ChevronRight size={14} className="text-slate-400" />
+                          </Link>
+                        )}
+
+                        {counts.queries > 0 && (
+                          <Link
+                            href="/admin/messages"
+                            onClick={() => setNotifDropdownOpen(false)}
+                            className="flex items-center justify-between p-2.5 hover:bg-slate-50 rounded-lg text-xs transition-colors border border-transparent hover:border-slate-200"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-1.5 bg-amber-50 text-amber-600 rounded-md">
+                                <Inbox size={14} />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium text-slate-900">Inbox Queries</span>
+                                <span className="text-[10px] text-slate-500">{counts.queries} unread contact inquiries</span>
+                              </div>
+                            </div>
+                            <ChevronRight size={14} className="text-slate-400" />
+                          </Link>
+                        )}
+
+                        {totalNotifications === 0 && (
+                          <div className="p-6 text-center text-xs text-slate-500 flex flex-col items-center gap-2">
+                            <CheckCircle2 size={24} className="text-emerald-500" />
+                            <span>All notifications cleared. System up to date.</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="px-4 pt-2.5 border-t border-slate-100 text-center">
+                        <span className="text-[10px] font-medium text-slate-400">
+                          Auto-refreshes live every 15s
+                        </span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
           </header>
 
-          {/* Content Area */}
-          <main className="flex-grow overflow-y-auto p-6 md:p-10 pb-28 lg:pb-10 relative">
-            <div className="absolute inset-0 noise-overlay opacity-[0.01] pointer-events-none" />
+          {/* Page Content Body */}
+          <main className="flex-grow overflow-y-auto p-6 lg:p-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 max-w-7xl mx-auto w-full flex-grow"
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="max-w-7xl mx-auto w-full"
               >
                 {children}
               </motion.div>
@@ -262,77 +402,73 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </main>
         </div>
 
-        {/* Mobile Drawer (Fallback Navigation) */}
+        {/* Mobile Navigation Drawer */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <div className="lg:hidden fixed inset-0 bg-[#1E4D2B]/95 z-40 backdrop-blur-md flex flex-col pt-24 px-6 pb-6">
+            <div className="lg:hidden fixed inset-0 z-50 flex">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <motion.aside
+                initial={{ x: -280 }}
+                animate={{ x: 0 }}
+                exit={{ x: -280 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                className="relative w-72 bg-[#0F172A] text-slate-300 flex flex-col h-full z-10 border-r border-slate-800"
+              >
+                <div className="h-16 px-5 border-b border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <img src="/bsd-logo.png" alt="BSD" className="w-7 h-7 object-contain" />
+                    <span className="font-semibold text-xs text-white">Management Portal</span>
+                  </div>
+                  <button onClick={() => setMobileMenuOpen(false)} className="text-slate-400 p-1">
+                    <X size={18} />
+                  </button>
+                </div>
 
-              <nav className="flex-grow flex flex-col gap-2 overflow-y-auto">
-                {navItems.map((item) => {
-                  const isActive = pathname === item.path;
-                  const Icon = item.icon;
-                  
-                  const baseCount = item.badgeKey ? (counts[item.badgeKey as keyof typeof counts] || 0) : 0;
-                  
-                  let badgeCount = baseCount;
-                  if (item.badgeKey === 'testimonials') {
-                    const seenCount = typeof window !== 'undefined' ? Number(localStorage.getItem('last_seen_testimonials_count') || 0) : 0;
-                    badgeCount = Math.max(0, baseCount - seenCount);
-                  }
+                <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+                  {navItems.map((item) => {
+                    const isActive = pathname === item.path;
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.path}
+                        href={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                          isActive ? 'bg-slate-800 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon size={16} />
+                          <span>{item.name}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </nav>
 
-                  if (isActive) {
-                    badgeCount = 0;
-                  }
-
-                  return (
-                    <Link
-                      key={item.path}
-                      href={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-5 py-3.5 rounded-xl transition-all font-bold uppercase tracking-wider text-xs border relative ${
-                        isActive 
-                          ? 'text-white border-white/20 z-10' 
-                          : 'text-[#FAF6EE]/75 border-transparent hover:bg-[#FAF6EE]/10 hover:text-white'
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeAdminNavMobile"
-                          className="absolute inset-0 bg-[#FAF6EE]/15 rounded-xl border border-white/20 -z-10 shadow-inner"
-                        />
-                      )}
-                      <div className="flex items-center gap-4">
-                        <Icon size={16} />
-                        <span>{item.name}</span>
-                      </div>
-                      {badgeCount > 0 && (
-                        <span className="bg-[#1E4D2B] text-white text-[10px] font-black px-2 py-0.5 rounded-full min-w-[20px] text-center shadow-md animate-pulse">
-                          {badgeCount}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </nav>
-              <div className="mt-auto border-t border-white/10 pt-6">
-                <button 
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-xl bg-black/25 text-zinc-300 border border-white/10 font-bold uppercase tracking-widest text-xs hover:bg-[#1E4D2B]"
-                >
-                  <LogOut size={16} />
-                  <span>Logout</span>
-                </button>
-              </div>
+                <div className="p-4 border-t border-slate-800 bg-slate-900">
+                  <button 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+                  >
+                    <LogOut size={15} />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </motion.aside>
             </div>
           )}
         </AnimatePresence>
       </div>
     </AntdProvider>
-    {/* Admin daily login verification modal */}
-    {adminEmail && <AdminLoginSnapshotModal adminEmail={adminEmail} />}
-    </>
   );
 }
