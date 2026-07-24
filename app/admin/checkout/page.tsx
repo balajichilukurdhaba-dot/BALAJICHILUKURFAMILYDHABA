@@ -55,8 +55,8 @@ export default function CheckoutRewardsPage() {
   const [billNumber, setBillNumber] = useState<string>('');
   const [baseBill, setBaseBill] = useState<number | null>(null);
   const [customerPhone, setCustomerPhone] = useState<string>('');
-  const [discountCategory, setDiscountCategory] = useState<string>('Happy Hour');
-  const [discountPercent, setDiscountPercent] = useState<number>(12.00); // 12% default for Happy Hour
+  const [discountCategory, setDiscountCategory] = useState<string>('Happy Hour Special');
+  const [discountPercent, setDiscountPercent] = useState<number>(12.00); // 12% default for Happy Hour Special
 
   // Generation response states
   const [generating, setGenerating] = useState(false);
@@ -72,19 +72,19 @@ export default function CheckoutRewardsPage() {
   // Default Categories & predefined percentages
   const handleCategoryChange = (val: string) => {
     setDiscountCategory(val);
-    if (val === 'Corporate Discount') {
+    if (val === 'Corporate Partner Privilege' || val === 'Corporate Discount') {
       setDiscountPercent(15.00);
-    } else if (val === 'Happy Hour') {
+    } else if (val === 'Happy Hour Special' || val === 'Happy Hour') {
       setDiscountPercent(12.00);
-    } else if (val === 'Weekend Offer') {
+    } else if (val === 'Weekend Dining Benefit' || val === 'Weekend Offer') {
       setDiscountPercent(20.00);
-    } else if (val === 'Loyalty Reward') {
+    } else if (val === 'VIP Member Loyalty Reward' || val === 'Loyalty Reward') {
       setDiscountPercent(10.00);
-    } else if (val === 'Festival Offer') {
+    } else if (val === 'Festive Season Offer' || val === 'Festival Offer') {
       setDiscountPercent(10.00);
-    } else if (val === 'Staff Courtesy') {
+    } else if (val === 'Manager Courtesy Concession' || val === 'Staff Courtesy') {
       setDiscountPercent(100.00);
-    } else if (val === 'Manual Custom') {
+    } else if (val === 'Custom Manager Adjustment' || val === 'Manual Custom') {
       setDiscountPercent(0.00);
     }
   };
@@ -505,13 +505,13 @@ We look forward to serving you again.`;
                     className="w-full"
                     style={{ border: '1px solid #F5E6E3', borderRadius: 8 }}
                   >
-                    <Option value="Corporate Discount">Corporate Discount</Option>
-                    <Option value="Happy Hour">Happy Hour</Option>
-                    <Option value="Weekend Offer">Weekend Offer</Option>
-                    <Option value="Loyalty Reward">Loyalty Reward</Option>
-                    <Option value="Festival Offer">Festival Offer</Option>
-                    <Option value="Staff Courtesy">Staff Courtesy</Option>
-                    <Option value="Manual Custom">Manual Custom</Option>
+                    <Option value="Corporate Partner Privilege">Corporate Partner Privilege</Option>
+                    <Option value="Happy Hour Special">Happy Hour Special</Option>
+                    <Option value="Weekend Dining Benefit">Weekend Dining Benefit</Option>
+                    <Option value="VIP Member Loyalty Reward">VIP Member Loyalty Reward</Option>
+                    <Option value="Festive Season Offer">Festive Season Offer</Option>
+                    <Option value="Manager Courtesy Concession">Manager Courtesy Concession</Option>
+                    <Option value="Custom Manager Adjustment">Custom Manager Adjustment</Option>
                   </Select>
                 </Col>
 
