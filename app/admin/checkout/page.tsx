@@ -10,11 +10,28 @@ import {
   WhatsAppOutlined, CopyOutlined, DownloadOutlined, CloseCircleOutlined, CheckCircleOutlined, SearchOutlined
 } from '@ant-design/icons';
 import { 
-  DollarSign, Phone, Award, QrCode, Loader2, Sparkles, CheckCircle2, Ticket, FileText, Calendar, Search, RefreshCw, X, ArrowUpRight
+  DollarSign, Phone, Award, QrCode, Loader2, Sparkles, CheckCircle2, Ticket, FileText, Calendar, Search, RefreshCw, X, ArrowUpRight, Printer, Plus, Trash2, ShoppingCart, SlidersHorizontal, Check
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
 const { Option } = Select;
+
+// Itemized Bill TypeScript interfaces
+interface BillItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  isCustom?: boolean;
+}
+
+interface MenuItemOption {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+}
 
 // Coupon data TypeScript interface
 interface Coupon {
@@ -58,6 +75,135 @@ function CheckoutRewardsContent() {
   const [customerPhone, setCustomerPhone] = useState<string>('');
   const [discountCategory, setDiscountCategory] = useState<string>('Business Dining');
   const [discountPercent, setDiscountPercent] = useState<number>(15.00); // 15% default for Business Dining
+
+  // Itemized POS Bill Builder state
+  const [orderItems, setOrderItems] = useState<BillItem[]>([]);
+  const [menuOptions, setMenuOptions] = useState<MenuItemOption[]>([]);
+  const [selectedMenuDishId, setSelectedMenuDishId] = useState<string>('');
+  const [itemQty, setItemQty] = useState<number>(1);
+  const [customItemName, setCustomItemName] = useState<string>('');
+  const [customItemPrice, setCustomItemPrice] = useState<number | null>(null);
+  const [paperSize, setPaperSize] = useState<'80mm' | '58mm' | 'A4' | 'A5'>('80mm');
+  const [showPrintModal, setShowPrintModal] = useState<boolean>(false);
+
+  // Fetch Menu Items for Dish Selector Dropdown
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const res = await fetch('/api/cms/menu');
+        const data = await res.json();
+        if (data.categories) {
+          const list: MenuItemOption[] = [];
+          data.categories.forEach((cat: any) => {
+            if (cat.dishes) {
+              cat.dishes.forEach((d: any) => {
+                list.push({
+                  id: d.id,
+                  name: d.name,
+                  price: Number(d.price || 0),
+                  category: cat.name
+                });
+              });
+            }
+          });
+          setMenuOptions(list);
+        }
+      } catch (e) {
+        console.error('Failed to load menu dishes:', e);
+      }
+    };
+    fetchMenu();
+  }, []);
+
+  // Update baseBill from item subtotal
+  const updateBaseBillFromItems = (items: BillItem[]) => {
+    const sum = items.reduce((total, item) => total + item.totalPrice, 0);
+    if (sum > 0) {
+      setBaseBill(Math.round(sum * 100) / 100);
+    }
+  };
+
+  // Add menu dish to bill
+  const handleAddMenuDish = () => {
+    if (!selectedMenuDishId) return;
+    const dish = menuOptions.find(m => m.id === selectedMenuDishId);
+    if (!dish) return;
+
+    const qty = itemQty > 0 ? itemQty : 1;
+    const newItem: BillItem = {
+      id: `item-${Date.now()}-${Math.random()}`,
+      name: dish.name,
+      quantity: qty,
+      unitPrice: dish.price,
+      totalPrice: dish.price * qty,
+      isCustom: false
+    };
+
+    const updated = [...orderItems, newItem];
+    setOrderItems(updated);
+    updateBaseBillFromItems(updated);
+
+    setSelectedMenuDishId('');
+    setItemQty(1);
+    message.success(`Added ${dish.name} (x${qty}) to bill`);
+  };
+
+  // Add custom manual item & custom price
+  const handleAddCustomItem = () => {
+    if (!customItemName.trim()) {
+      message.error('Please enter item name');
+      return;
+    }
+    if (customItemPrice === null || customItemPrice < 0) {
+      message.error('Please enter valid unit price');
+      return;
+    }
+
+    const qty = itemQty > 0 ? itemQty : 1;
+    const newItem: BillItem = {
+      id: `custom-${Date.now()}-${Math.random()}`,
+      name: customItemName.trim(),
+      quantity: qty,
+      unitPrice: customItemPrice,
+      totalPrice: customItemPrice * qty,
+      isCustom: true
+    };
+
+    const updated = [...orderItems, newItem];
+    setOrderItems(updated);
+    updateBaseBillFromItems(updated);
+
+    setCustomItemName('');
+    setCustomItemPrice(null);
+    setItemQty(1);
+    message.success(`Added custom item ${newItem.name}`);
+  };
+
+  // Update quantity or unit price for any item in real time
+  const handleUpdateItem = (id: string, field: 'quantity' | 'unitPrice', val: number) => {
+    const updated = orderItems.map(item => {
+      if (item.id === id) {
+        const newQty = field === 'quantity' ? Math.max(1, val) : item.quantity;
+        const newPrice = field === 'unitPrice' ? Math.max(0, val) : item.unitPrice;
+        return {
+          ...item,
+          quantity: newQty,
+          unitPrice: newPrice,
+          totalPrice: newQty * newPrice
+        };
+      }
+      return item;
+    });
+    setOrderItems(updated);
+    updateBaseBillFromItems(updated);
+  };
+
+  // Remove item from bill
+  const handleRemoveItem = (id: string) => {
+    const updated = orderItems.filter(item => item.id !== id);
+    setOrderItems(updated);
+    updateBaseBillFromItems(updated);
+  };
 
   // Generation response states
   const [generating, setGenerating] = useState(false);
@@ -389,6 +535,176 @@ We look forward to serving you again.`;
               />
             </div>
 
+            {/* POS Itemized Order & Receipt Builder Card */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  <ShoppingCart size={15} className="text-[#1E4D2B]" />
+                  <span>Itemized Order &amp; POS Bill Builder</span>
+                </div>
+                <span className="text-[11px] font-medium text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded-full">
+                  {orderItems.length} {orderItems.length === 1 ? 'Item' : 'Items'} Added
+                </span>
+              </div>
+
+              {/* Add Item Controls */}
+              <div className="space-y-2 bg-white p-3 rounded-lg border border-slate-200/80">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
+                  {/* Select Dish from Menu */}
+                  <div className="sm:col-span-6">
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Select Menu Dish</label>
+                    <Select
+                      size="middle"
+                      showSearch
+                      placeholder="Search menu dish..."
+                      optionFilterProp="children"
+                      value={selectedMenuDishId || undefined}
+                      onChange={(val) => {
+                        setSelectedMenuDishId(val);
+                        setCustomItemName('');
+                      }}
+                      className="w-full text-xs"
+                    >
+                      {menuOptions.map(item => (
+                        <Option key={item.id} value={item.id}>
+                          {item.name} — ₹{item.price} ({item.category})
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  {/* Custom Manual Item Name */}
+                  <div className="sm:col-span-6">
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Or Manual Custom Item</label>
+                    <Input
+                      size="middle"
+                      placeholder="Custom Dish Name (e.g. Special Thali)"
+                      value={customItemName}
+                      onChange={(e) => {
+                        setCustomItemName(e.target.value);
+                        setSelectedMenuDishId('');
+                      }}
+                      className="text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 pt-1">
+                  <div className="sm:col-span-4">
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Qty</label>
+                    <InputNumber
+                      size="middle"
+                      min={1}
+                      value={itemQty}
+                      onChange={(val) => setItemQty(val || 1)}
+                      className="w-full text-xs"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-4">
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Custom Unit Price (₹)</label>
+                    <InputNumber
+                      size="middle"
+                      min={0}
+                      placeholder={selectedMenuDishId ? `₹${menuOptions.find(m => m.id === selectedMenuDishId)?.price || 0}` : 'Price ₹'}
+                      value={customItemPrice}
+                      onChange={(val) => setCustomItemPrice(val)}
+                      className="w-full text-xs"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-4 flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedMenuDishId) {
+                          handleAddMenuDish();
+                        } else if (customItemName.trim()) {
+                          handleAddCustomItem();
+                        } else {
+                          message.warning('Select a menu dish or enter custom item name');
+                        }
+                      }}
+                      className="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <Plus size={14} />
+                      <span>Add Item</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Items List Table */}
+              {orderItems.length > 0 ? (
+                <div className="bg-white rounded-lg border border-slate-200/80 overflow-hidden text-xs">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-100/80 text-[10px] uppercase font-semibold text-slate-500 border-b border-slate-200">
+                      <tr>
+                        <th className="py-2 px-3">Item Description</th>
+                        <th className="py-2 px-2 text-center w-20">Qty</th>
+                        <th className="py-2 px-2 text-right w-24">Unit Price (₹)</th>
+                        <th className="py-2 px-2 text-right w-24">Total (₹)</th>
+                        <th className="py-2 px-2 text-center w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {orderItems.map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-50/50">
+                          <td className="py-2 px-3 font-medium">
+                            {item.name}
+                            {item.isCustom && <span className="ml-1.5 text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-mono">custom</span>}
+                          </td>
+                          <td className="py-1.5 px-2 text-center">
+                            <InputNumber
+                              size="small"
+                              min={1}
+                              value={item.quantity}
+                              onChange={(val) => handleUpdateItem(item.id, 'quantity', val || 1)}
+                              className="w-16 text-center text-xs"
+                            />
+                          </td>
+                          <td className="py-1.5 px-2 text-right">
+                            <InputNumber
+                              size="small"
+                              min={0}
+                              value={item.unitPrice}
+                              onChange={(val) => handleUpdateItem(item.id, 'unitPrice', val || 0)}
+                              className="w-20 text-right text-xs"
+                            />
+                          </td>
+                          <td className="py-2 px-2 text-right font-semibold text-slate-900">
+                            ₹{item.totalPrice.toFixed(2)}
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(item.id)}
+                              className="text-slate-400 hover:text-rose-600 transition-colors"
+                              title="Remove item"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  
+                  {/* Items Subtotal Footer */}
+                  <div className="bg-slate-50/80 px-3 py-2 border-t border-slate-200 flex items-center justify-between text-xs">
+                    <span className="text-slate-500 font-medium">Calculated Items Subtotal:</span>
+                    <span className="font-bold text-slate-900 text-sm">
+                      ₹{orderItems.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[11px] text-slate-400 italic text-center py-1">
+                  No items added yet. Pick menu dishes above or enter manual items with custom prices.
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
@@ -449,30 +765,46 @@ We look forward to serving you again.`;
               </div>
             ) : null}
 
-            {/* HIGH-CONTRAST PRIMARY BUTTON */}
-            <motion.button 
-              type="submit"
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.98 }}
-              disabled={generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10}
-              className={`w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 select-none shadow-sm ${
-                generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10
-                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
-                  : 'bg-[#1E4D2B] hover:bg-[#163a20] text-white shadow-emerald-900/10'
-              }`}
-            >
-              {generating ? (
-                <>
-                  <Loader2 className="animate-spin" size={16} />
-                  <span>Committing to Ledger...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles size={16} />
-                  <span>Generate Voucher QR</span>
-                </>
-              )}
-            </motion.button>
+            {/* ACTION BUTTONS GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
+              <div className="sm:col-span-4">
+                <button
+                  type="button"
+                  onClick={() => setShowPrintModal(true)}
+                  className="w-full py-3 px-3 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 select-none"
+                >
+                  <Printer size={15} />
+                  <span>Print Receipt</span>
+                </button>
+              </div>
+
+              <div className="sm:col-span-8">
+                {/* HIGH-CONTRAST PRIMARY BUTTON */}
+                <motion.button 
+                  type="submit"
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10}
+                  className={`w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 select-none shadow-sm ${
+                    generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10
+                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+                      : 'bg-[#1E4D2B] hover:bg-[#163a20] text-white shadow-emerald-900/10'
+                  }`}
+                >
+                  {generating ? (
+                    <>
+                      <Loader2 className="animate-spin" size={16} />
+                      <span>Committing to Ledger...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={16} />
+                      <span>Generate Voucher QR</span>
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </div>
           </form>
         </div>
 
@@ -837,7 +1169,213 @@ We look forward to serving you again.`;
             )}
           </div>
         )}
+      {/* ONLINE BILL PRINTING MODAL FOR ALL PAPER SIZES */}
+      <Modal
+        open={showPrintModal}
+        onCancel={() => setShowPrintModal(false)}
+        footer={null}
+        width={paperSize === 'A4' ? 820 : paperSize === 'A5' ? 620 : 440}
+        title={
+          <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+            <Printer size={16} className="text-[#1E4D2B]" />
+            <span>Online Bill &amp; Receipt Printer</span>
+          </div>
+        }
+      >
+        <div className="space-y-4 pt-2 font-sans">
+          {/* Paper Size Selector Tabs */}
+          <div className="bg-slate-100 p-1.5 rounded-xl flex items-center justify-between gap-1 text-xs font-medium">
+            <span className="text-slate-500 font-semibold px-2 uppercase text-[10px] hidden sm:inline">Paper Format:</span>
+            <div className="grid grid-cols-4 gap-1 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => setPaperSize('80mm')}
+                className={`py-1.5 px-3 rounded-lg transition-all text-center text-xs ${
+                  paperSize === '80mm' ? 'bg-[#1E4D2B] text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
+                }`}
+              >
+                80mm POS
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaperSize('58mm')}
+                className={`py-1.5 px-3 rounded-lg transition-all text-center text-xs ${
+                  paperSize === '58mm' ? 'bg-[#1E4D2B] text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
+                }`}
+              >
+                58mm Mini
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaperSize('A4')}
+                className={`py-1.5 px-3 rounded-lg transition-all text-center text-xs ${
+                  paperSize === 'A4' ? 'bg-[#1E4D2B] text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
+                }`}
+              >
+                A4 Invoice
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaperSize('A5')}
+                className={`py-1.5 px-3 rounded-lg transition-all text-center text-xs ${
+                  paperSize === 'A5' ? 'bg-[#1E4D2B] text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
+                }`}
+              >
+                A5 Half Page
+              </button>
+            </div>
+          </div>
+
+          {/* Printable Bill Receipt Preview Area */}
+          <div className="bg-slate-200/60 p-4 rounded-xl max-h-[60vh] overflow-y-auto flex justify-center">
+            <div
+              id="printable-bill-area"
+              className={`bg-white text-slate-900 shadow-md p-4 rounded border border-slate-300 font-mono transition-all ${
+                paperSize === '58mm' ? 'w-[220px] text-[10px]' : paperSize === '80mm' ? 'w-[300px] text-xs' : paperSize === 'A5' ? 'w-[500px] text-xs font-sans' : 'w-[700px] text-sm font-sans'
+              }`}
+            >
+              {/* Header */}
+              <div className="text-center border-b border-slate-900/40 pb-3 mb-3 space-y-1">
+                <h2 className="font-bold text-base uppercase tracking-tight text-slate-900">Balaji Chilkur Family Dhaba</h2>
+                <p className="text-[10px] text-slate-600">Vikarabad Highway, Chilkur X Road, TS</p>
+                <p className="text-[10px] text-slate-600">Ph: +91 93471 04569 | GSTIN: 36ABCDE1234F1Z5</p>
+                <div className="mt-2 inline-block border border-slate-800 px-2 py-0.5 font-bold text-[10px] uppercase">
+                  Tax Invoice / Bill Receipt
+                </div>
+              </div>
+
+              {/* Bill Meta Details */}
+              <div className="text-[11px] border-b border-slate-900/40 pb-2 mb-3 space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Bill / Inv No:</span>
+                  <span className="font-bold">{billNumber || 'BSD-POS-001'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Date &amp; Time:</span>
+                  <span>{new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Customer Phone:</span>
+                  <span className="font-bold">{customerPhone || 'Walk-in Guest'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Promotion:</span>
+                  <span>{discountCategory} ({discountPercent}%)</span>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <div className="border-b border-slate-900/40 pb-3 mb-3">
+                <table className="w-full text-left text-[11px]">
+                  <thead>
+                    <tr className="border-b border-slate-800 font-bold">
+                      <th className="py-1">Item Description</th>
+                      <th className="py-1 text-center">Qty</th>
+                      <th className="py-1 text-right">Rate</th>
+                      <th className="py-1 text-right">Amt</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {orderItems.length > 0 ? (
+                      orderItems.map((item) => (
+                        <tr key={item.id}>
+                          <td className="py-1 font-medium">{item.name}</td>
+                          <td className="py-1 text-center">{item.quantity}</td>
+                          <td className="py-1 text-right">₹{item.unitPrice}</td>
+                          <td className="py-1 text-right font-semibold">₹{item.totalPrice}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td className="py-1 font-medium" colSpan={3}>Dhaba Dining Bill Amount</td>
+                        <td className="py-1 text-right font-semibold">₹{baseBill || 0}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals Calculation Summary */}
+              <div className="text-[11px] space-y-1 border-b border-slate-900/40 pb-3 mb-3">
+                <div className="flex justify-between text-slate-700">
+                  <span>Gross Subtotal:</span>
+                  <span>₹{baseBill || 0}</span>
+                </div>
+                {calculatedDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-800 font-medium">
+                    <span>Discount ({discountPercent}%):</span>
+                    <span>-₹{calculatedDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-sm text-slate-900 pt-1 border-t border-slate-800">
+                  <span>Net Payable Amount:</span>
+                  <span>₹{finalBill.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Footer & QR */}
+              <div className="text-center text-[10px] space-y-2 pt-1">
+                {activeCoupon && (
+                  <div className="flex flex-col items-center justify-center my-2">
+                    <QRCodeCanvas value={`https://balajichilkur.com/menu?claimBonusToken=${activeCoupon.token}`} size={70} />
+                    <span className="font-bold text-[9px] mt-1">Token: {activeCoupon.token}</span>
+                  </div>
+                )}
+                <p className="font-semibold text-slate-800">Thank you for dining at Balaji Chilkur Family Dhaba!</p>
+                <p className="text-slate-500">Please visit again. Have a delicious day!</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Modal Footer Controls */}
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-xs text-slate-500">Selected Format: <strong className="text-slate-900">{paperSize}</strong></span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowPrintModal(false)}
+                className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors"
+              >
+                Close Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="py-2 px-4 bg-[#1E4D2B] hover:bg-[#163a20] text-white font-semibold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+              >
+                <Printer size={15} />
+                <span>Print Bill Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </Modal>
+
+      {/* Global CSS for Window Print */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-bill-area, #printable-bill-area * {
+            visibility: visible !important;
+          }
+          #printable-bill-area {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: ${paperSize === '58mm' ? '58mm' : paperSize === '80mm' ? '80mm' : '100%'} !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+          @page {
+            size: ${paperSize === '80mm' ? '80mm auto' : paperSize === '58mm' ? '58mm auto' : paperSize === 'A4' ? 'A4 portrait' : 'A5 portrait'};
+            margin: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
