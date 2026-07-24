@@ -149,7 +149,7 @@ function SuccessContent() {
           </p>
         </div>
 
-        <div className="mt-8 space-y-3 w-full">
+        <div className="mt-8 w-full">
           {/* Hand-Crafted Primary "Book Another Table" Button */}
           <Link
             href="/reserve"
@@ -161,16 +161,6 @@ function SuccessContent() {
             </div>
             <ArrowRight size={14} className="text-[#E0B252] group-hover:translate-x-1 transition-transform" />
           </Link>
-
-          {/* Secondary Lookup Action */}
-          <button
-            type="button"
-            onClick={() => setShowLookupModal(true)}
-            className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200/80"
-          >
-            <Search size={14} className="text-slate-500" />
-            <span>Look Up Existing Booking</span>
-          </button>
         </div>
       </div>
 
