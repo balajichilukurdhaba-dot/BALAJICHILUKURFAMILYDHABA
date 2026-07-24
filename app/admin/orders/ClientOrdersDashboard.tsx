@@ -35,6 +35,33 @@ function getLocalDateStr(daysAgo: number): string {
   return local.toISOString().split('T')[0];
 }
 
+function getWhatsAppMessage(order: { orderRef: string; customerName: string | null; status: string; total: string }): string {
+  const customer = order.customerName || 'Valued Customer';
+  const ref = order.orderRef;
+  const total = order.total;
+  const status = (order.status || '').toLowerCase();
+
+  switch (status) {
+    case 'confirmed':
+      return `Hello ${customer},\n\nYour order *${ref}* (Total: ₹${total}) has been *CONFIRMED* by Balaji Chilkur Family Dhaba! 👨‍🍳🔥\nOur chef is preparing your delicious meal now. We will notify you once it is out for delivery.\n\nThank you for choosing us! 🍲`;
+
+    case 'delivering':
+    case 'out_for_delivery':
+      return `Hello ${customer},\n\nGreat news! Your order *${ref}* is now *OUT FOR DELIVERY* 🛵💨\nOur delivery partner is on the way with your hot meal from Balaji Chilkur Family Dhaba.\n\nPlease keep ₹${total} ready if paying cash on delivery. Enjoy your food! 😋`;
+
+    case 'completed':
+    case 'delivered':
+      return `Hello ${customer},\n\nYour order *${ref}* has been successfully *DELIVERED*! 🎉\nWe hope you enjoy your delicious meal from Balaji Chilkur Family Dhaba.\n\nPlease share your valuable feedback with us. Have a great day! 🙏✨`;
+
+    case 'cancelled':
+      return `Hello ${customer},\n\nWe regret to inform you that your order *${ref}* at Balaji Chilkur Family Dhaba has been *CANCELLED*. ❌\nIf you have any questions or would like to re-order, please reply directly to this message.\n\nWe apologize for any inconvenience caused. 🙏`;
+
+    case 'sent':
+    default:
+      return `Hello ${customer},\n\nThank you for placing order *${ref}* (Total: ₹${total}) with Balaji Chilkur Family Dhaba! 🍽️\nWe have received your order details and are reviewing it right now. We will update you shortly.`;
+  }
+}
+
 export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDashboardProps) {
   const router = useRouter();
 
@@ -55,6 +82,18 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
       const data = await res.json();
       if (data.success) {
         setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+        
+        // Auto-open WhatsApp chat with status-tailored notification message
+        const updatedOrd = orders.find(o => o.id === id);
+        if (updatedOrd) {
+          const targetOrd = { ...updatedOrd, status: newStatus };
+          const cleanPhone = targetOrd.phone.replace(/\D/g, '');
+          const formattedPhone = cleanPhone.startsWith('91') || cleanPhone.length > 10 ? cleanPhone : `91${cleanPhone}`;
+          const msg = getWhatsAppMessage(targetOrd);
+          const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`;
+          window.open(waUrl, '_blank');
+        }
+
         router.refresh();
       } else {
         alert(data.error || 'Failed to update order status');
@@ -443,7 +482,7 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
                       <a href={`tel:${order.phone}`} className="hover:underline font-semibold">{order.phone}</a>
                       <a
                         href={`https://wa.me/${order.phone.replace(/\D/g, '').startsWith('91') || order.phone.replace(/\D/g, '').length > 10 ? '' : '91'}${order.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                          `Hello ${order.customerName || 'Customer'}, regarding your order ${order.orderRef} at Balaji Chilkur Family Dhaba:`
+                          getWhatsAppMessage(order)
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -531,7 +570,7 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
 
                   <a
                     href={`https://wa.me/${order.phone.replace(/\D/g, '').startsWith('91') || order.phone.replace(/\D/g, '').length > 10 ? '' : '91'}${order.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      `Hello ${order.customerName || 'Customer'}, regarding your order ${order.orderRef} at Balaji Chilkur Family Dhaba:`
+                      getWhatsAppMessage(order)
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
