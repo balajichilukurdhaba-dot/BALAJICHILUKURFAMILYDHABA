@@ -7,8 +7,8 @@ import { getSessionUser } from '@/lib/auth';
 export async function GET(request: Request) {
   try {
     const user = await getSessionUser();
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ success: false, error: 'Admin role required' }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);

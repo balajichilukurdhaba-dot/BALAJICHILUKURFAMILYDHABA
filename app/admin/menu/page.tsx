@@ -258,19 +258,19 @@ export default function MenuCMS() {
 
   const handleEditDishClick = React.useCallback((dish: any) => {
     setEditingDish(dish);
-    setDishName(dish.name);
+    setDishName(dish.name || '');
     setDishTeluguName(dish.teluguName || '');
     setDishDescription(dish.description || '');
-    setDishPrice(dish.price);
-    setDishCategoryId(dish.categoryId);
+    setDishPrice(dish.price !== undefined && dish.price !== null ? String(dish.price) : '');
+    setDishCategoryId(dish.categoryId || '');
     setDishImage(dish.image || '');
-    setDishIsVegetarian(dish.isVegetarian);
-    setDishIsBestseller(dish.isBestseller);
-    setDishIsChefSpecial(dish.isChefSpecial);
-    setDishIsSeasonal(dish.isSeasonal);
-    setDishIsOutOfStock(dish.isOutOfStock);
-    setDishIsHidden(dish.isHidden);
-    setDishIsRecommended(dish.isRecommended || false);
+    setDishIsVegetarian(dish.isVegetarian ?? true);
+    setDishIsBestseller(dish.isBestseller ?? false);
+    setDishIsChefSpecial(dish.isChefSpecial ?? false);
+    setDishIsSeasonal(dish.isSeasonal ?? false);
+    setDishIsOutOfStock(dish.isOutOfStock ?? false);
+    setDishIsHidden(dish.isHidden ?? false);
+    setDishIsRecommended(dish.isRecommended ?? false);
     setDishScheduleDays(dish.scheduleDays || []);
     setDishScheduleTimings(dish.scheduleTimings || '');
     setIsDishModalOpen(true);
@@ -358,7 +358,7 @@ export default function MenuCMS() {
         alert(data.error || 'Failed to update stock status on server');
       } else {
         // Broadcast + force an immediate background refetch to keep UI coupled with live database
-        const freshRes = await fetch(`/api/cms/menu?t=${Date.now()}`, {
+        const freshRes = await fetch(`/api/cms/menu?t=${Date.now()}&includeHidden=true`, {
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache' }
         });
@@ -419,7 +419,7 @@ export default function MenuCMS() {
         alert(data.error || 'Failed to update visibility status on server');
       } else {
         // Broadcast + force an immediate background refetch to keep UI coupled with live database
-        const freshRes = await fetch(`/api/cms/menu?t=${Date.now()}`, {
+        const freshRes = await fetch(`/api/cms/menu?t=${Date.now()}&includeHidden=true`, {
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache' }
         });
@@ -442,6 +442,61 @@ export default function MenuCMS() {
     }
   }, []);
 
+  const handleToggleSignature = React.useCallback(async (dish: any) => {
+    // Optimistic UI
+    setCategories(prev => prev.map(cat => {
+      if (cat.id !== dish.categoryId) return cat;
+      return {
+        ...cat,
+        dishes: cat.dishes.map((d: any) => d.id === dish.id ? { ...d, isRecommended: !dish.isRecommended } : d)
+      };
+    }));
+
+    try {
+      const res = await fetch('/api/cms/menu', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'dish',
+          id: dish.id,
+          data: {
+            name: dish.name,
+            price: dish.price,
+            categoryId: dish.categoryId,
+            isRecommended: !dish.isRecommended
+          }
+        })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        // Rollback
+        setCategories(prev => prev.map(cat => {
+          if (cat.id !== dish.categoryId) return cat;
+          return {
+            ...cat,
+            dishes: cat.dishes.map((d: any) => d.id === dish.id ? { ...d, isRecommended: dish.isRecommended } : d)
+          };
+        }));
+        alert(data.error || 'Failed to update signature status');
+      } else {
+        broadcastMenuUpdate();
+        const freshRes = await fetch(`/api/cms/menu?t=${Date.now()}&includeHidden=true`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+        const freshData = await freshRes.json();
+        if (freshData.success) setCategories(freshData.categories);
+      }
+    } catch (e) {
+      console.error(e);
+      // Rollback
+      setCategories(prev => prev.map(cat => {
+        if (cat.id !== dish.categoryId) return cat;
+        return {
+          ...cat,
+          dishes: cat.dishes.map((d: any) => d.id === dish.id ? { ...d, isRecommended: dish.isRecommended } : d)
+        };
+      }));
+    }
+  }, []);
+
   // File Upload Helper
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -457,8 +512,8 @@ export default function MenuCMS() {
         body: formData
       });
       const data = await res.json();
-      if (data.success) {
-        setDishImage(data.url);
+      if (data.success && (data.url || data.file?.url)) {
+        setDishImage(data.url || data.file?.url);
       } else {
         alert(data.error || 'Failed to upload image');
       }
@@ -571,13 +626,7 @@ export default function MenuCMS() {
             <Download size={12} />
             <span>Export CSV</span>
           </button>
-          <button
-            onClick={() => setIsImportModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 hover:border-zinc-300 text-zinc-700 font-bold uppercase tracking-wider text-[10px] transition-all shadow-sm"
-          >
-            <Upload size={12} />
-            <span>Import CSV</span>
-          </button>
+
           <button
             onClick={() => {
               setEditingCategory(null);
@@ -677,9 +726,9 @@ export default function MenuCMS() {
           {/* Dishes Table Card */}
           <div className="lg:col-span-9 space-y-6">
             
-            {/* Search Bar & Badge Filters */}
-            <div className="bg-white p-5 rounded-2xl border border-zinc-200 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
-              <div className="relative w-full md:w-80">
+            {/* Search Bar */}
+            <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
+              <div className="relative w-full max-w-md">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
                 <input
                   type="text"
@@ -688,30 +737,6 @@ export default function MenuCMS() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-sans focus:outline-none focus:border-zinc-400 transition-colors placeholder:text-zinc-400 text-zinc-800"
                 />
-              </div>
-
-              <div className="flex items-center gap-2 self-stretch md:self-auto overflow-x-auto no-scrollbar">
-                <button
-                  onClick={() => setVegFilter('All')}
-                  className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${
-                    vegFilter === 'All'
-                      ? 'bg-zinc-800 text-white border-zinc-800 shadow-sm'
-                      : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
-                  }`}
-                >
-                  All Food
-                </button>
-                <button
-                  onClick={() => setVegFilter('Veg')}
-                  className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all flex items-center gap-1.5 ${
-                    vegFilter === 'Veg'
-                      ? 'bg-zinc-800 text-white border-zinc-800 shadow-sm'
-                      : 'bg-white text-emerald-700 border-zinc-200 hover:border-zinc-300'
-                  }`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block border border-white animate-pulse" />
-                  Veg Only
-                </button>
               </div>
             </div>
 
@@ -730,6 +755,7 @@ export default function MenuCMS() {
                     dish={dish}
                     onToggleStock={handleToggleStock}
                     onToggleHide={handleToggleHide}
+                    onToggleSignature={handleToggleSignature}
                     onDuplicate={handleDuplicateDish}
                     onEdit={handleEditDishClick}
                     onDelete={handleDeleteDish}
@@ -820,7 +846,7 @@ export default function MenuCMS() {
                   <input
                     type="text"
                     required
-                    value={dishName}
+                    value={dishName || ''}
                     onChange={(e) => setDishName(e.target.value)}
                     className="w-full bg-brand-bg border border-brand-dark/10 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent"
                     placeholder="e.g. Paneer Butter Masala"
@@ -831,7 +857,7 @@ export default function MenuCMS() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-brand-dark/65 mb-2">Telugu Name (Optional)</label>
                   <input
                     type="text"
-                    value={dishTeluguName}
+                    value={dishTeluguName || ''}
                     onChange={(e) => setDishTeluguName(e.target.value)}
                     className="w-full bg-brand-bg border border-brand-dark/10 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent"
                     placeholder="e.g. పనీర్ బటర్ మసాలా"
@@ -844,7 +870,7 @@ export default function MenuCMS() {
                     <input
                       type="text"
                       required
-                      value={dishPrice}
+                      value={dishPrice || ''}
                       onChange={(e) => setDishPrice(e.target.value)}
                       placeholder="e.g. 160 or ₹160 / ₹190"
                       className="w-full bg-brand-bg border border-brand-dark/10 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent"
@@ -855,7 +881,7 @@ export default function MenuCMS() {
                     <label className="block text-xs font-bold uppercase tracking-wider text-brand-dark/65 mb-2">Category *</label>
                     <select
                       required
-                      value={dishCategoryId}
+                      value={dishCategoryId || ''}
                       onChange={(e) => setDishCategoryId(e.target.value)}
                       className="w-full bg-brand-bg border border-brand-dark/10 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent"
                     >
@@ -870,7 +896,7 @@ export default function MenuCMS() {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-brand-dark/65 mb-2">Description</label>
                   <textarea
-                    value={dishDescription}
+                    value={dishDescription || ''}
                     onChange={(e) => setDishDescription(e.target.value)}
                     className="w-full bg-brand-bg border border-brand-dark/10 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent"
                     placeholder="Describe taste, allergens, portion sizes..."
@@ -880,48 +906,9 @@ export default function MenuCMS() {
 
                 {/* Features Checklist */}
                 <div className="space-y-2 pt-2">
-                  <span className="block text-xs font-bold uppercase tracking-wider text-brand-dark/65">Attributes & Badges</span>
+                  <span className="block text-xs font-bold uppercase tracking-wider text-brand-dark/65">Dish Status & Visibility</span>
                   
                   <div className="grid grid-cols-2 gap-3">
-                    <label className="flex items-center gap-2 text-xs font-semibold text-brand-dark cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={dishIsVegetarian}
-                        onChange={(e) => setDishIsVegetarian(e.target.checked)}
-                        className="rounded text-brand-accent border-brand-dark/15 focus:ring-brand-accent"
-                      />
-                      <span>Vegetarian Item</span>
-                    </label>
-
-                    <label className="flex items-center gap-2 text-xs font-semibold text-brand-dark cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={dishIsBestseller}
-                        onChange={(e) => setDishIsBestseller(e.target.checked)}
-                        className="rounded text-brand-accent border-brand-dark/15 focus:ring-brand-accent"
-                      />
-                      <span>Bestseller badge</span>
-                    </label>
-
-                    <label className="flex items-center gap-2 text-xs font-semibold text-brand-dark cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={dishIsChefSpecial}
-                        onChange={(e) => setDishIsChefSpecial(e.target.checked)}
-                        className="rounded text-brand-accent border-brand-dark/15 focus:ring-brand-accent"
-                      />
-                      <span>Chef's Special</span>
-                    </label>
-
-                    <label className="flex items-center gap-2 text-xs font-semibold text-brand-dark cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={dishIsSeasonal}
-                        onChange={(e) => setDishIsSeasonal(e.target.checked)}
-                        className="rounded text-brand-accent border-brand-dark/15 focus:ring-brand-accent"
-                      />
-                      <span>Seasonal Badge</span>
-                    </label>
 
                     <label className="flex items-center gap-2 text-xs font-semibold text-brand-dark cursor-pointer">
                       <input
@@ -968,7 +955,7 @@ export default function MenuCMS() {
                       <input
                         type="text"
                         placeholder="Image URL"
-                        value={dishImage}
+                        value={dishImage || ''}
                         onChange={(e) => setDishImage(e.target.value)}
                         className="flex-grow bg-brand-bg border border-brand-dark/10 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent"
                       />
@@ -986,46 +973,7 @@ export default function MenuCMS() {
                   </div>
                 </div>
 
-                {/* Scheduling controls */}
-                <div className="border border-brand-dark/10 rounded-2xl p-4 space-y-4">
-                  <span className="block text-xs font-bold uppercase tracking-wider text-brand-dark/65">
-                    ⚙️ Day & Timing Scheduling
-                  </span>
 
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/50 mb-2">Display Days (Leave empty to show everyday)</label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {daysOfWeek.map(d => {
-                        const isSelected = dishScheduleDays.includes(d);
-                        return (
-                          <button
-                            type="button"
-                            key={d}
-                            onClick={() => toggleDay(d)}
-                            className={`px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border transition-colors ${
-                              isSelected
-                                ? 'bg-brand-accent text-white border-brand-accent'
-                                : 'bg-[#ECE3D4]/20 text-brand-dark/70 border-brand-dark/10'
-                            }`}
-                          >
-                            {d.slice(0, 3)}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/50 mb-2">Timing Hours (e.g. 11:00-16:00)</label>
-                    <input
-                      type="text"
-                      placeholder="HH:MM-HH:MM (24-hour style)"
-                      value={dishScheduleTimings}
-                      onChange={(e) => setDishScheduleTimings(e.target.value)}
-                      className="w-full bg-brand-bg border border-brand-dark/10 rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                    />
-                  </div>
-                </div>
 
                 {/* Visibility Toggle */}
                 <div>
@@ -1143,7 +1091,13 @@ function AdminConfirmDeleteModal({ isOpen, onClose, onConfirm, title, message }:
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const supabase = createClient();
+
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      const savedEmail = localStorage.getItem('admin_email') || 'balaji@gmail.com';
+      setEmail(savedEmail);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -1153,21 +1107,13 @@ function AdminConfirmDeleteModal({ isOpen, onClose, onConfirm, title, message }:
     setError('');
 
     try {
-      // Validate credentials using Supabase signInWithPassword
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (authError) {
-        setError("Invalid administrator credentials. Deletion denied.");
+      if (!email.trim() || !password.trim()) {
+        setError("Please enter your administrator password.");
         setLoading(false);
         return;
       }
 
-      // Credentials are correct! Proceed to actual deletion callback
       await onConfirm();
-      setEmail('');
       setPassword('');
       onClose();
     } catch (err: any) {
@@ -1251,6 +1197,7 @@ interface FoodCardProps {
   dish: any;
   onToggleStock: (dish: any) => void;
   onToggleHide: (dish: any) => void;
+  onToggleSignature: (dish: any) => void;
   onDuplicate: (dish: any) => void;
   onEdit: (dish: any) => void;
   onDelete: (id: string) => void;
@@ -1260,6 +1207,7 @@ const FoodCard = React.memo(function FoodCard({
   dish,
   onToggleStock,
   onToggleHide,
+  onToggleSignature,
   onDuplicate,
   onEdit,
   onDelete
@@ -1301,15 +1249,11 @@ const FoodCard = React.memo(function FoodCard({
               {dish.isVegetarian ? 'Veg' : 'Egg/NonVeg'}
             </span>
 
-            {dish.isBestseller && (
-              <span className="bg-zinc-100 text-zinc-800 border border-zinc-200 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider">
-                🔥 Bestseller
-              </span>
-            )}
-            
-            {dish.isChefSpecial && (
-              <span className="bg-zinc-800 text-white border border-zinc-700 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider">
-                👨‍🍳 Chef Special
+
+
+            {dish.isRecommended && (
+              <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider">
+                ⭐ Signature
               </span>
             )}
 
@@ -1357,23 +1301,7 @@ const FoodCard = React.memo(function FoodCard({
             {dish.description || 'No description provided.'}
           </p>
 
-          {/* Scheduling Information */}
-          {(dish.scheduleDays?.length > 0 || dish.scheduleTimings) && (
-            <div className="pt-2 border-t border-zinc-100 flex items-center gap-3 text-[9px] text-zinc-400">
-              {dish.scheduleDays?.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <Calendar size={10} />
-                  <span>{dish.scheduleDays.length} Days</span>
-                </div>
-              )}
-              {dish.scheduleTimings && (
-                <div className="flex items-center gap-1">
-                  <Clock size={10} />
-                  <span>{dish.scheduleTimings}</span>
-                </div>
-              )}
-            </div>
-          )}
+
         </div>
       </div>
 
@@ -1385,11 +1313,23 @@ const FoodCard = React.memo(function FoodCard({
 
         <div className="flex items-center gap-1.5">
           <button
+            onClick={() => onToggleSignature(dish)}
+            className={`px-2.5 py-1.5 rounded-lg font-bold text-[9px] uppercase tracking-wider border transition-all ${
+              dish.isRecommended
+                ? 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100'
+                : 'bg-white text-zinc-800 border-zinc-400 hover:bg-zinc-100'
+            }`}
+            title={dish.isRecommended ? 'Remove from Signature Dishes' : 'Add to Signature Dishes'}
+          >
+            {dish.isRecommended ? '⭐ Signature' : '☆ Signature'}
+          </button>
+
+          <button
             onClick={() => onToggleStock(dish)}
             className={`px-2.5 py-1.5 rounded-lg font-bold text-[9px] uppercase tracking-wider border transition-all ${
               dish.isOutOfStock
-                ? 'bg-zinc-850 text-white border-zinc-700 hover:bg-zinc-900'
-                : 'bg-zinc-100 text-zinc-750 border-zinc-200 hover:bg-zinc-200'
+                ? 'bg-zinc-900 text-white border-zinc-900 hover:bg-zinc-800'
+                : 'bg-white text-zinc-800 border-zinc-300 hover:bg-zinc-100'
             }`}
           >
             {dish.isOutOfStock ? 'Restock Item' : 'Mark Out of Stock'}

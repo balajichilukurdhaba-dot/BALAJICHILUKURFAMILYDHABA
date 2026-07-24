@@ -98,6 +98,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
+      url,
       file: {
         name: filename,
         url,

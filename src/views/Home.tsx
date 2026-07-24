@@ -12,13 +12,16 @@ import {
   Star,
   X,
   Quote,
-  Calendar
+  Calendar,
+  Info,
+  Search,
+  MessageSquare,
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 import { DishCard } from '../components/DishCard';
 import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
-import { CrazyScrollTransitionEffect } from '../components/CrazyScrollTransitionEffect';
 import { SIGNATURE_DISHES as STATIC_DISHES, GALLERY_PHOTOS as STATIC_GALLERY, TESTIMONIALS as STATIC_TESTIMONIALS } from '../utils/menuData';
-import { Loader2 } from 'lucide-react';
 
 // ─── Google Review Card ────────────────────────────────────────────────────────
 interface CircularReviewCardProps {
@@ -197,6 +200,236 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ testimonial, onClose }) => {
   );
 };
 
+// ─── Submit Customer Review Modal ────────────────────────────────────────────────
+interface SubmitReviewModalProps {
+  onClose: () => void;
+}
+
+const SubmitReviewModal: React.FC<SubmitReviewModalProps> = ({ onClose }) => {
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('Dine-in Customer');
+  const [content, setContent] = useState('');
+  const [rating, setRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  useEffect(() => {
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = origOverflow;
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !content.trim()) {
+      setErrorMsg('Please enter your name and review text.');
+      return;
+    }
+    setErrorMsg('');
+    setSubmitting(true);
+
+    try {
+      const res = await fetch('/api/cms/testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          role: role.trim() || 'Valued Customer',
+          content: content.trim(),
+          rating,
+          source: 'Website Customer Review',
+          isApproved: false
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setErrorMsg(data.error || 'Failed to submit review. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Network error. Please check your connection.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Exceptional!'];
+
+  return createPortal(
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/75 backdrop-blur-md"
+        onClick={onClose}
+      />
+
+      <motion.div
+        className="relative z-10 bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl overflow-hidden border border-brand-dark/10 font-sans"
+        initial={{ scale: 0.85, opacity: 0, y: 40 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.85, opacity: 0, y: 40 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 bg-brand-dark/5 hover:bg-brand-dark/15 text-brand-dark rounded-full p-2 transition-colors"
+        >
+          <X size={16} />
+        </button>
+
+        {submitted ? (
+          <div className="text-center py-6 space-y-4">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+              <CheckCircle2 size={36} />
+            </div>
+            <h3 className="font-display text-xl font-extrabold text-brand-dark">Review Submitted!</h3>
+            <p className="text-xs text-brand-dark/70 font-sans leading-relaxed px-2">
+              Thank you for reviewing Balaji Dhaba! Your feedback has been sent to our management for approval and will appear on our website once accepted.
+            </p>
+            <button
+              onClick={onClose}
+              className="mt-4 px-6 py-2.5 rounded-xl bg-brand-accent hover:bg-brand-accent/90 text-white font-bold text-xs uppercase tracking-wider shadow-md"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div className="mb-5 text-left">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-accent flex items-center gap-1.5 mb-1">
+                <MessageSquare size={12} /> Share Your Experience
+              </span>
+              <h3 className="font-display text-xl font-extrabold text-brand-dark">Rate & Review Our Restaurant</h3>
+              <p className="text-xs text-brand-dark/60 mt-1">Your review will be sent to admin for approval.</p>
+            </div>
+
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl font-sans">
+                {errorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4 text-left">
+              {/* Star Rating selection */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/70 mb-1.5">
+                  Overall Rating *
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1 text-brand-gold">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="p-1 transition-transform hover:scale-125 focus:outline-none"
+                      >
+                        <Star
+                          size={24}
+                          className={(hoverRating || rating) >= star ? 'fill-current text-brand-gold' : 'text-brand-dark/20'}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-xs font-bold text-brand-dark/60 ml-2 font-mono">
+                    {ratingLabels[hoverRating || rating]}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/70 mb-1">
+                  Your Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Kumar"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-brand-dark/5 border border-brand-dark/10 rounded-xl px-3.5 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/70 mb-1">
+                  Visit Type / Tag (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Dine-in Customer, Family Dinner, Regular Patron"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full bg-brand-dark/5 border border-brand-dark/10 rounded-xl px-3.5 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/70 mb-1">
+                  Your Review / Feedback *
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Share your experience about food quality, taste, and hospitality..."
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full bg-brand-dark/5 border border-brand-dark/10 rounded-xl px-3.5 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2.5 rounded-xl border border-brand-dark/15 text-brand-dark/70 hover:bg-brand-dark/5 text-xs font-bold uppercase tracking-wider"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-2.5 rounded-xl bg-brand-accent hover:bg-brand-accent/90 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-2 border border-brand-accent/30 disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Review'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </motion.div>
+    </div>,
+    document.body
+  );
+};
+
 const HOME_BRANCHES = [
   {
     name: "Moinabad Branch",
@@ -235,6 +468,27 @@ export const Home: React.FC = () => {
 
   // Selected review for details modal
   const [selectedReview, setSelectedReview] = useState<any>(null);
+  const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
+  const [viewOfferDishesModal, setViewOfferDishesModal] = useState<{ title: string; dishes: string[]; price?: string } | null>(null);
+  const [offerDishSearch, setOfferDishSearch] = useState('');
+  const [modalSelectedCategory, setModalSelectedCategory] = useState<string>('ALL');
+
+  useEffect(() => {
+    if (viewOfferDishesModal) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [viewOfferDishesModal]);
 
   const reviewsScrollRef = useRef<HTMLDivElement>(null);
   const reviewsDragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0, hasDragged: false });
@@ -260,7 +514,7 @@ export const Home: React.FC = () => {
           }),
           fetch('/api/cms/offers?activeOnly=true&homepageOnly=true'),
           fetch('/api/cms/testimonials?approvedOnly=true'),
-          fetch('/api/cms/gallery?featured=true'),
+          fetch(`/api/cms/gallery?featured=true&t=${Date.now()}`, { cache: 'no-store' }),
           fetch('/api/cms/branches')
         ]);
 
@@ -420,7 +674,8 @@ export const Home: React.FC = () => {
 
   // Use DB loaded values or fallback to static defaults
   const listDishes = dishes.length > 0 ? dishes : STATIC_DISHES.map(d => ({ ...d, isVegetarian: d.isVegetarian ?? true }));
-  const filteredDishes = listDishes.filter(dish => dish.category === activeCategory).slice(0, 4);
+  // Signature dishes = ONLY dishes explicitly marked as isRecommended (Signature) by admin
+  const filteredDishes = listDishes.filter(dish => dish.isRecommended === true && !dish.isHidden);
 
   const listOffers = offers.length > 0 ? offers : [
     {
@@ -650,11 +905,8 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* CRAZY SCROLL TRANSITION EFFECT BETWEEN PAGES/SECTIONS */}
-      <CrazyScrollTransitionEffect />
-
-      {/* 2. FEATURED DISHES SECTION */}
-      {sectionsMap.featuredDishes && (
+      {/* 2. SIGNATURE DISHES SECTION */}
+      {sectionsMap.featuredDishes && filteredDishes.length > 0 && (
         <section className="pt-24 pb-8 px-6 md:px-12 max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-accent">Signature Selection</span>
@@ -722,8 +974,6 @@ export const Home: React.FC = () => {
         </section>
       )}
 
-      {/* SCROLL TRANSITION EFFECT BETWEEN SECTIONS */}
-      <CrazyScrollTransitionEffect />
 
       {/* 4. SPECIAL OFFERS SECTION */}
       {sectionsMap.offers && (
@@ -760,9 +1010,68 @@ export const Home: React.FC = () => {
                   <h3 className="font-display text-2xl md:text-3xl font-semibold mt-5 text-[#FFFFFF] tracking-wide">
                     {offer.title}
                   </h3>
-                  <p className="text-xs text-[#FFFFFF]/70 mt-3 font-sans leading-relaxed">
-                    {offer.description}
-                  </p>
+                  {(() => {
+                    let descText = offer.description || '';
+                    let dishes: string[] = [];
+                    try {
+                      if (descText && descText.trim().startsWith('{')) {
+                        const parsed = JSON.parse(descText);
+                        descText = parsed.text || '';
+                        if (Array.isArray(parsed.comboDishes)) {
+                          dishes = parsed.comboDishes;
+                        }
+                      }
+                    } catch (e) {
+                      // ignore parse error
+                    }
+
+                    return (
+                      <>
+                        {descText && (
+                          <p className="text-xs text-[#FFFFFF]/80 mt-3 font-sans leading-relaxed">
+                            {descText}
+                          </p>
+                        )}
+                        {dishes.length > 0 ? (
+                          <div className="mt-3.5">
+                            {dishes.length > 3 ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOfferDishSearch('');
+                                  setModalSelectedCategory('ALL');
+                                  setViewOfferDishesModal({ title: offer.title, dishes, price: offer.price });
+                                }}
+                                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/25 border border-white/25 text-white text-xs font-medium px-3.5 py-1.5 rounded-lg backdrop-blur-md shadow-sm transition-all cursor-pointer group/btn"
+                              >
+                                <span>{dishes.length > 50 ? 'Valid on All Menu Items' : `Valid on ${dishes.length} selected items`}</span>
+                                {dishes.length <= 50 && (
+                                  <span className="text-[10px] font-bold text-brand-gold group-hover/btn:underline flex items-center gap-1">
+                                    View Dishes <Info size={12} />
+                                  </span>
+                                )}
+                              </button>
+                            ) : (
+                              <div className="flex flex-wrap gap-1.5">
+                                {dishes.map((d, i) => (
+                                  <span key={i} className="bg-white/10 border border-white/20 text-white/90 text-xs font-medium px-2.5 py-1 rounded-lg backdrop-blur-md">
+                                    {d}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="mt-3.5">
+                            <span className="inline-flex items-center bg-white/10 border border-white/20 text-white/90 text-xs font-medium px-3 py-1.5 rounded-lg backdrop-blur-md shadow-sm">
+                              Valid on All Menu Items
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
 
                   <div className="flex items-center space-x-6 mt-8">
                     {offer.isBooking ? (
@@ -1082,8 +1391,18 @@ export const Home: React.FC = () => {
                 Words From Our Patrons
               </h2>
               <p className="text-xs text-brand-dark/50 uppercase tracking-widest font-semibold mt-2">
-                Click any review card to read the full patron feedback
+                Click any review card to read full patron feedback or leave your own review!
               </p>
+
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => setIsWriteReviewOpen(true)}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-accent hover:bg-brand-accent/90 text-white font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                >
+                  <MessageSquare size={16} />
+                  <span>Write a Review</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1115,6 +1434,15 @@ export const Home: React.FC = () => {
               <ReviewModal
                 testimonial={selectedReview}
                 onClose={() => setSelectedReview(null)}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Submit Customer Review Modal */}
+          <AnimatePresence>
+            {isWriteReviewOpen && (
+              <SubmitReviewModal
+                onClose={() => setIsWriteReviewOpen(false)}
               />
             )}
           </AnimatePresence>
@@ -1270,6 +1598,203 @@ export const Home: React.FC = () => {
         </section>
       )}
 
+      {/* --- Included Dishes Modal --- */}
+      <AnimatePresence>
+        {viewOfferDishesModal && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm overflow-hidden touch-none"
+            onClick={() => setViewOfferDishesModal(null)}
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="bg-white border border-zinc-200 text-zinc-900 rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl font-sans overflow-hidden pointer-events-auto select-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Pinned Header Section */}
+              <div className="shrink-0 p-6 pb-4 border-b border-zinc-100 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-zinc-500">Campaign Details</span>
+                      {viewOfferDishesModal.price && (
+                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[11px] px-2.5 py-0.5 rounded-full shadow-sm">
+                          {viewOfferDishesModal.price}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-bold text-zinc-900 tracking-tight mt-1">{viewOfferDishesModal.title}</h3>
+                  </div>
+                  <button 
+                    onClick={() => setViewOfferDishesModal(null)}
+                    className="p-1.5 text-zinc-400 hover:text-zinc-800 hover:bg-zinc-100 rounded-lg transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between text-xs font-medium text-zinc-600">
+                  <span>Included Items</span>
+                  <span className="font-semibold text-zinc-800 bg-zinc-100 px-2.5 py-1 rounded-lg border border-zinc-200/80">
+                    {viewOfferDishesModal.dishes.length} Items Selected
+                  </span>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    type="text"
+                    placeholder="Search dish in this campaign..."
+                    value={offerDishSearch}
+                    onChange={(e) => setOfferDishSearch(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 focus:bg-white focus:border-zinc-900 rounded-xl py-2.5 pl-9 pr-8 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition-all shadow-sm"
+                  />
+                  {offerDishSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setOfferDishSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-800 p-1"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Category Filter Pills */}
+                {(() => {
+                  const dishCategoryMap = new Map<string, string>();
+                  viewOfferDishesModal.dishes.forEach(dName => {
+                    const found = dishes.find(d => d.name === dName);
+                    if (found && (found.category || found.categoryName)) {
+                      dishCategoryMap.set(dName, found.category || found.categoryName);
+                    }
+                  });
+
+                  const categoriesInModal = Array.from(new Set(Array.from(dishCategoryMap.values()))).filter(Boolean);
+
+                  if (categoriesInModal.length === 0) return null;
+
+                  return (
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setModalSelectedCategory('ALL')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
+                          modalSelectedCategory === 'ALL'
+                            ? 'bg-zinc-900 text-white shadow-sm'
+                            : 'bg-zinc-100 border border-zinc-200/80 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
+                        }`}
+                      >
+                        All ({viewOfferDishesModal.dishes.length})
+                      </button>
+                      {categoriesInModal.map((cat) => {
+                        const countInCat = viewOfferDishesModal.dishes.filter(d => dishCategoryMap.get(d) === cat).length;
+                        return (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setModalSelectedCategory(cat)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
+                              modalSelectedCategory === cat
+                                ? 'bg-zinc-900 text-white shadow-sm'
+                                : 'bg-zinc-100 border border-zinc-200/80 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
+                            }`}
+                          >
+                            {cat} ({countInCat})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Scrollable Dish List */}
+              <div 
+                className="flex-1 overflow-y-auto p-6 pt-4 space-y-2 overscroll-contain touch-pan-y min-h-0 custom-scrollbar"
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+              >
+                {(() => {
+                  const dishCategoryMap = new Map<string, string>();
+                  viewOfferDishesModal.dishes.forEach(dName => {
+                    const found = dishes.find(d => d.name === dName);
+                    if (found && (found.category || found.categoryName)) {
+                      dishCategoryMap.set(dName, found.category || found.categoryName);
+                    }
+                  });
+
+                  const filteredDishes = viewOfferDishesModal.dishes.filter(dName => {
+                    const matchesSearch = dName.toLowerCase().includes(offerDishSearch.toLowerCase().trim());
+                    const cat = dishCategoryMap.get(dName);
+                    const matchesCategory = modalSelectedCategory === 'ALL' || cat === modalSelectedCategory;
+                    return matchesSearch && matchesCategory;
+                  });
+
+                  if (filteredDishes.length === 0) {
+                    return (
+                      <div className="py-8 text-center bg-zinc-50 rounded-xl border border-zinc-200/80">
+                        <p className="text-xs text-zinc-500 font-medium">No matching dishes found</p>
+                      </div>
+                    );
+                  }
+
+                  return filteredDishes.map((dishName, i) => {
+                    const cat = dishCategoryMap.get(dishName);
+                    const targetUrl = cat 
+                      ? `/menu?category=${encodeURIComponent(cat)}&dish=${encodeURIComponent(dishName)}` 
+                      : `/menu?search=${encodeURIComponent(dishName)}`;
+
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          setViewOfferDishesModal(null);
+                          navigate.push(targetUrl);
+                        }}
+                        className="w-full flex items-center justify-between gap-3 bg-zinc-50/80 hover:bg-white border border-zinc-200/80 hover:border-zinc-400 px-4 py-3 rounded-xl text-xs text-zinc-900 font-medium transition-all group/row text-left shadow-2xs cursor-pointer"
+                      >
+                        <span className="font-semibold text-zinc-900 group-hover/row:text-zinc-950 transition-colors">
+                          {dishName}
+                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {viewOfferDishesModal.price && (
+                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md">
+                              {viewOfferDishesModal.price}
+                            </span>
+                          )}
+                          {cat && (
+                            <span className="text-[10px] font-medium text-zinc-500 bg-zinc-200/60 px-2 py-0.5 rounded-md">
+                              {cat}
+                            </span>
+                          )}
+                          <ArrowRight size={13} className="text-zinc-400 group-hover/row:text-zinc-800 group-hover/row:translate-x-0.5 transition-all" />
+                        </div>
+                      </button>
+                    );
+                  });
+                })()}
+              </div>
+
+              {/* Pinned Footer */}
+              <div className="shrink-0 p-4 px-6 border-t border-zinc-100 bg-zinc-50/50 flex justify-end">
+                <button
+                  onClick={() => setViewOfferDishesModal(null)}
+                  className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-xs rounded-xl transition-all shadow-sm"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

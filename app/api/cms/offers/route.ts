@@ -12,6 +12,51 @@ export async function GET(request: Request) {
     const activeOnly = searchParams.get('activeOnly') === 'true';
     const homepageOnly = searchParams.get('homepageOnly') === 'true';
 
+    // Auto-seed default campaigns if table is completely empty
+    const totalCount = await prisma.offer.count();
+    if (totalCount === 0) {
+      await prisma.offer.createMany({
+        data: [
+          {
+            title: '10% Off Online Bookings',
+            badge: 'Limited Time',
+            description: JSON.stringify({
+              comboDishes: [],
+              discountType: 'percentage',
+              discountValue: '10',
+              targetBranches: [],
+              text: 'Skip the wait and get 10% off your entire bill when you reserve a table online.'
+            }),
+            price: '-10% OFF',
+            cta: 'Book Now',
+            link: '/reserve',
+            image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
+            isActive: true,
+            showOnHomepage: true,
+            displayPriority: 10
+          },
+          {
+            title: 'Jumbo Family Pack',
+            badge: 'Best Value',
+            description: JSON.stringify({
+              comboDishes: ['Veg Biryani', 'Paneer Butter Masala', 'Tandoori Roti', 'Gulab Jamun'],
+              discountType: 'fixed',
+              discountValue: '1499',
+              targetBranches: [],
+              text: 'Perfect for 4-5 people. Includes Biryani, Curries, Rotis, and Desserts.'
+            }),
+            price: '₹1499',
+            cta: 'Order Now',
+            link: '/menu',
+            image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
+            isActive: true,
+            showOnHomepage: true,
+            displayPriority: 5
+          }
+        ]
+      });
+    }
+
     const where: any = {};
 
     if (activeOnly) {

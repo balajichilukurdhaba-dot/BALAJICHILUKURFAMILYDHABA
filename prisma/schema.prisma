@@ -232,6 +232,7 @@ model AdminLoginSession {
   photoBase64  String?  @map("photo_base64")
   latitude     Float?
   longitude    Float?
+  altitude     Float?
   ipAddress    String?  @map("ip_address")
   userAgent    String?  @map("user_agent")
   createdAt    DateTime @default(now()) @map("created_at")

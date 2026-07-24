@@ -13,13 +13,14 @@ async function ensureTable() {
         photo_base64 TEXT,
         latitude     DOUBLE PRECISION,
         longitude    DOUBLE PRECISION,
+        altitude     DOUBLE PRECISION,
         ip_address   TEXT,
         user_agent   TEXT,
         created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
+      );
+      ALTER TABLE admin_login_sessions ADD COLUMN IF NOT EXISTS altitude DOUBLE PRECISION;
     `);
   } catch (e) {
-    // Table probably already exists or schema engine busy — ignore
     console.warn('[admin-logins] ensureTable warning:', e);
   }
 }
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     // Use raw SQL so we don't need Prisma client re-generation
     const sessions: any[] = await prisma.$queryRawUnsafe(`
-      SELECT id, admin_email, login_at, photo_base64, latitude, longitude, ip_address, user_agent, created_at
+      SELECT id, admin_email, login_at, photo_base64, latitude, longitude, altitude, ip_address, user_agent, created_at
       FROM admin_login_sessions
       ORDER BY login_at DESC
       LIMIT $1
@@ -48,6 +49,7 @@ export async function GET(req: NextRequest) {
       photoBase64: s.photo_base64,
       latitude: s.latitude,
       longitude: s.longitude,
+      altitude: s.altitude,
       ipAddress: s.ip_address,
       userAgent: s.user_agent,
       createdAt: s.created_at,
@@ -60,17 +62,15 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST — record a new admin login snapshot
+// POST — record a new admin login snapshot (IP, Location with Lat/Lng/Alt, Timestamp)
 export async function POST(req: NextRequest) {
   try {
     await ensureTable();
 
     const body = await req.json();
-    const { adminEmail, photoBase64, latitude, longitude } = body;
+    const { adminEmail, photoBase64, latitude, longitude, altitude } = body;
 
-    if (!adminEmail) {
-      return NextResponse.json({ success: false, error: 'adminEmail is required' }, { status: 400 });
-    }
+    const emailToUse = adminEmail || 'admin@balajichilkur.com';
 
     // Get IP from request headers
     const headersList = await headers();
@@ -82,13 +82,15 @@ export async function POST(req: NextRequest) {
     const userAgent = headersList.get('user-agent') || '';
 
     await prisma.$executeRawUnsafe(`
-      INSERT INTO admin_login_sessions (admin_email, photo_base64, latitude, longitude, ip_address, user_agent)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO admin_login_sessions (id, admin_email, photo_base64, latitude, longitude, altitude, ip_address, user_agent)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     `,
-      adminEmail,
+      crypto.randomUUID(),
+      emailToUse,
       photoBase64 ?? null,
       latitude ?? null,
       longitude ?? null,
+      altitude ?? null,
       ip,
       userAgent
     );

@@ -242,51 +242,87 @@ export default function TestimonialsCMS() {
                   }`}
                 >
                   <div className="space-y-4">
-                    {/* Header: Author + Rating */}
-                    <div className="flex justify-between items-start">
+                    {/* Header: Author + Rating + Status Badge */}
+                    <div className="flex justify-between items-start gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-brand-bg text-brand-dark border border-brand-dark/15 rounded-full flex items-center justify-center font-bold text-xs shadow-sm">
+                        <div className="w-10 h-10 bg-brand-bg text-brand-dark border border-brand-dark/15 rounded-full flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
                           {t.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <h4 className="font-display font-bold text-brand-dark text-xs">{t.name}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-display font-bold text-brand-dark text-xs">{t.name}</h4>
+                            <span className="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border text-brand-dark/60 bg-brand-bg/60 border-brand-dark/10">
+                              {t.role || 'Customer'}
+                            </span>
+                          </div>
                           <span className="text-[9px] font-mono text-brand-dark/45 block mt-0.5">
-                            Created: {new Date(t.createdAt || Date.now()).toLocaleDateString('en-IN')}
+                            Source: {t.source || 'Customer Review'} &bull; {t.date || 'Recently'}
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star 
-                            key={i} 
-                            size={12} 
-                            fill={i < t.rating ? "currentColor" : "none"} 
-                            className={i < t.rating ? "text-brand-gold fill-current" : "text-brand-dark/25"}
-                          />
-                        ))}
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star 
+                              key={i} 
+                              size={12} 
+                              fill={i < t.rating ? "currentColor" : "none"} 
+                              className={i < t.rating ? "text-brand-gold fill-current" : "text-brand-dark/25"}
+                            />
+                          ))}
+                        </div>
+                        {t.isApproved ? (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            <Check size={10} /> Live on Website
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                            <AlertCircle size={10} /> Pending Review
+                          </span>
+                        )}
                       </div>
                     </div>
 
                     {/* Review text */}
-                    <p className="text-xs text-brand-dark/75 font-sans leading-relaxed italic">
-                      "{t.content}"
-                    </p>
+                    <div className="bg-brand-bg/10 p-3 rounded-xl border border-brand-dark/5">
+                      <p className="text-xs text-brand-dark/80 font-sans leading-relaxed italic">
+                        "{t.content}"
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Actions bar */}
-                  <div className="pt-4 mt-4 border-t border-brand-dark/10 flex items-center justify-between">
-                    <button
-                      onClick={() => handleToggleApprove(t)}
-                      className={`px-3 py-1.5 rounded-lg font-bold text-[9px] uppercase tracking-wider flex items-center gap-1.5 border transition-colors ${
-                        t.isApproved
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-100 hover:bg-emerald-100/70'
-                          : 'bg-white text-brand-dark border-brand-dark/15 hover:bg-brand-bg/35'
-                      }`}
-                    >
-                      {t.isApproved ? <Check size={10} /> : <X size={10} />}
-                      <span>{t.isApproved ? 'Approved (Shown)' : 'Approve Review'}</span>
-                    </button>
+                  {/* Actions bar: Accept & Reject */}
+                  <div className="pt-4 mt-4 border-t border-brand-dark/10 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      {!t.isApproved ? (
+                        <button
+                          onClick={() => handleToggleApprove(t)}
+                          className="px-3.5 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all border border-emerald-700"
+                        >
+                          <Check size={12} />
+                          <span>Accept & Publish</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleToggleApprove(t)}
+                          className="px-3 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors border border-slate-300"
+                        >
+                          <EyeOff size={12} />
+                          <span>Unpublish</span>
+                        </button>
+                      )}
+
+                      {!t.isApproved && (
+                        <button
+                          onClick={() => handleDelete(t.id)}
+                          className="px-3 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors"
+                        >
+                          <X size={12} />
+                          <span>Reject</span>
+                        </button>
+                      )}
+                    </div>
 
                     <div className="flex items-center gap-1">
                       <button
@@ -297,14 +333,14 @@ export default function TestimonialsCMS() {
                           setRating(t.rating);
                           setIsApproved(t.isApproved);
                         }}
-                        className="p-1.5 text-brand-dark/50 hover:text-brand-accent hover:bg-brand-bg/40 rounded transition-colors"
+                        className="p-2 text-brand-dark/50 hover:text-brand-accent hover:bg-brand-bg/40 rounded-lg transition-colors"
                         title="Edit Review"
                       >
                         <Edit size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(t.id)}
-                        className="p-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded transition-colors"
+                        className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
                         title="Delete Review"
                       >
                         <Trash2 size={14} />

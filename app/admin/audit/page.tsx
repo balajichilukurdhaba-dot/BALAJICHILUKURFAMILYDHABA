@@ -196,14 +196,24 @@ export default function AuditLogsCMS() {
           </p>
         </div>
 
-        <button
-          onClick={() => loadLogs(true)}
-          disabled={refreshing}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-brand-dark/15 hover:border-brand-accent text-brand-dark hover:text-brand-accent text-[10px] font-bold uppercase transition-all shadow-sm disabled:opacity-50"
-        >
-          <RefreshCw size={12} className={refreshing ? 'animate-spin text-brand-accent' : 'text-brand-accent'} />
-          <span>Refresh Logs</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('trigger-admin-snapshot'))}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4A2E2B] text-white hover:bg-[#382220] text-[10px] font-bold uppercase transition-all shadow-sm"
+          >
+            <UserCheck size={12} className="text-[#D35400]" />
+            <span>Verify Login Photo</span>
+          </button>
+
+          <button
+            onClick={() => loadLogs(true)}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-brand-dark/15 hover:border-brand-accent text-brand-dark hover:text-brand-accent text-[10px] font-bold uppercase transition-all shadow-sm disabled:opacity-50"
+          >
+            <RefreshCw size={12} className={refreshing ? 'animate-spin text-brand-accent' : 'text-brand-accent'} />
+            <span>Refresh Logs</span>
+          </button>
+        </div>
       </div>
 
       {/* Date Filter Strip */}
@@ -592,70 +602,72 @@ function LoginHistoryCards({ sessions }: { sessions: any[] }) {
           {/* Session cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {daySessions.map((s: any) => (
-              <div key={s.id} className="bg-white rounded-2xl border border-brand-dark/10 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                {/* Photo */}
-                {s.photoBase64 ? (
-                  <div className="relative aspect-video bg-zinc-100 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={s.photoBase64}
-                      alt={`${s.adminEmail} login snapshot`}
-                      className="w-full h-full object-cover scale-x-[-1]"
-                    />
-                    <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[9px] px-2 py-0.5 rounded-full font-bold backdrop-blur-sm">
-                      📸 Selfie
-                    </div>
-                  </div>
-                ) : (
-                  <div className="aspect-video bg-zinc-50 flex items-center justify-center border-b border-brand-dark/5">
-                    <UserCheck size={32} className="text-zinc-300" />
-                  </div>
-                )}
-
-                {/* Details */}
-                <div className="p-4 space-y-2.5">
-                  <div className="flex items-start justify-between gap-2">
+              <div key={s.id} className="bg-white rounded-2xl border border-brand-dark/10 shadow-sm p-4 hover:shadow-md transition-shadow space-y-3">
+                {/* Header: Admin Email + Verified Badge */}
+                <div className="flex items-start justify-between gap-2 border-b border-brand-dark/5 pb-2.5">
+                  <div>
                     <p className="font-bold text-xs text-brand-dark truncate">{s.adminEmail}</p>
-                    <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold shrink-0">Verified</span>
+                    <span className="text-[9px] text-brand-dark/45 font-mono">ID: {s.id.slice(0, 8)}...</span>
+                  </div>
+                  <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold shrink-0 flex items-center gap-1">
+                    <UserCheck size={10} /> Verified
+                  </span>
+                </div>
+
+                {/* Details list */}
+                <div className="space-y-2 text-[11px] text-brand-dark/70">
+                  {/* Date & Time */}
+                  <div className="flex items-center gap-2 bg-brand-bg/20 p-2 rounded-xl border border-brand-dark/5">
+                    <Clock size={12} className="text-brand-accent shrink-0" />
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-brand-dark/50">Date &amp; Time</span>
+                      <span className="font-mono text-brand-dark font-semibold">
+                        {new Date(s.loginAt).toLocaleString('en-IN', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: true
+                        })}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5 text-[10px] text-brand-dark/60">
-                    <div className="flex items-center gap-1.5">
-                      <Clock size={10} className="text-brand-accent shrink-0" />
-                      <span>{new Date(s.loginAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}</span>
-                    </div>
-
-                    {s.latitude && s.longitude ? (
-                      <div className="flex items-center gap-1.5">
-                        <MapPin size={10} className="text-brand-accent shrink-0" />
+                  {/* Location & Altitude */}
+                  <div className="flex items-start gap-2 bg-brand-bg/20 p-2 rounded-xl border border-brand-dark/5">
+                    <MapPin size={12} className="text-brand-accent shrink-0 mt-0.5" />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] uppercase font-bold text-brand-dark/50">Coordinates &amp; Altitude</span>
+                      {s.latitude && s.longitude ? (
                         <a
                           href={`https://maps.google.com/?q=${s.latitude},${s.longitude}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-brand-accent hover:underline font-medium"
+                          className="text-brand-accent hover:underline font-mono text-[10px] font-bold truncate"
                         >
-                          {parseFloat(s.latitude).toFixed(4)}, {parseFloat(s.longitude).toFixed(4)} ↗
+                          Lat: {parseFloat(s.latitude).toFixed(4)}°, Lng: {parseFloat(s.longitude).toFixed(4)}°
+                          {s.altitude != null ? ` • Alt: ${parseFloat(s.altitude).toFixed(1)}m` : ''} ↗
                         </a>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1.5">
-                        <MapPin size={10} className="text-zinc-300 shrink-0" />
-                        <span className="text-zinc-300">Location not captured</span>
-                      </div>
-                    )}
+                      ) : (
+                        <span className="text-brand-dark/40 font-mono text-[10px] italic">Location not captured</span>
+                      )}
+                    </div>
+                  </div>
 
-                    <div className="flex items-start gap-1.5">
-                      <Monitor size={10} className="text-brand-accent shrink-0 mt-0.5" />
-                      <span className="truncate font-semibold text-brand-dark" title={s.userAgent || ''}>
-                        {s.userAgent ? formatDevice(s.userAgent) : 'Unknown device'}
+                  {/* IP Address & Device */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div className="bg-zinc-50 p-2 rounded-xl border border-zinc-100">
+                      <span className="text-[8px] uppercase font-bold text-zinc-400 block">IP Address</span>
+                      <span className="font-mono text-[10px] font-bold text-zinc-800 truncate block">{s.ipAddress || '127.0.0.1'}</span>
+                    </div>
+                    <div className="bg-zinc-50 p-2 rounded-xl border border-zinc-100">
+                      <span className="text-[8px] uppercase font-bold text-zinc-400 block">Device</span>
+                      <span className="font-sans text-[10px] font-semibold text-zinc-800 truncate block" title={s.userAgent || ''}>
+                        {s.userAgent ? formatDevice(s.userAgent) : 'Browser'}
                       </span>
                     </div>
-
-                    {s.ipAddress && (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-mono bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded">IP: {s.ipAddress}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

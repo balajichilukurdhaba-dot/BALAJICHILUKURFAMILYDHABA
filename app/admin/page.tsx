@@ -12,43 +12,58 @@ export default async function AdminDashboard() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const [
-    totalReservations,
-    todayReservations,
-    verifiedDiscounts,
-    dishCount,
-    photoCount,
-    pendingTestimonials,
-    messageCount,
-    recentReservations
-  ] = await Promise.all([
-    prisma.reservation.count(),
-    prisma.reservation.count({
-      where: {
-        date: {
-          gte: today,
+  let totalReservations = 0;
+  let todayReservations = 0;
+  let verifiedDiscounts = 0;
+  let dishCount = 0;
+  let photoCount = 0;
+  let pendingTestimonials = 0;
+  let messageCount = 0;
+  let recentReservations: any[] = [];
+
+  try {
+    const res = await Promise.all([
+      prisma.reservation.count().catch(() => 0),
+      prisma.reservation.count({
+        where: {
+          date: {
+            gte: today,
+          }
         }
-      }
-    }),
-    prisma.reservation.count({
-      where: {
-        discountVerified: true
-      }
-    }),
-    prisma.dish.count(),
-    prisma.galleryPhoto.count(),
-    prisma.testimonial.count({
-      where: { isApproved: false }
-    }),
-    prisma.contactMessage.count(),
-    prisma.reservation.findMany({
-      orderBy: [
-        { date: 'desc' },
-        { time: 'desc' }
-      ],
-      take: 5
-    })
-  ]);
+      }).catch(() => 0),
+      prisma.reservation.count({
+        where: {
+          discountVerified: true
+        }
+      }).catch(() => 0),
+      prisma.dish.count().catch(() => 0),
+      prisma.galleryPhoto.count().catch(() => 0),
+      prisma.testimonial.count({
+        where: { isApproved: false }
+      }).catch(() => 0),
+      prisma.contactMessage.count().catch(() => 0),
+      prisma.reservation.findMany({
+        orderBy: [
+          { date: 'desc' },
+          { time: 'desc' }
+        ],
+        take: 5
+      }).catch(() => [])
+    ]);
+
+    [
+      totalReservations,
+      todayReservations,
+      verifiedDiscounts,
+      dishCount,
+      photoCount,
+      pendingTestimonials,
+      messageCount,
+      recentReservations
+    ] = res;
+  } catch (err) {
+    console.error('Failed to fetch dashboard statistics:', err);
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8 w-full max-w-full">

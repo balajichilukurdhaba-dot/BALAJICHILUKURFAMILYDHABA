@@ -469,6 +469,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
         </AnimatePresence>
       </div>
+      <AdminLoginSnapshotModal adminEmail={adminEmail || 'admin@balajichilkur.com'} />
     </AntdProvider>
   );
 }

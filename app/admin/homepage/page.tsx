@@ -221,11 +221,11 @@ export default function HomepageCMS() {
                   <input type="checkbox" checked={secHero} onChange={(e) => setSecHero(e.target.checked)} className="rounded text-zinc-800 focus:ring-zinc-850" />
                 </label>
                 <label className="flex items-center justify-between p-3 rounded-xl cursor-pointer border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 transition-colors">
-                  <span className="text-[10px] font-bold text-zinc-700 uppercase">Announcement Bar</span>
+                  <span className="text-[10px] font-bold text-zinc-700 uppercase">Popup</span>
                   <input type="checkbox" checked={secAnnounce} onChange={(e) => setSecAnnounce(e.target.checked)} className="rounded text-zinc-800 focus:ring-zinc-850" />
                 </label>
                 <label className="flex items-center justify-between p-3 rounded-xl cursor-pointer border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 transition-colors">
-                  <span className="text-[10px] font-bold text-zinc-700 uppercase">Featured Dishes</span>
+                  <span className="text-[10px] font-bold text-zinc-700 uppercase">Signature Dishes</span>
                   <input type="checkbox" checked={secFeatured} onChange={(e) => setSecFeatured(e.target.checked)} className="rounded text-zinc-800 focus:ring-zinc-850" />
                 </label>
                 <label className="flex items-center justify-between p-3 rounded-xl cursor-pointer border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 transition-colors">
@@ -251,26 +251,6 @@ export default function HomepageCMS() {
               </div>
             </div>
 
-            {/* Announcement Form */}
-            <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm space-y-4">
-              <div className="flex justify-between items-center border-b border-zinc-100 pb-2">
-                <h3 className="font-display font-bold text-sm text-zinc-800">Announcement Header Bar</h3>
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={announceActive} onChange={(e) => setAnnounceActive(e.target.checked)} className="rounded text-zinc-800" />
-                  <span className="text-[10px] uppercase font-bold text-zinc-500">Active</span>
-                </label>
-              </div>
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-zinc-500 mb-1">Banner Announcement Text</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 🎉 Special Offer: Flat 10% Off on Table Bookings Online!"
-                  value={announceText}
-                  onChange={(e) => setAnnounceText(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-zinc-400 text-zinc-800"
-                />
-              </div>
-            </div>
 
             {/* Hero Form */}
             <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm space-y-4">

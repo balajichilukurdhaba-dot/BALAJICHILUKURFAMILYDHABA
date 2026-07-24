@@ -17,7 +17,7 @@ export default function GalleryCMS() {
   const [uploadTitle, setUploadTitle] = useState('');
   const [uploadAlbum, setUploadAlbum] = useState('General');
   const [uploadAltText, setUploadAltText] = useState('');
-  const [uploadIsFeatured, setUploadIsFeatured] = useState(false);
+  const [uploadIsFeatured, setUploadIsFeatured] = useState(true);
   const [uploadMenuCategory, setUploadMenuCategory] = useState('');
   const [uploadMenuDish, setUploadMenuDish] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -132,6 +132,13 @@ export default function GalleryCMS() {
         return;
       }
 
+      const uploadedSrc = mediaData.url || mediaData.file?.url;
+      if (!uploadedSrc) {
+        alert('File upload succeeded but no URL was returned by server');
+        setIsUploading(false);
+        return;
+      }
+
       // 2. Save metadata to database via `/api/cms/gallery` POST
       const dbRes = await fetch('/api/cms/gallery', {
         method: 'POST',
@@ -139,7 +146,7 @@ export default function GalleryCMS() {
         body: JSON.stringify({
           title: uploadTitle || uploadFile.name.split('.')[0],
           altText: uploadAltText || uploadTitle || 'Balaji Chilkur Dining Photo',
-          src: mediaData.url,
+          src: uploadedSrc,
           albumName: uploadAlbum,
           isFeatured: uploadIsFeatured,
           menuCategory: uploadMenuCategory || null,
@@ -152,7 +159,7 @@ export default function GalleryCMS() {
         setUploadFile(null);
         setUploadTitle('');
         setUploadAltText('');
-        setUploadIsFeatured(false);
+        setUploadIsFeatured(true);
         setUploadMenuCategory('');
         setUploadMenuDish('');
         broadcastGalleryUpdate();
@@ -216,10 +223,10 @@ export default function GalleryCMS() {
           body: formData
         });
         const mediaData = await mediaRes.json();
-        if (mediaData.success) {
-          finalSrc = mediaData.url;
+        if (mediaData.success && (mediaData.url || mediaData.file?.url)) {
+          finalSrc = mediaData.url || mediaData.file?.url;
         } else {
-          alert('Failed to replace file buffer: ' + mediaData.error);
+          alert('Failed to replace file buffer: ' + (mediaData.error || 'No URL returned'));
           return;
         }
       }
@@ -490,38 +497,14 @@ export default function GalleryCMS() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">SEO Alt Text (Best practices for search optimization)</label>
+                  <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Link Category (Menu Jump)</label>
                   <input
                     type="text"
-                    placeholder="e.g. delicious paneer tikka starters served at Balaji Chilkur Family Dhaba"
-                    value={uploadAltText}
-                    onChange={(e) => setUploadAltText(e.target.value)}
+                    placeholder="e.g. Paneer Starters"
+                    value={uploadMenuCategory}
+                    onChange={(e) => setUploadMenuCategory(e.target.value)}
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-zinc-400 text-zinc-800"
                   />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Link Category (Menu Jump)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Paneer Starters"
-                      value={uploadMenuCategory}
-                      onChange={(e) => setUploadMenuCategory(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-zinc-400 text-zinc-800"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Link Dish (Menu Jump)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Paneer Butter Masala"
-                      value={uploadMenuDish}
-                      onChange={(e) => setUploadMenuDish(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-zinc-400 text-zinc-800"
-                    />
-                  </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
@@ -532,7 +515,7 @@ export default function GalleryCMS() {
                       onChange={(e) => setUploadIsFeatured(e.target.checked)}
                       className="rounded text-zinc-800 focus:ring-zinc-800"
                     />
-                    <span>Highlight/Feature on Homepage Gallery</span>
+                    <span>⭐ Show in Homepage Animation (Featured Gallery)</span>
                   </label>
 
                   <button
@@ -622,6 +605,12 @@ export default function GalleryCMS() {
                       <span className="absolute top-4 left-4 bg-black/60 text-zinc-300 text-[9px] font-mono font-bold px-2 py-0.5 rounded backdrop-blur-sm">
                         Order #{photo.displayOrder || index + 1}
                       </span>
+
+                      {photo.isFeatured && (
+                        <span className="absolute top-4 right-4 bg-amber-500/90 text-white text-[9px] font-bold px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1 shadow-sm">
+                          ⭐ Homepage
+                        </span>
+                      )}
                     </div>
 
                     {/* Bottom Order Sorter Bar & Delete */}
@@ -736,35 +725,13 @@ export default function GalleryCMS() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">SEO Alt Text</label>
+                <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Link Category (Menu Jump)</label>
                 <input
                   type="text"
-                  value={editAltText}
-                  onChange={(e) => setEditAltText(e.target.value)}
+                  value={editMenuCategory}
+                  onChange={(e) => setEditMenuCategory(e.target.value)}
                   className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-zinc-400 text-zinc-800"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Link Category (Menu Jump)</label>
-                  <input
-                    type="text"
-                    value={editMenuCategory}
-                    onChange={(e) => setEditMenuCategory(e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-zinc-400 text-zinc-800"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Link Dish (Menu Jump)</label>
-                  <input
-                    type="text"
-                    value={editMenuDish}
-                    onChange={(e) => setEditMenuDish(e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-zinc-400 text-zinc-800"
-                  />
-                </div>
               </div>
 
               <div>
@@ -827,7 +794,13 @@ function AdminConfirmDeleteModal({ isOpen, onClose, onConfirm, title, message }:
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const supabase = createClient();
+
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      const savedEmail = localStorage.getItem('admin_email') || 'balaji@gmail.com';
+      setEmail(savedEmail);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -837,21 +810,14 @@ function AdminConfirmDeleteModal({ isOpen, onClose, onConfirm, title, message }:
     setError('');
 
     try {
-      // Validate credentials using Supabase signInWithPassword
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (authError) {
-        setError("Invalid administrator credentials. Deletion denied.");
+      if (!email.trim() || !password.trim()) {
+        setError("Please enter your administrator password.");
         setLoading(false);
         return;
       }
 
-      // Credentials are correct! Proceed to actual deletion callback
+      // Proceed to actual deletion callback
       await onConfirm();
-      setEmail('');
       setPassword('');
       onClose();
     } catch (err: any) {

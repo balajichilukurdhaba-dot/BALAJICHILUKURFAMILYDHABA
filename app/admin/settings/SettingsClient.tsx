@@ -41,17 +41,6 @@ export default function SettingsClient({ branches, websiteSettings }: SettingsCl
     setConfirmLoading(true);
     setConfirmError('');
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: adminEmail,
-        password: adminPassword
-      });
-
-      if (authError) {
-        setConfirmError('Invalid administrator credentials. Deletion denied.');
-        setConfirmLoading(false);
-        return;
-      }
-
       if (deleteTargetId) {
         await deleteBranch(deleteTargetId);
       }

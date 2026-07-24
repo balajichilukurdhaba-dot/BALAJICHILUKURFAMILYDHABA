@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Navbar } from '../src/components/Navbar';
 import { Footer } from '../src/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
+import DiscountPopup from '../src/components/DiscountPopup';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -11,6 +12,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   return (
     <>
+      {!isAdmin && <DiscountPopup />}
       {!isAdmin && <Navbar />}
       <main className="flex-grow">
         {isAdmin ? (
