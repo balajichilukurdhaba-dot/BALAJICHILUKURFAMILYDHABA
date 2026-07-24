@@ -2,18 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Card, Input, InputNumber, Select, Button, Statistic, Typography, Space, Divider, Row, Col, Alert, Badge, Table, Modal, Tooltip, message, notification
+  Input, InputNumber, Select, Space, Tooltip, message, notification, Modal, Badge
 } from 'antd';
 import { 
-  WhatsAppOutlined, CopyOutlined, DownloadOutlined, CloseCircleOutlined, CheckCircleOutlined, SearchOutlined, ReloadOutlined
+  WhatsAppOutlined, CopyOutlined, DownloadOutlined, CloseCircleOutlined, CheckCircleOutlined, SearchOutlined
 } from '@ant-design/icons';
 import { 
-  DollarSign, Phone, Award, QrCode, Loader2, Sparkles, CheckCircle2, Ticket, FileText, Calendar
+  DollarSign, Phone, Award, QrCode, Loader2, Sparkles, CheckCircle2, Ticket, FileText, Calendar, Search, RefreshCw, X, ArrowUpRight
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
-const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 
 // Coupon data TypeScript interface
@@ -37,7 +37,7 @@ interface Coupon {
 export default function CheckoutRewardsPage() {
   const router = useRouter();
 
-  // Active client-side heartbeat hook executing router.refresh() on a continuous 4-second layout tree cache-busting cycle
+  // Active client-side heartbeat hook
   useEffect(() => {
     const interval = setInterval(() => {
       router.refresh();
@@ -69,7 +69,7 @@ export default function CheckoutRewardsPage() {
   const expiryEpoch = Date.now() + validityDays * 24 * 60 * 60 * 1000;
   const expiryDateFormatted = new Date(expiryEpoch).toISOString().split('T')[0];
 
-  // Default Categories & predefined percentages
+  // Categories & predefined percentages
   const handleCategoryChange = (val: string) => {
     setDiscountCategory(val);
     if (val === 'Corporate Partner Privilege' || val === 'Corporate Discount') {
@@ -144,7 +144,7 @@ export default function CheckoutRewardsPage() {
       if (data.success) {
         notification.success({
           message: 'Voucher Created',
-          description: `Voucher ${data.token} has been successfully generated for bill ${billNumber}.`,
+          description: `Voucher ${data.token} has been generated for bill ${billNumber}.`,
           placement: 'topRight'
         });
 
@@ -181,7 +181,7 @@ export default function CheckoutRewardsPage() {
     }
   };
 
-  // Compile secure target verification URL
+  // Compile target verification URL
   const getVerificationUrl = (coupon: Coupon) => {
     const token = coupon.token;
     const billNo = encodeURIComponent(coupon.billNo);
@@ -294,7 +294,7 @@ We look forward to serving you again.`;
     }
   };
 
-  // Filter vouchers by search query safely
+  // Filter vouchers by search query
   const filteredVouchers = vouchers.filter(v => {
     if (!v) return false;
     const query = searchQuery.toLowerCase();
@@ -304,426 +304,429 @@ We look forward to serving you again.`;
     return tokenMatch || billNoMatch || phoneMatch;
   });
 
-  // Table Columns config
-  const columns = [
-    {
-      title: 'Created',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (dateStr: string) => <span className="font-mono text-zinc-500 text-xs">{new Date(dateStr).toISOString().split('T')[0]}</span>
-    },
-    {
-      title: 'Bill Number',
-      dataIndex: 'billNo',
-      key: 'billNo',
-      render: (val: string) => <span className="font-mono font-bold text-zinc-800 text-xs">{val}</span>
-    },
-    {
-      title: 'Customer Phone',
-      dataIndex: 'phone',
-      key: 'phone',
-      render: (val: string) => <span className="font-sans text-xs text-zinc-700">{val}</span>
-    },
-    {
-      title: 'Credit Amount',
-      key: 'discountValue',
-      render: (_: any, record: Coupon) => (
-        <span className="font-bold text-[#1E4D2B] text-xs">
-          ₹{record.discountValue} <Text type="secondary" style={{ fontSize: '10px' }}>({record.discountPercent}%)</Text>
-        </span>
-      )
-    },
-    {
-      title: 'Category',
-      dataIndex: 'discountCategory',
-      key: 'discountCategory',
-      render: (val: string) => <Badge count={val} color="#1E4D2B" style={{ fontSize: '9px', fontWeight: 'bold' }} />
-    },
-    {
-      title: 'Status',
-      key: 'status',
-      render: (_: any, record: Coupon) => {
-        const isExpired = Date.now() > record.expiryEpoch;
-        if (record.isCancelled) return <Badge status="default" text={<span className="text-zinc-400 font-bold uppercase text-[9px]">Cancelled</span>} />;
-        if (record.isUsed) return <Badge status="success" text={<span className="text-emerald-600 font-bold uppercase text-[9px]">Redeemed</span>} />;
-        if (isExpired) return <Badge status="error" text={<span className="text-rose-600 font-bold uppercase text-[9px]">Expired</span>} />;
-        return <Badge status="processing" text={<span className="text-[#1E4D2B] font-bold uppercase text-[9px]">Active</span>} />;
-      }
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_: any, record: Coupon) => {
-        const isExpired = Date.now() > record.expiryEpoch;
-        const disableActions = record.isUsed || record.isCancelled || isExpired;
-        return (
-          <Space size="middle">
-            <Tooltip title="View Details">
-              <Button size="small" type="text" icon={<QrCode size={14} />} onClick={() => setViewVoucherModal(record)} />
-            </Tooltip>
-            <Tooltip title="Copy Token">
-              <Button size="small" type="text" icon={<CopyOutlined />} onClick={() => copyToClipboard(record.token)} />
-            </Tooltip>
-            {record.phone && record.phone !== 'Walk-in' && (
-              <Tooltip title="Send WhatsApp">
-                <Button 
-                  size="small" 
-                  type="text" 
-                  icon={<WhatsAppOutlined style={{ color: '#25D366' }} />} 
-                  href={getWhatsAppRedirectionUrl(record)}
-                  target="_blank"
-                />
-              </Tooltip>
-            )}
-            {!disableActions && (
-              <>
-                <Tooltip title="Mark Redeemed">
-                  <Button 
-                    size="small" 
-                    type="text" 
-                    icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />} 
-                    onClick={() => redeemVoucherManually(record.token)} 
-                  />
-                </Tooltip>
-                <Tooltip title="Cancel Voucher">
-                  <Button 
-                    size="small" 
-                    type="text" 
-                    danger
-                    icon={<CloseCircleOutlined />} 
-                    onClick={() => cancelVoucher(record.token)} 
-                  />
-                </Tooltip>
-              </>
-            )}
-          </Space>
-        );
-      }
-    }
-  ];
-
   return (
-    <div className="space-y-8 animate-fadeIn font-sans max-w-7xl mx-auto" style={{ background: '#FFFFFF' }}>
-      
-      {/* Page Header Header */}
-      <Card 
-        variant="borderless" 
-        style={{ background: '#FFFFFF', border: '1px solid #F5E6E3', borderRadius: 16 }}
-      >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#1E4D2B] flex items-center gap-1.5">
-              <Award size={12} className="text-[#1E4D2B]" />
-              Zomato & Swiggy Loyalty retention system
+    <div className="space-y-6 font-sans text-slate-800 antialiased max-w-7xl mx-auto px-2 sm:px-4">
+      {/* Header section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/60">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <Title level={2} style={{ margin: '8px 0 0 0', fontWeight: 900 }}>
-              Checkout Incentives Manager
-            </Title>
-            <Text type="secondary" style={{ fontSize: '13px' }}>
-              Issue customized discount vouchers based on billing value and track counter redemption history.
-            </Text>
+            <span className="text-xs font-semibold tracking-wide uppercase text-slate-500">Counter Rewards POS</span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Checkout Rewards &amp; Vouchers</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Issue customer loyalty discount passes and manage redemption status</p>
         </div>
-      </Card>
+      </div>
 
-      <Row gutter={[24, 24]} align="stretch">
+      {/* Main Action Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Checkout Billing Input Panel */}
-        <Col xs={24} md={12}>
-          <Card 
-            title={
-              <Space>
-                <DollarSign size={16} className="text-[#1E4D2B]" />
-                <span>Base Bill Processing Grid</span>
-              </Space>
-            }
-            variant="borderless" 
-            style={{ height: '100%', border: '1px solid #F5E6E3', borderRadius: 16 }}
-          >
-            <form onSubmit={handleGenerate} className="space-y-4">
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Text strong style={{ fontSize: '10px', textTransform: 'uppercase', color: '#666', display: 'block', marginBottom: '6px' }}>
-                    Bill / Invoice Number *
-                  </Text>
-                  <Input 
-                    size="large"
-                    required
-                    placeholder="e.g. INV-2026-00125" 
-                    prefix={<FileText size={14} className="text-gray-400" />}
-                    value={billNumber}
-                    onChange={(e) => setBillNumber(e.target.value.toUpperCase())}
-                    className="rounded-lg font-mono text-sm"
-                    style={{ border: '1px solid #F5E6E3' }}
-                  />
-                </Col>
+        {/* Left Form: Issue Discount Voucher */}
+        <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2 font-semibold text-slate-900 text-base">
+              <DollarSign size={18} className="text-[#1E4D2B]" />
+              <span>Issue Discount Voucher</span>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">Step 1 of 2</span>
+          </div>
 
-                <Col span={12}>
-                  <Text strong style={{ fontSize: '10px', textTransform: 'uppercase', color: '#666', display: 'block', marginBottom: '6px' }}>
-                    Base Bill Total (₹) *
-                  </Text>
-                  <InputNumber
-                    size="large"
-                    required
-                    min={1}
-                    placeholder="e.g. 1500" 
-                    prefix={<span className="text-gray-400 font-bold text-sm">₹</span>}
-                    value={baseBill}
-                    onChange={(val) => setBaseBill(val)}
-                    className="w-full rounded-lg"
-                    style={{ border: '1px solid #F5E6E3' }}
-                  />
-                </Col>
-              </Row>
-
+          <form onSubmit={handleGenerate} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Text strong style={{ fontSize: '10px', textTransform: 'uppercase', color: '#666', display: 'block', marginBottom: '6px' }}>
-                  Customer Phone Number
-                </Text>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                  Bill / Invoice Number *
+                </label>
                 <Input 
                   size="large"
-                  placeholder="e.g. 9347104569" 
-                  prefix={<Phone size={14} className="text-gray-400" />}
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
-                  className="rounded-lg text-sm"
-                  style={{ border: '1px solid #F5E6E3' }}
+                  required
+                  placeholder="e.g. INV-2026-00125" 
+                  prefix={<FileText size={15} className="text-slate-400 mr-1" />}
+                  value={billNumber}
+                  onChange={(e) => setBillNumber(e.target.value.toUpperCase())}
+                  className="rounded-xl text-xs font-mono font-semibold"
                 />
               </div>
 
-              <Divider style={{ margin: '8px 0' }} />
-
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Text strong style={{ fontSize: '10px', textTransform: 'uppercase', color: '#666', display: 'block', marginBottom: '6px' }}>
-                    Promotion Category
-                  </Text>
-                  <Select
-                    size="large"
-                    value={discountCategory}
-                    onChange={handleCategoryChange}
-                    className="w-full"
-                    style={{ border: '1px solid #F5E6E3', borderRadius: 8 }}
-                  >
-                    <Option value="Corporate Partner Privilege">Corporate Partner Privilege</Option>
-                    <Option value="Happy Hour Special">Happy Hour Special</Option>
-                    <Option value="Weekend Dining Benefit">Weekend Dining Benefit</Option>
-                    <Option value="VIP Member Loyalty Reward">VIP Member Loyalty Reward</Option>
-                    <Option value="Festive Season Offer">Festive Season Offer</Option>
-                    <Option value="Manager Courtesy Concession">Manager Courtesy Concession</Option>
-                    <Option value="Custom Manager Adjustment">Custom Manager Adjustment</Option>
-                  </Select>
-                </Col>
-
-                <Col span={12}>
-                  <Text strong style={{ fontSize: '10px', textTransform: 'uppercase', color: '#666', display: 'block', marginBottom: '6px' }}>
-                    Discount Percentage (%)
-                  </Text>
-                  <InputNumber
-                    size="large"
-                    min={0}
-                    max={100}
-                    step={0.01}
-                    precision={2}
-                    value={discountPercent}
-                    onChange={(val) => setDiscountPercent(val !== null ? val : 0)}
-                    className="w-full rounded-lg"
-                    style={{ border: '1px solid #F5E6E3' }}
-                  />
-                </Col>
-              </Row>
-
-              {/* Dynamic pricing engine preview cards */}
-              {baseBill && baseBill > 0 ? (
-                <div className="bg-[#FAF6EE] p-4 rounded-xl border border-dashed border-[#F5E6E3] grid grid-cols-2 gap-3 text-xs mt-3">
-                  <div>
-                    <span className="text-gray-400 block uppercase font-bold text-[9px]">Base Bill Amount:</span>
-                    <strong className="text-zinc-800 text-sm">₹{baseBill}</strong>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block uppercase font-bold text-[9px]">Discount Percentage:</span>
-                    <strong className="text-zinc-800 text-sm">{discountPercent.toFixed(2)}%</strong>
-                  </div>
-                  <div className="border-t border-zinc-150 pt-2">
-                    <span className="text-[#1E4D2B] block uppercase font-black text-[9px]">Discount Value:</span>
-                    <strong className="text-[#1E4D2B] text-sm">₹{calculatedDiscount.toFixed(2)}</strong>
-                  </div>
-                  <div className="border-t border-zinc-150 pt-2">
-                    <span className="text-emerald-700 block uppercase font-black text-[9px]">Final Bill Value:</span>
-                    <strong className="text-emerald-700 text-sm">₹{finalBill.toFixed(2)}</strong>
-                  </div>
-                </div>
-              ) : null}
-
-              <Button 
-                type="primary" 
-                htmlType="submit"
-                size="large" 
-                block
-                disabled={generating || !baseBill || baseBill <= 0 || !billNumber}
-                style={{ height: '46px', background: '#1E4D2B', borderColor: '#1E4D2B', borderRadius: 8, marginTop: 8 }}
-              >
-                {generating ? (
-                  <Space>
-                    <Loader2 className="animate-spin" size={14} />
-                    <span>Committing to Ledger...</span>
-                  </Space>
-                ) : (
-                  <Space>
-                    <Sparkles size={14} />
-                    <span>Generate Secure Voucher QR</span>
-                  </Space>
-                )}
-              </Button>
-            </form>
-          </Card>
-        </Col>
-
-        {/* Real-time Voucher Display Panel */}
-        <Col xs={24} md={12}>
-          <Card 
-            title={
-              <Space>
-                <QrCode size={16} className="text-[#1E4D2B]" />
-                <span>Immediate QR Code Payload</span>
-              </Space>
-            }
-            variant="borderless" 
-            style={{ height: '100%', border: '1px solid #F5E6E3', borderRadius: 16, display: 'flex', flexDirection: 'column' }}
-            styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' } }}
-          >
-            {activeCoupon ? (
-              <div className="text-center space-y-4 animate-fadeIn py-1">
-                
-                {/* Modern canvas-based QR rendering using project libraries */}
-                <div className="inline-block p-4 bg-white border border-[#F5E6E3] rounded-2xl">
-                  <QRCodeCanvas 
-                    id={`qr-canvas-${activeCoupon.token}`} 
-                    value={getVerificationUrl(activeCoupon)} 
-                    size={160} 
-                    includeMargin 
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex gap-2 justify-center">
-                    {activeCoupon.isCancelled ? (
-                      <Badge count="Cancelled" color="#bfbfbf" />
-                    ) : activeCoupon.isUsed ? (
-                      <Badge count="Redeemed" color="#52c41a" />
-                    ) : (
-                      <Badge count="Active in Ledger" color="#52c41a" />
-                    )}
-                  </div>
-                  <div className="font-mono text-xs font-black text-gray-800 tracking-wider">
-                    {activeCoupon.token}
-                  </div>
-                </div>
-
-                <Divider style={{ margin: '8px 0' }} />
-
-                <Row gutter={8} className="bg-[#FAF6EE]/50 p-3 rounded-xl border border-[#F5E6E3] text-left text-xs">
-                  <Col span={12} className="space-y-1.5 border-r border-[#F5E6E3] pr-2">
-                    <div><Text type="secondary">Generated On:</Text> <span className="font-semibold font-mono">{generatedDateFormatted}</span></div>
-                    <div><Text type="secondary">Expires On:</Text> <span className="font-semibold font-mono text-rose-600">{expiryDateFormatted}</span></div>
-                  </Col>
-                  <Col span={12} className="space-y-1.5 pl-2">
-                    <div><Text type="secondary">Bill No:</Text> <span className="font-semibold font-mono">{activeCoupon.billNo}</span></div>
-                    <div><Text type="secondary">Discount Credit:</Text> <strong className="text-[#1E4D2B]">₹{activeCoupon.discountValue}</strong></div>
-                  </Col>
-                </Row>
-
-                <Row gutter={12}>
-                  <Col span={12}>
-                    <Button 
-                      block 
-                      icon={<CopyOutlined />} 
-                      onClick={() => copyToClipboard(activeCoupon.token)}
-                    >
-                      Copy Voucher
-                    </Button>
-                  </Col>
-                  <Col span={12}>
-                    <Button 
-                      block 
-                      icon={<DownloadOutlined />} 
-                      onClick={() => downloadQRCodeFile(activeCoupon.token)}
-                    >
-                      Download QR
-                    </Button>
-                  </Col>
-                </Row>
-
-                {activeCoupon.phone && activeCoupon.phone !== 'Walk-in' && !activeCoupon.isCancelled && !activeCoupon.isUsed && (
-                  <Button 
-                    type="default" 
-                    size="large"
-                    icon={<WhatsAppOutlined />} 
-                    href={getWhatsAppRedirectionUrl(activeCoupon)}
-                    target="_blank"
-                    block
-                    style={{ background: '#25D366', color: '#FFFFFF', borderColor: '#25D366', fontWeight: 'bold', borderRadius: 8, height: '40px', marginTop: '4px' }}
-                  >
-                    Send WhatsApp Voucher
-                  </Button>
-                )}
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                  Base Bill Total (₹) *
+                </label>
+                <InputNumber
+                  size="large"
+                  required
+                  min={1}
+                  placeholder="e.g. 1500" 
+                  prefix={<span className="text-slate-400 font-bold text-xs mr-1">₹</span>}
+                  value={baseBill}
+                  onChange={(val) => setBaseBill(val)}
+                  className="w-full rounded-xl"
+                />
               </div>
-            ) : (
-              <div className="text-center py-12 text-gray-400 space-y-3">
-                <Ticket size={44} className="mx-auto text-gray-200" />
-                <Title level={5} style={{ color: '#aaa', margin: 0 }}>Voucher Standby</Title>
-                <Paragraph style={{ color: '#bbb', fontSize: '11px', maxWidth: '240px', margin: '8px auto 0 auto' }}>
-                  Input physical receipt details and set custom discount settings to generate customer loyalty QR code matrices.
-                </Paragraph>
-              </div>
-            )}
-          </Card>
-        </Col>
-      </Row>
+            </div>
 
-      {/* Admin Ledger Panel */}
-      <Card 
-        title={
-          <Space>
-            <Calendar size={16} className="text-[#1E4D2B]" />
-            <span>Dining Vouchers Ledger</span>
-          </Space>
-        }
-        variant="borderless" 
-        style={{ border: '1px solid #F5E6E3', borderRadius: 16 }}
-      >
-        <div className="space-y-4">
-          {/* Search controls */}
-          <div className="max-w-md">
-            <Input 
-              placeholder="Search by Bill No, Phone, or Voucher Code..." 
-              prefix={<SearchOutlined />}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-lg"
-              size="large"
-              style={{ border: '1px solid #F5E6E3' }}
-            />
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                Customer Mobile Phone
+              </label>
+              <Input 
+                size="large"
+                placeholder="e.g. 9347104569 (Optional for walk-in)" 
+                prefix={<Phone size={15} className="text-slate-400 mr-1" />}
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
+                className="rounded-xl text-xs"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                  Promotion Category
+                </label>
+                <Select
+                  size="large"
+                  value={discountCategory}
+                  onChange={handleCategoryChange}
+                  className="w-full rounded-xl"
+                >
+                  <Option value="Corporate Partner Privilege">Corporate Partner Privilege</Option>
+                  <Option value="Happy Hour Special">Happy Hour Special</Option>
+                  <Option value="Weekend Dining Benefit">Weekend Dining Benefit</Option>
+                  <Option value="VIP Member Loyalty Reward">VIP Member Loyalty Reward</Option>
+                  <Option value="Festive Season Offer">Festive Season Offer</Option>
+                  <Option value="Manager Courtesy Concession">Manager Courtesy Concession</Option>
+                  <Option value="Custom Manager Adjustment">Custom Manager Adjustment</Option>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                  Discount Rate (%)
+                </label>
+                <InputNumber
+                  size="large"
+                  min={0}
+                  max={100}
+                  step={0.01}
+                  precision={2}
+                  value={discountPercent}
+                  onChange={(val) => setDiscountPercent(val !== null ? val : 0)}
+                  className="w-full rounded-xl"
+                />
+              </div>
+            </div>
+
+            {/* Calculations Breakdown Card */}
+            {baseBill && baseBill > 0 ? (
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span className="text-slate-400 block uppercase font-medium text-[10px]">Original Bill Amount</span>
+                  <strong className="text-slate-800 text-sm font-semibold">₹{baseBill}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block uppercase font-medium text-[10px]">Discount Rate</span>
+                  <strong className="text-slate-800 text-sm font-semibold">{discountPercent.toFixed(2)}%</strong>
+                </div>
+                <div className="border-t border-slate-200/60 pt-2">
+                  <span className="text-emerald-700 block uppercase font-semibold text-[10px]">Loyalty Benefit Credit</span>
+                  <strong className="text-emerald-700 text-sm font-bold">₹{calculatedDiscount.toFixed(2)}</strong>
+                </div>
+                <div className="border-t border-slate-200/60 pt-2">
+                  <span className="text-slate-700 block uppercase font-semibold text-[10px]">Payable Net Bill</span>
+                  <strong className="text-slate-900 text-sm font-bold">₹{finalBill.toFixed(2)}</strong>
+                </div>
+              </div>
+            ) : null}
+
+            {/* HIGH-CONTRAST PRIMARY BUTTON */}
+            <motion.button 
+              type="submit"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={generating || !baseBill || baseBill <= 0 || !billNumber}
+              className={`w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 select-none shadow-sm ${
+                generating || !baseBill || baseBill <= 0 || !billNumber
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+                  : 'bg-[#1E4D2B] hover:bg-[#163a20] text-white shadow-emerald-900/10'
+              }`}
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} />
+                  <span>Committing to Ledger...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
+                  <span>Generate Voucher QR</span>
+                </>
+              )}
+            </motion.button>
+          </form>
+        </div>
+
+        {/* Right Panel: Voucher Pass Preview Card */}
+        <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2 font-semibold text-slate-900 text-base">
+              <QrCode size={18} className="text-[#1E4D2B]" />
+              <span>Voucher Pass Preview</span>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">Step 2 of 2</span>
           </div>
 
-          <Table 
-            dataSource={filteredVouchers}
-            columns={columns}
-            rowKey="token"
-            loading={loadingLedger}
-            pagination={{ pageSize: 10 }}
-            className="border border-[#F5E6E3] rounded-xl overflow-hidden font-sans"
-          />
+          {activeCoupon ? (
+            <div className="text-center space-y-4 my-auto py-2">
+              <div className="inline-block p-4 bg-white border border-slate-200/90 rounded-2xl shadow-xs">
+                <QRCodeCanvas 
+                  id={`qr-canvas-${activeCoupon.token}`} 
+                  value={getVerificationUrl(activeCoupon)} 
+                  size={150} 
+                  includeMargin 
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex gap-2 justify-center">
+                  {activeCoupon.isCancelled ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                      Cancelled
+                    </span>
+                  ) : activeCoupon.isUsed ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                      Redeemed
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Active in Ledger
+                    </span>
+                  )}
+                </div>
+                <div className="font-mono text-sm font-bold text-slate-800 tracking-wider">
+                  {activeCoupon.token}
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-left text-xs space-y-1.5 font-sans">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Bill Number:</span>
+                  <span className="font-mono font-semibold text-slate-800">{activeCoupon.billNo}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Discount Credit:</span>
+                  <strong className="text-emerald-700 font-bold">₹{activeCoupon.discountValue} ({activeCoupon.discountPercent}%)</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Validity:</span>
+                  <span className="font-mono text-slate-700 font-medium">17 Days ({expiryDateFormatted})</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button 
+                  onClick={() => copyToClipboard(activeCoupon.token)}
+                  className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
+                >
+                  <CopyOutlined /> Copy Code
+                </button>
+                <button 
+                  onClick={() => downloadQRCodeFile(activeCoupon.token)}
+                  className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
+                >
+                  <DownloadOutlined /> Download QR
+                </button>
+              </div>
+
+              {activeCoupon.phone && activeCoupon.phone !== 'Walk-in' && !activeCoupon.isCancelled && !activeCoupon.isUsed && (
+                <a 
+                  href={getWhatsAppRedirectionUrl(activeCoupon)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 select-none mt-2"
+                >
+                  <WhatsAppOutlined /> Send WhatsApp Voucher
+                </a>
+              )}
+            </div>
+          ) : (
+            <div className="text-center my-auto py-12 text-slate-400 space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                <Ticket size={28} />
+              </div>
+              <h4 className="font-semibold text-slate-700 text-sm">Voucher Pass Standby</h4>
+              <p className="text-slate-400 text-xs max-w-xs mx-auto leading-relaxed">
+                Enter receipt details on the left to generate and issue a customer loyalty QR voucher.
+              </p>
+            </div>
+          )}
         </div>
-      </Card>
+      </div>
+
+      {/* Admin Ledger Panel */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-100">
+          <div className="flex items-center gap-2 font-semibold text-slate-900 text-base">
+            <Calendar size={18} className="text-[#1E4D2B]" />
+            <span>Voucher Issuance Ledger</span>
+          </div>
+
+          {/* Search controls */}
+          <div className="relative max-w-md w-full sm:w-72">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+            <input 
+              type="text"
+              placeholder="Search by Bill No, phone, or token..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Clean Enterprise Table */}
+        <div className="overflow-x-auto rounded-xl border border-slate-200/80">
+          <table className="w-full text-left border-collapse text-xs font-sans">
+            <thead>
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[10px]">
+                <th className="py-3 px-4">Created Date</th>
+                <th className="py-3 px-4">Bill Number</th>
+                <th className="py-3 px-4">Customer Phone</th>
+                <th className="py-3 px-4">Category</th>
+                <th className="py-3 px-4">Credit Value</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {filteredVouchers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-slate-400 font-medium">
+                    No voucher records found matching your query.
+                  </td>
+                </tr>
+              ) : (
+                filteredVouchers.map((v) => {
+                  const isExpired = Date.now() > v.expiryEpoch;
+                  const disableActions = v.isUsed || v.isCancelled || isExpired;
+
+                  return (
+                    <tr key={v.token} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-3 px-4 font-mono text-slate-500">
+                        {new Date(v.createdAt).toISOString().split('T')[0]}
+                      </td>
+                      <td className="py-3 px-4 font-mono font-semibold text-slate-900">
+                        {v.billNo}
+                      </td>
+                      <td className="py-3 px-4 font-medium text-slate-700">
+                        {v.phone}
+                      </td>
+                      <td className="py-3 px-4 font-medium text-slate-800">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                          {v.discountCategory}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 font-semibold text-emerald-800">
+                        ₹{v.discountValue} <span className="text-[10px] font-normal text-slate-400">({v.discountPercent}%)</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        {v.isCancelled ? (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                            Cancelled
+                          </span>
+                        ) : v.isUsed ? (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                            Redeemed
+                          </span>
+                        ) : isExpired ? (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                            Expired
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Active
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Tooltip title="View Pass Details">
+                            <button 
+                              onClick={() => setViewVoucherModal(v)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
+                            >
+                              <QrCode size={14} />
+                            </button>
+                          </Tooltip>
+                          <Tooltip title="Copy Token">
+                            <button 
+                              onClick={() => copyToClipboard(v.token)}
+                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
+                            >
+                              <CopyOutlined size={14} />
+                            </button>
+                          </Tooltip>
+                          {v.phone && v.phone !== 'Walk-in' && (
+                            <Tooltip title="Send WhatsApp">
+                              <a 
+                                href={getWhatsAppRedirectionUrl(v)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 hover:bg-emerald-50 rounded-lg text-emerald-600 transition-colors"
+                              >
+                                <WhatsAppOutlined size={14} />
+                              </a>
+                            </Tooltip>
+                          )}
+                          {!disableActions && (
+                            <>
+                              <Tooltip title="Mark Redeemed">
+                                <button 
+                                  onClick={() => redeemVoucherManually(v.token)}
+                                  className="p-1.5 hover:bg-sky-50 rounded-lg text-sky-600 transition-colors"
+                                >
+                                  <CheckCircleOutlined size={14} />
+                                </button>
+                              </Tooltip>
+                              <Tooltip title="Cancel Voucher">
+                                <button 
+                                  onClick={() => cancelVoucher(v.token)}
+                                  className="p-1.5 hover:bg-rose-50 rounded-lg text-rose-600 transition-colors"
+                                >
+                                  <CloseCircleOutlined size={14} />
+                                </button>
+                              </Tooltip>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* View Voucher Details Modal */}
       <Modal
         title={
-          <Space>
-            <Ticket size={18} className="text-[#1E4D2B] mt-1" />
-            <span>Voucher Details Viewer</span>
-          </Space>
+          <div className="flex items-center gap-2 font-semibold text-slate-900 text-base">
+            <Ticket size={18} className="text-[#1E4D2B]" />
+            <span>Voucher Pass Details</span>
+          </div>
         }
         open={!!viewVoucherModal}
         onCancel={() => setViewVoucherModal(null)}
@@ -732,8 +735,8 @@ We look forward to serving you again.`;
         styles={{ body: { padding: '12px 0' } }}
       >
         {viewVoucherModal && (
-          <div className="text-center space-y-4 font-sans text-zinc-800">
-            <div className="inline-block p-4 bg-white border border-[#F5E6E3] rounded-2xl mx-auto">
+          <div className="text-center space-y-4 font-sans text-slate-800">
+            <div className="inline-block p-4 bg-white border border-slate-200/90 rounded-2xl mx-auto shadow-xs">
               <QRCodeCanvas 
                 id={`qr-canvas-${viewVoucherModal.token}`} 
                 value={getVerificationUrl(viewVoucherModal)} 
@@ -743,98 +746,87 @@ We look forward to serving you again.`;
             </div>
             
             <div className="space-y-1">
-              <div className="font-mono text-sm font-black text-gray-800">{viewVoucherModal.token}</div>
+              <div className="font-mono text-sm font-bold text-slate-800">{viewVoucherModal.token}</div>
               <div>
                 {viewVoucherModal.isCancelled ? (
-                  <Badge count="Cancelled" color="#bfbfbf" />
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                    Cancelled
+                  </span>
                 ) : viewVoucherModal.isUsed ? (
-                  <Badge count="Redeemed" color="#52c41a" />
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                    Redeemed
+                  </span>
                 ) : Date.now() > viewVoucherModal.expiryEpoch ? (
-                  <Badge count="Expired" color="#f5222d" />
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                    Expired
+                  </span>
                 ) : (
-                  <Badge count="Active" color="#52c41a" />
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Active Pass
+                  </span>
                 )}
               </div>
             </div>
 
-            <Divider style={{ margin: '12px 0' }} />
-
-            <div className="bg-[#FAF6EE] p-4 rounded-xl border border-[#F5E6E3] text-left text-xs space-y-2">
-              <div className="flex justify-between border-b border-zinc-150 pb-1.5">
-                <span className="text-gray-400 font-semibold">Bill / Invoice Number:</span>
-                <span className="font-mono font-bold text-zinc-800">{viewVoucherModal.billNo}</span>
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 text-left text-xs space-y-2 font-sans">
+              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                <span className="text-slate-400">Bill Number:</span>
+                <span className="font-mono font-semibold text-slate-800">{viewVoucherModal.billNo}</span>
               </div>
-              <div className="flex justify-between border-b border-zinc-150 pb-1.5">
-                <span className="text-gray-400 font-semibold">Base Receipt Bill:</span>
-                <span className="font-bold text-zinc-800">₹{viewVoucherModal.originalBill}</span>
+              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                <span className="text-slate-400">Base Receipt Bill:</span>
+                <span className="font-bold text-slate-800">₹{viewVoucherModal.originalBill}</span>
               </div>
-              <div className="flex justify-between border-b border-zinc-150 pb-1.5">
-                <span className="text-gray-400 font-semibold">Discount Category:</span>
-                <span className="font-bold text-zinc-800">{viewVoucherModal.discountCategory}</span>
+              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                <span className="text-slate-400">Promotion Category:</span>
+                <span className="font-semibold text-slate-800">{viewVoucherModal.discountCategory}</span>
               </div>
-              <div className="flex justify-between border-b border-zinc-150 pb-1.5">
-                <span className="text-gray-400 font-semibold">Discount Rate:</span>
-                <span className="font-bold text-zinc-800">{viewVoucherModal.discountPercent.toFixed(2)}%</span>
+              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                <span className="text-slate-400">Discount Rate:</span>
+                <span className="font-bold text-slate-800">{viewVoucherModal.discountPercent.toFixed(2)}%</span>
               </div>
-              <div className="flex justify-between border-b border-zinc-150 pb-1.5">
-                <span className="text-gray-400 font-semibold">Loyalty Reward Credit:</span>
-                <strong className="text-[#1E4D2B]">₹{viewVoucherModal.discountValue}</strong>
+              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                <span className="text-slate-400">Loyalty Benefit Credit:</span>
+                <strong className="text-emerald-700 font-bold">₹{viewVoucherModal.discountValue}</strong>
               </div>
-              <div className="flex justify-between border-b border-zinc-150 pb-1.5">
-                <span className="text-gray-400 font-semibold">Customer Mobile:</span>
-                <span className="font-bold text-zinc-800">{viewVoucherModal.phone}</span>
+              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                <span className="text-slate-400">Customer Mobile:</span>
+                <span className="font-medium text-slate-800">{viewVoucherModal.phone}</span>
               </div>
-              <div className="flex justify-between border-b border-zinc-150 pb-1.5">
-                <span className="text-gray-400 font-semibold">Voucher Created:</span>
-                <span className="font-mono text-zinc-700">{new Date(viewVoucherModal.createdAt).toISOString().split('T')[0]}</span>
+              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                <span className="text-slate-400">Issued On:</span>
+                <span className="font-mono text-slate-700">{new Date(viewVoucherModal.createdAt).toISOString().split('T')[0]}</span>
               </div>
               <div className="flex justify-between pb-0.5">
-                <span className="text-gray-400 font-semibold">Voucher Expiry:</span>
-                <span className="font-mono font-bold text-rose-600">{new Date(viewVoucherModal.expiryEpoch).toISOString().split('T')[0]}</span>
+                <span className="text-slate-400">Expiry Date:</span>
+                <span className="font-mono font-semibold text-rose-600">{new Date(viewVoucherModal.expiryEpoch).toISOString().split('T')[0]}</span>
               </div>
             </div>
 
-            <Row gutter={8}>
-              <Col span={8}>
-                <Button block onClick={() => copyToClipboard(viewVoucherModal.token)}>Copy Code</Button>
-              </Col>
-              <Col span={8}>
-                <Button block onClick={() => downloadQRCodeFile(viewVoucherModal.token)}>Download QR</Button>
-              </Col>
-              <Col span={8}>
-                {viewVoucherModal.phone && viewVoucherModal.phone !== 'Walk-in' ? (
-                  <Button 
-                    block 
-                    type="primary" 
-                    icon={<WhatsAppOutlined />} 
-                    href={getWhatsAppRedirectionUrl(viewVoucherModal)}
-                    target="_blank"
-                    style={{ background: '#25D366', borderColor: '#25D366' }}
-                  >
-                    WhatsApp
-                  </Button>
-                ) : (
-                  <Button block disabled>WhatsApp</Button>
-                )}
-              </Col>
-            </Row>
+            <div className="grid grid-cols-2 gap-2">
+              <button 
+                onClick={() => copyToClipboard(viewVoucherModal.token)}
+                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
+              >
+                <CopyOutlined /> Copy Code
+              </button>
+              <button 
+                onClick={() => downloadQRCodeFile(viewVoucherModal.token)}
+                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
+              >
+                <DownloadOutlined /> Download QR
+              </button>
+            </div>
 
-            {!viewVoucherModal.isUsed && !viewVoucherModal.isCancelled && Date.now() <= viewVoucherModal.expiryEpoch && (
-              <Row gutter={8} className="mt-2">
-                <Col span={12}>
-                  <Button 
-                    block 
-                    type="primary" 
-                    style={{ background: '#52c41a', borderColor: '#52c41a' }}
-                    onClick={() => redeemVoucherManually(viewVoucherModal.token)}
-                  >
-                    Mark Redeemed
-                  </Button>
-                </Col>
-                <Col span={12}>
-                  <Button block danger onClick={() => cancelVoucher(viewVoucherModal.token)}>Cancel Voucher</Button>
-                </Col>
-              </Row>
+            {viewVoucherModal.phone && viewVoucherModal.phone !== 'Walk-in' && (
+              <a 
+                href={getWhatsAppRedirectionUrl(viewVoucherModal)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 select-none block mt-2"
+              >
+                <WhatsAppOutlined /> Send WhatsApp Voucher
+              </a>
             )}
           </div>
         )}
