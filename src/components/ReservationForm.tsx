@@ -32,12 +32,30 @@ const TIME_SLOTS = [
   { value: '23:00', label: '11:00 PM' },
 ];
 
+const GUEST_OPTIONS = [
+  { value: '1', label: '1 Person' },
+  { value: '2', label: '2 Persons' },
+  { value: '3', label: '3 Persons' },
+  { value: '4', label: '4 Persons' },
+  { value: '5', label: '5 Persons' },
+  { value: '6', label: '6 Persons' },
+  { value: '7', label: '7 Persons' },
+  { value: '8', label: '8 Persons' },
+  { value: '9', label: '9 Persons' },
+  { value: '10', label: '10 Persons' },
+  { value: '10+', label: '10+ Persons' },
+];
+
 export const ReservationForm = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
+  const [isGuestsDropdownOpen, setIsGuestsDropdownOpen] = useState(false);
+  
   const timeDropdownRef = useRef<HTMLDivElement>(null);
+  const guestsDropdownRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     branchId: '52ae6a0f-daee-40f5-aa0e-ac44e17d325e',
@@ -50,11 +68,14 @@ export const ReservationForm = () => {
     specialInstructions: ''
   });
 
-  // Close dropdown on click outside
+  // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (timeDropdownRef.current && !timeDropdownRef.current.contains(e.target as Node)) {
         setIsTimeDropdownOpen(false);
+      }
+      if (guestsDropdownRef.current && !guestsDropdownRef.current.contains(e.target as Node)) {
+        setIsGuestsDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -68,6 +89,11 @@ export const ReservationForm = () => {
   const handleSelectTime = (slotValue: string) => {
     setFormData(prev => ({ ...prev, time: slotValue }));
     setIsTimeDropdownOpen(false);
+  };
+
+  const handleSelectGuests = (guestValue: string) => {
+    setFormData(prev => ({ ...prev, guests: guestValue }));
+    setIsGuestsDropdownOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,6 +123,7 @@ export const ReservationForm = () => {
   };
 
   const selectedSlot = TIME_SLOTS.find(s => s.value === formData.time) || TIME_SLOTS[16];
+  const selectedGuestOption = GUEST_OPTIONS.find(g => g.value === formData.guests) || GUEST_OPTIONS[1];
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-[#FFFFFF] rounded-3xl shadow-2xl overflow-hidden border border-brand-dark/10 font-sans">
@@ -152,6 +179,7 @@ export const ReservationForm = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Date Picker */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-brand-dark/70 ml-1">Date</label>
             <div className="relative">
@@ -168,14 +196,17 @@ export const ReservationForm = () => {
             </div>
           </div>
 
-          {/* Software Grade Custom Downward Time Picker (Exactly 5 visible items with scroll bar) */}
+          {/* Software Grade Downward Time Picker (Exactly 5 items visible with scroll) */}
           <div className="space-y-1.5 relative" ref={timeDropdownRef}>
             <label className="text-xs font-bold uppercase tracking-wider text-brand-dark/70 ml-1">Time</label>
             <div className="relative">
               <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/40 z-10 pointer-events-none" size={18} />
               <button
                 type="button"
-                onClick={() => setIsTimeDropdownOpen(prev => !prev)}
+                onClick={() => {
+                  setIsTimeDropdownOpen(prev => !prev);
+                  setIsGuestsDropdownOpen(false);
+                }}
                 className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-10 text-left text-brand-dark font-medium text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all flex items-center justify-between shadow-sm hover:border-brand-dark/30"
               >
                 <span>{selectedSlot.label}</span>
@@ -191,7 +222,6 @@ export const ReservationForm = () => {
                     transition={{ duration: 0.15, ease: 'easeOut' }}
                     className="absolute top-full mt-1.5 left-0 w-full bg-white border border-slate-200/90 rounded-xl shadow-xl z-50 p-1 overflow-hidden"
                   >
-                    {/* Fixed Height shows exactly 5 items (5 x 35px = 175px max height) */}
                     <div className="max-h-[175px] overflow-y-auto space-y-0.5 pr-1 divide-y divide-slate-50 scrollbar-thin scrollbar-thumb-slate-300">
                       {TIME_SLOTS.map((slot) => {
                         const isSelected = slot.value === formData.time;
@@ -218,21 +248,55 @@ export const ReservationForm = () => {
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          {/* Software Grade Downward Guests Picker (Exactly 5 items visible with scroll) */}
+          <div className="space-y-1.5 relative" ref={guestsDropdownRef}>
             <label className="text-xs font-bold uppercase tracking-wider text-brand-dark/70 ml-1">Guests</label>
             <div className="relative">
-              <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/40" size={18} />
-              <select 
-                required 
-                name="guests"
-                value={formData.guests}
-                onChange={handleChange}
-                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all appearance-none text-sm"
+              <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/40 z-10 pointer-events-none" size={18} />
+              <button
+                type="button"
+                onClick={() => {
+                  setIsGuestsDropdownOpen(prev => !prev);
+                  setIsTimeDropdownOpen(false);
+                }}
+                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-10 text-left text-brand-dark font-medium text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all flex items-center justify-between shadow-sm hover:border-brand-dark/30"
               >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '10+'].map(num => (
-                  <option key={num} value={num}>{num} Person{num !== 1 && 's'}</option>
-                ))}
-              </select>
+                <span>{selectedGuestOption.label}</span>
+                <ChevronDown size={16} className={`text-brand-dark/50 transition-transform duration-200 ${isGuestsDropdownOpen ? 'rotate-180 text-brand-dark' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isGuestsDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    className="absolute top-full mt-1.5 left-0 w-full bg-white border border-slate-200/90 rounded-xl shadow-xl z-50 p-1 overflow-hidden"
+                  >
+                    <div className="max-h-[175px] overflow-y-auto space-y-0.5 pr-1 divide-y divide-slate-50 scrollbar-thin scrollbar-thumb-slate-300">
+                      {GUEST_OPTIONS.map((g) => {
+                        const isSelected = g.value === formData.guests;
+                        return (
+                          <button
+                            key={g.value}
+                            type="button"
+                            onClick={() => handleSelectGuests(g.value)}
+                            className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-center justify-between font-medium ${
+                              isSelected 
+                                ? 'bg-slate-900 text-white font-semibold'
+                                : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{g.label}</span>
+                            {isSelected && <Check size={14} className="text-emerald-400" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
