@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Input, InputNumber, Select, Space, Tooltip, message, notification, Modal, Badge
+  Input, InputNumber, Select, Space, Tooltip, Modal, Badge, App
 } from 'antd';
 import { 
   WhatsAppOutlined, CopyOutlined, DownloadOutlined, CloseCircleOutlined, CheckCircleOutlined, SearchOutlined
@@ -34,7 +34,8 @@ interface Coupon {
   cancelledAt?: string;
 }
 
-export default function CheckoutRewardsPage() {
+function CheckoutRewardsContent() {
+  const { message, notification } = App.useApp();
   const router = useRouter();
 
   // Active client-side heartbeat hook
@@ -832,5 +833,13 @@ We look forward to serving you again.`;
         )}
       </Modal>
     </div>
+  );
+}
+
+export default function CheckoutRewardsPage() {
+  return (
+    <App>
+      <CheckoutRewardsContent />
+    </App>
   );
 }
