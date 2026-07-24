@@ -1,6 +1,6 @@
 import { createClient } from '../utils/supabase/server';
 import prisma from './prisma';
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
 
 export interface AdminUser {
   id: string;
@@ -12,23 +12,40 @@ export async function getSessionUser(): Promise<AdminUser | null> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !user.email) return null;
+    if (user && user.email) {
+      // Check database role
+      const dbRole = await prisma.adminUserRole.findUnique({
+        where: { email: user.email }
+      });
 
-    // Check database role
-    const dbRole = await prisma.adminUserRole.findUnique({
-      where: { email: user.email }
-    });
+      if (dbRole) {
+        return {
+          id: user.id,
+          email: user.email,
+          role: dbRole.role as 'admin' | 'staff'
+        };
+      }
 
-    if (dbRole) {
-      return {
-        id: user.id,
-        email: user.email,
-        role: dbRole.role as 'admin' | 'staff'
-      };
+      // Fail-safe logic for seeding / initial admins / local testing
+      return { id: user.id, email: user.email, role: 'admin' };
     }
 
-    // Fail-safe logic for seeding / initial admins / local testing
-    return { id: user.id, email: user.email, role: 'admin' };
+    // Check admin_logged_in cookie fallback
+    try {
+      const cookieStore = await cookies();
+      const adminCookie = cookieStore.get('admin_logged_in')?.value;
+      if (adminCookie === 'true') {
+        return {
+          id: 'admin-session-local',
+          email: 'admin@balajichilkur.com',
+          role: 'admin'
+        };
+      }
+    } catch {
+      // Ignore cookie store errors outside request context
+    }
+
+    return null;
   } catch (error) {
     console.error('Error getting session user:', error);
     return null;
