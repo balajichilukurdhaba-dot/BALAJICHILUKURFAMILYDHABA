@@ -9,6 +9,7 @@ export default function ScannerPage() {
   const [loading, setLoading] = useState(false);
   const [manualCode, setManualCode] = useState('');
   const [useCamera, setUseCamera] = useState(false);
+  const [cameraNotice, setCameraNotice] = useState<string | null>(null);
   const [cameraMode, setCameraMode] = useState<'environment' | 'user'>('environment');
   const [restartCount, setRestartCount] = useState(0);
 
@@ -154,15 +155,15 @@ export default function ScannerPage() {
       } catch (err: any) {
         console.error("Stream initialization error:", err);
         if (active) {
-          // 3. ROBUST TRY/CATCH ERROR LIFECYCLE
-          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-            setError("Camera access is denied. Please go to your browser settings, enable camera access for this site, and try again.");
-          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-            setError("No compatible camera hardware detected on this device.");
-          } else {
-            setError("Unable to initiate video stream. Ensure camera permissions are enabled.");
-          }
+          stopMediaStream();
           setUseCamera(false);
+          let msg = "Camera hardware unavailable. Switched to manual code verification.";
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            msg = "Camera permission denied by browser. Switched to manual code entry.";
+          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            msg = "No webcam detected on this device. Switched to manual code entry.";
+          }
+          setCameraNotice(msg);
         }
       }
     };
@@ -294,6 +295,7 @@ export default function ScannerPage() {
     stopMediaStream();
     setScanResult(null);
     setError(null);
+    setCameraNotice(null);
     setUseCamera(false);
     setManualCode('');
   };
@@ -405,7 +407,20 @@ export default function ScannerPage() {
                 </div>
               ) : (
                 /* Manual Ticket Input Form */
-                <form onSubmit={handleManualVerify} className="space-y-6 max-w-md mx-auto py-8">
+                <form onSubmit={handleManualVerify} className="space-y-6 max-w-md mx-auto py-4">
+                  {cameraNotice && (
+                    <div className="p-3 bg-amber-50 border border-amber-200/90 rounded-xl text-amber-800 text-xs font-medium flex items-center justify-between gap-2">
+                      <span>{cameraNotice}</span>
+                      <button
+                        type="button"
+                        onClick={() => setCameraNotice(null)}
+                        className="text-amber-600 hover:text-amber-900 font-bold text-xs"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-zinc-700 ml-1">
                       Enter Ticket / Booking Reference Code
@@ -413,10 +428,10 @@ export default function ScannerPage() {
                     <input 
                       type="text" 
                       required
-                      placeholder="e.g. RES-042382"
+                      placeholder="e.g. BSD-REWARD-XXX or RES-042382"
                       value={manualCode}
                       onChange={e => setManualCode(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-4 px-5 text-center text-lg font-mono font-black text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 transition-all uppercase placeholder:normal-case placeholder:font-sans placeholder:font-normal placeholder:text-sm"
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-4 px-5 text-center text-lg font-mono font-black text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 transition-all uppercase placeholder:normal-case placeholder:font-sans placeholder:font-normal placeholder:text-xs"
                     />
                   </div>
 
