@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, Users, User, Phone, FileText, Loader2, PartyPopper, ChevronDown, Check } from 'lucide-react';
+import { Calendar, Clock, Users, User, Phone, FileText, Loader2, PartyPopper, ChevronDown, Check, Ticket } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TIME_SLOTS = [
@@ -82,6 +82,19 @@ export const ReservationForm = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const [activeBooking, setActiveBooking] = useState<{ ref: string; token: string } | null>(null);
+
+  // Check for cached active booking pass on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cachedRef = localStorage.getItem('active_booking_ref');
+      const cachedToken = localStorage.getItem('active_booking_token');
+      if (cachedRef && cachedToken) {
+        setActiveBooking({ ref: cachedRef, token: cachedToken });
+      }
+    }
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -114,6 +127,11 @@ export const ReservationForm = () => {
         throw new Error(data.error || 'Failed to make reservation');
       }
 
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('active_booking_ref', data.reservation.bookingRef);
+        localStorage.setItem('active_booking_token', data.qrToken);
+      }
+
       router.push(`/reserve/success?ref=${data.reservation.bookingRef}&token=${encodeURIComponent(data.qrToken)}`);
 
     } catch (err: any) {
@@ -138,6 +156,21 @@ export const ReservationForm = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        {activeBooking && (
+          <div className="bg-emerald-50 border border-emerald-200/80 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-emerald-900 font-medium">
+            <div className="flex items-center gap-2">
+              <Ticket className="text-emerald-600 shrink-0" size={18} />
+              <span>You have a confirmed booking pass (Ref: <strong className="font-mono">{activeBooking.ref}</strong>)</span>
+            </div>
+            <Link 
+              href={`/reserve/success?ref=${activeBooking.ref}&token=${encodeURIComponent(activeBooking.token)}`}
+              className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-3 py-1.5 rounded-lg shrink-0 transition-colors shadow-sm text-[11px]"
+            >
+              View Active QR Code →
+            </Link>
+          </div>
+        )}
+
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-semibold border border-red-100 flex items-center justify-center">
             {error}
