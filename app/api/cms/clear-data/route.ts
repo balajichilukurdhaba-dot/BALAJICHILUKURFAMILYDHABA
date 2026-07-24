@@ -2,10 +2,32 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { logAdminAction } from '@/lib/auth';
 
+function getDateCutoff(range?: string, beforeDate?: string): Date | undefined {
+  if (!range || range === 'all') return undefined;
+
+  const now = new Date();
+  if (range === 'older_7') {
+    return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  }
+  if (range === 'older_30') {
+    return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  }
+  if (range === 'older_90') {
+    return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+  }
+  if (range === 'older_180') {
+    return new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+  }
+  if (range === 'custom' && beforeDate) {
+    return new Date(beforeDate);
+  }
+  return undefined;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, dataTypes } = body;
+    const { email, password, dataTypes, timelines } = body;
 
     // Privacy verification: require Admin ID (email) and password
     if (!email || !password) {
@@ -17,7 +39,7 @@ export async function POST(request: Request) {
 
     if (!Array.isArray(dataTypes) || dataTypes.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Please select at least one type of data to delete.' },
+        { success: false, error: 'Please select at least one category to delete.' },
         { status: 400 }
       );
     }
@@ -32,28 +54,40 @@ export async function POST(request: Request) {
 
     const deletedCounts: Record<string, number> = {};
 
-    // 1. Delete Reservations from database table
+    // 1. Delete Reservations by timeline filter
     if (dataTypes.includes('reservations')) {
-      const res = await prisma.reservation.deleteMany({});
+      const config = timelines?.reservations || {};
+      const cutoff = getDateCutoff(config.range, config.beforeDate);
+      const where = cutoff ? { createdAt: { lt: cutoff } } : {};
+      const res = await prisma.reservation.deleteMany({ where });
       deletedCounts.reservations = res.count;
     }
 
-    // 2. Delete WhatsApp Orders from database table
+    // 2. Delete WhatsApp Orders by timeline filter
     if (dataTypes.includes('orders')) {
-      const res = await prisma.whatsAppOrder.deleteMany({});
+      const config = timelines?.orders || {};
+      const cutoff = getDateCutoff(config.range, config.beforeDate);
+      const where = cutoff ? { createdAt: { lt: cutoff } } : {};
+      const res = await prisma.whatsAppOrder.deleteMany({ where });
       deletedCounts.orders = res.count;
     }
 
-    // 3. Delete Audit Logs & Login Sessions from database tables
+    // 3. Delete Audit Logs & Login Sessions by timeline filter
     if (dataTypes.includes('audits')) {
-      const res1 = await prisma.auditLog.deleteMany({});
-      const res2 = await prisma.adminLoginSession.deleteMany({});
+      const config = timelines?.audits || {};
+      const cutoff = getDateCutoff(config.range, config.beforeDate);
+      const where = cutoff ? { createdAt: { lt: cutoff } } : {};
+      const res1 = await prisma.auditLog.deleteMany({ where });
+      const res2 = await prisma.adminLoginSession.deleteMany({ where });
       deletedCounts.audits = res1.count + res2.count;
     }
 
-    // 4. Delete Customer Messages from database table
+    // 4. Delete Customer Messages by timeline filter
     if (dataTypes.includes('messages')) {
-      const res = await prisma.contactMessage.deleteMany({});
+      const config = timelines?.messages || {};
+      const cutoff = getDateCutoff(config.range, config.beforeDate);
+      const where = cutoff ? { createdAt: { lt: cutoff } } : {};
+      const res = await prisma.contactMessage.deleteMany({ where });
       deletedCounts.messages = res.count;
     }
 
@@ -61,7 +95,7 @@ export async function POST(request: Request) {
     try {
       await prisma.$executeRawUnsafe(`VACUUM ANALYZE;`);
     } catch (vErr) {
-      // In PostgreSQL, VACUUM frees dead space to decrease data usage
+      // In PostgreSQL, VACUUM reclaims freed space
     }
 
     // Log the purge action
@@ -69,14 +103,14 @@ export async function POST(request: Request) {
       'admin-purge',
       email,
       'PURGE_DATA',
-      `Permanently deleted database records: ${dataTypes.join(', ')} (${JSON.stringify(deletedCounts)})`,
+      `Deleted database records by timeline: ${dataTypes.join(', ')} (${JSON.stringify(deletedCounts)})`,
       null,
       deletedCounts
     );
 
     return NextResponse.json({
       success: true,
-      message: 'Selected records were permanently deleted from the database to decrease data usage.',
+      message: 'Selected timeline records were permanently deleted from the database.',
       deletedCounts
     });
   } catch (error: any) {

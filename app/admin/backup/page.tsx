@@ -478,6 +478,12 @@ function AdminPurgeModal({ isOpen, onClose, onSuccess }: AdminPurgeModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>(['reservations', 'orders', 'audits']);
+  const [timelines, setTimelines] = useState<Record<string, { range: string; beforeDate: string }>>({
+    reservations: { range: 'all', beforeDate: '' },
+    orders: { range: 'all', beforeDate: '' },
+    messages: { range: 'all', beforeDate: '' },
+    audits: { range: 'all', beforeDate: '' },
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -490,10 +496,19 @@ function AdminPurgeModal({ isOpen, onClose, onSuccess }: AdminPurgeModalProps) {
     { key: 'audits', label: 'Audit Trail Logs & Admin Sessions' },
   ];
 
+  const timelineRanges = [
+    { key: 'all', label: 'ALL TIME (Delete Everything)' },
+    { key: 'older_7', label: 'Older than 7 Days' },
+    { key: 'older_30', label: 'Older than 30 Days (1 Month)' },
+    { key: 'older_90', label: 'Older than 90 Days (3 Months)' },
+    { key: 'older_180', label: 'Older than 180 Days (6 Months)' },
+    { key: 'custom', label: 'Custom Cutoff Date' },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedTypes.length === 0) {
-      setError('Please select at least one dataset type to purge.');
+      setError('Please select at least one category to purge.');
       return;
     }
     setLoading(true);
@@ -506,13 +521,14 @@ function AdminPurgeModal({ isOpen, onClose, onSuccess }: AdminPurgeModalProps) {
         body: JSON.stringify({
           email,
           password,
-          dataTypes: selectedTypes
+          dataTypes: selectedTypes,
+          timelines
         })
       });
 
       const data = await res.json();
       if (data.success) {
-        onSuccess(data.message || 'Selected records permanently purged.');
+        onSuccess(data.message || 'Selected records permanently purged from database.');
         setEmail('');
         setPassword('');
       } else {
@@ -526,15 +542,15 @@ function AdminPurgeModal({ isOpen, onClose, onSuccess }: AdminPurgeModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-red-200 space-y-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-brand-dark/60 backdrop-blur-md animate-fadeIn overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-red-200 space-y-4 my-8">
         <div className="flex items-center gap-3 border-b border-red-100 pb-3">
           <div className="p-2 bg-red-100 text-red-700 rounded-xl">
             <ShieldAlert size={22} />
           </div>
           <div>
-            <h3 className="font-display font-black text-lg text-red-900">Privacy & Data Purge</h3>
-            <p className="text-xs text-red-700/80">Confirm identity to permanently wipe database records</p>
+            <h3 className="font-display font-black text-lg text-red-900">Privacy & Timeline Data Purge</h3>
+            <p className="text-xs text-red-700/80">Select timeline per category to permanently wipe records</p>
           </div>
         </div>
 
@@ -545,36 +561,84 @@ function AdminPurgeModal({ isOpen, onClose, onSuccess }: AdminPurgeModalProps) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-          <div className="space-y-2">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-red-900/70">
-              1. Select Data Categories to Permanently Delete
+        <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
+          {/* Category & Timeline Selection */}
+          <div className="space-y-3">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-red-900/80">
+              1. Select Categories and Timeline / Date Range
             </label>
-            <div className="grid grid-cols-1 gap-2 border border-red-100 rounded-2xl p-4 bg-red-50/40">
+            <div className="space-y-3 border border-red-100 rounded-2xl p-4 bg-red-50/30">
               {purgeOptions.map(opt => {
                 const isChecked = selectedTypes.includes(opt.key);
+                const categoryTimeline = timelines[opt.key] || { range: 'all', beforeDate: '' };
+
                 return (
-                  <label key={opt.key} className="flex items-center gap-2.5 text-xs font-bold text-red-950 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => {
-                        if (isChecked) {
-                          setSelectedTypes(prev => prev.filter(t => t !== opt.key));
-                        } else {
-                          setSelectedTypes(prev => [...prev, opt.key]);
-                        }
-                      }}
-                      className="rounded border-red-300 text-red-600 focus:ring-red-500 h-4 w-4"
-                    />
-                    <span>{opt.label}</span>
-                  </label>
+                  <div key={opt.key} className="p-3 bg-white border border-red-100 rounded-xl space-y-2 shadow-sm">
+                    <label className="flex items-center gap-2.5 text-xs font-bold text-red-950 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => {
+                          if (isChecked) {
+                            setSelectedTypes(prev => prev.filter(t => t !== opt.key));
+                          } else {
+                            setSelectedTypes(prev => [...prev, opt.key]);
+                          }
+                        }}
+                        className="rounded border-red-300 text-red-600 focus:ring-red-500 h-4 w-4"
+                      />
+                      <span>{opt.label}</span>
+                    </label>
+
+                    {isChecked && (
+                      <div className="pl-6 pt-1 space-y-2 animate-fadeIn">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-dark/50">Timeline:</span>
+                          <select
+                            value={categoryTimeline.range}
+                            onChange={(e) => {
+                              const newRange = e.target.value;
+                              setTimelines(prev => ({
+                                ...prev,
+                                [opt.key]: { ...prev[opt.key], range: newRange }
+                              }));
+                            }}
+                            className="bg-brand-bg border border-brand-dark/15 rounded-lg px-2.5 py-1 text-xs font-semibold text-brand-dark focus:outline-none focus:border-red-500"
+                          >
+                            {timelineRanges.map(tr => (
+                              <option key={tr.key} value={tr.key}>{tr.label}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {categoryTimeline.range === 'custom' && (
+                          <div className="flex items-center gap-2 pt-1">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-dark/50">Before Date:</span>
+                            <input
+                              type="date"
+                              required
+                              value={categoryTimeline.beforeDate}
+                              onChange={(e) => {
+                                const newDate = e.target.value;
+                                setTimelines(prev => ({
+                                  ...prev,
+                                  [opt.key]: { ...prev[opt.key], beforeDate: newDate }
+                                }));
+                              }}
+                              className="bg-brand-bg border border-brand-dark/15 rounded-lg px-2 py-1 text-xs text-brand-dark focus:outline-none focus:border-red-500"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
           </div>
 
-          <div className="space-y-3 pt-1">
+          {/* Privacy Credentials */}
+          <div className="space-y-3 pt-1 border-t border-brand-dark/5">
             <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/70">
               2. Privacy Verification (Enter Admin Credentials)
             </label>
@@ -621,7 +685,7 @@ function AdminPurgeModal({ isOpen, onClose, onSuccess }: AdminPurgeModalProps) {
               className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-2 justify-center disabled:opacity-50"
             >
               {loading ? <Loader2 className="animate-spin" size={14} /> : <AlertTriangle size={14} />}
-              <span>{loading ? "Wiping Records..." : "Confirm Permanent Delete"}</span>
+              <span>{loading ? "Deleting Records..." : "Delete Timeline Records"}</span>
             </button>
           </div>
         </form>
