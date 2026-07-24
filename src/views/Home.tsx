@@ -9,7 +9,6 @@ import {
   Phone,
   Clock,
   ArrowRight,
-  ChevronDown,
   Star,
   X,
   Quote,
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react';
 import { DishCard } from '../components/DishCard';
 import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
+import { CrazyScrollTransitionEffect } from '../components/CrazyScrollTransitionEffect';
 import { SIGNATURE_DISHES as STATIC_DISHES, GALLERY_PHOTOS as STATIC_GALLERY, TESTIMONIALS as STATIC_TESTIMONIALS } from '../utils/menuData';
 import { Loader2 } from 'lucide-react';
 
@@ -647,84 +647,16 @@ export const Home: React.FC = () => {
               </Link>
             </div>
           </div>
-
-          {/* Smooth Animated Downward Scroll Indicator */}
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.8 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center cursor-pointer select-none"
-            onClick={() => {
-              document.getElementById('signature-selection')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            <span className="text-[9px] uppercase font-bold tracking-[0.25em] text-white/80 mb-1.5 font-sans drop-shadow-md">
-              Scroll To Explore
-            </span>
-            <motion.div
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/25 flex items-center justify-center text-white shadow-lg hover:bg-white/20 transition-colors"
-            >
-              <ChevronDown size={15} />
-            </motion.div>
-          </motion.div>
         </section>
       )}
 
-      {/* ANIMATED INTERACTIVE SCROLL FEATURE BAR BETWEEN HERO & SIGNATURE SELECTION */}
-      <div className="relative z-30 -mt-10 px-4 max-w-5xl mx-auto pointer-events-auto">
-        <motion.div 
-          initial={{ opacity: 0, y: 35, scale: 0.96 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-xl p-4 md:p-5 grid grid-cols-2 md:grid-cols-4 gap-4 divide-y md:divide-y-0 md:divide-x divide-slate-100/80 font-sans"
-        >
-          <div className="flex items-center space-x-3 justify-center text-center py-2 md:py-0">
-            <span className="text-xl">🌱</span>
-            <div className="text-left">
-              <p className="text-xs font-bold text-slate-900 leading-tight">100% Pure Veg</p>
-              <p className="text-[10px] text-slate-500 font-medium">Fresh Kitchen Daily</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3 justify-center text-center py-2 md:py-0">
-            <span className="text-xl">🔥</span>
-            <div className="text-left">
-              <p className="text-xs font-bold text-slate-900 leading-tight">Authentic Spices</p>
-              <p className="text-[10px] text-slate-500 font-medium">Rich Traditional Recipe</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3 justify-center text-center py-2 md:py-0">
-            <span className="text-xl">⭐</span>
-            <div className="text-left">
-              <p className="text-xs font-bold text-slate-900 leading-tight">4.9 Star Rating</p>
-              <p className="text-[10px] text-slate-500 font-medium">Verified Google Reviews</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3 justify-center text-center py-2 md:py-0">
-            <span className="text-xl">🎁</span>
-            <div className="text-left">
-              <p className="text-xs font-bold text-slate-900 leading-tight">10% Online Booking</p>
-              <p className="text-[10px] text-slate-500 font-medium">Instant QR Voucher</p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+      {/* CRAZY SCROLL TRANSITION EFFECT BETWEEN PAGES/SECTIONS */}
+      <CrazyScrollTransitionEffect />
 
       {/* 2. FEATURED DISHES SECTION */}
       {sectionsMap.featuredDishes && (
-        <section id="signature-selection" className="pt-16 pb-8 px-6 md:px-12 max-w-7xl mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-16"
-          >
+        <section className="pt-24 pb-8 px-6 md:px-12 max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-accent">Signature Selection</span>
             <h2 className="font-display text-3xl md:text-5xl font-black text-brand-dark mt-3">
               Delicious Pure Vegetarian Cuisine
@@ -732,7 +664,7 @@ export const Home: React.FC = () => {
             <p className="text-brand-dark/70 font-sans text-sm md:text-base mt-4">
               Select a category below to explore our delicious Indian vegetarian options, freshly prepared with quality ingredients.
             </p>
-          </motion.div>
+          </div>
 
           {/* Grid display of signature dishes - Stack animation on mobile, standard grid on desktop */}
           {isMobileView ? (
@@ -790,6 +722,8 @@ export const Home: React.FC = () => {
         </section>
       )}
 
+      {/* SCROLL TRANSITION EFFECT BETWEEN SECTIONS */}
+      <CrazyScrollTransitionEffect />
 
       {/* 4. SPECIAL OFFERS SECTION */}
       {sectionsMap.offers && (
