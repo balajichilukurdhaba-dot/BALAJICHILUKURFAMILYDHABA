@@ -138,10 +138,11 @@ export const DishCard: React.FC<DishCardProps> = ({ dish, onOrderClick, isCompac
           ) : (
             <button 
               onClick={handleOrder}
-              className="relative px-5 py-2.5 bg-brand-accent text-[#FFFFFF] font-bold text-[10px] tracking-widest uppercase rounded-xl border border-brand-accent/50 shadow-[0_4px_0_0_#12301A] hover:translate-y-[2px] hover:shadow-[0_2px_0_0_#12301A] active:translate-y-[4px] active:shadow-[0_0px_0_0_#12301A] transition-all flex items-center gap-1.5 select-none"
+              className="group/btn relative px-4.5 py-2.5 bg-[#12301A] hover:bg-[#1b4325] text-white font-bold text-xs tracking-wider uppercase rounded-xl border border-emerald-900/40 shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center gap-2 select-none"
             >
-              <ShoppingBag size={12} />
-              <span>Order Now</span>
+              <ShoppingBag size={14} className="text-[#E0B252] group-hover/btn:-rotate-12 transition-transform duration-200" />
+              <span>Order</span>
+              <span className="text-[#E0B252] text-xs font-bold transition-transform duration-200 group-hover/btn:translate-x-0.5">→</span>
             </button>
           )}
         </div>
