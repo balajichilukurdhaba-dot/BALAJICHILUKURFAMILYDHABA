@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, Loader2 } from 'lucide-react';
+import { Lock, Mail, Loader2, ShieldCheck, ArrowRight } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
 
@@ -28,51 +28,58 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-dark flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 font-sans selection:bg-slate-800 selection:text-white antialiased relative overflow-hidden">
+      {/* Subtle Background Mesh Overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
+
       <motion.div 
-        initial={{ opacity: 0, scale: 0.92, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-md bg-[#FFFFFF] rounded-3xl shadow-2xl overflow-hidden relative"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="w-full max-w-sm bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 p-8 space-y-6 relative z-10"
       >
-        <div className="p-8 text-center border-b border-brand-dark/10">
-          <img src="/bsd-logo.png" alt="Logo" className="w-16 h-16 mx-auto mb-4 drop-shadow-md" />
-          <h2 className="font-display text-2xl font-bold text-brand-dark">Admin Portal</h2>
-          <p className="text-brand-dark/60 font-sans text-sm mt-1">Sign in to manage your restaurant</p>
+        <div className="flex flex-col items-center text-center space-y-2">
+          <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/80 flex items-center justify-center p-2 shadow-sm">
+            <img src="/bsd-logo.png" alt="Balaji Dhaba" className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-white tracking-tight">Admin Console</h1>
+            <p className="text-xs text-slate-400 mt-1">Sign in to access management dashboard</p>
+          </div>
         </div>
 
-        <form onSubmit={handleLogin} className="p-8 space-y-6">
+        <form onSubmit={handleLogin} className="space-y-4">
           {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm text-center border border-red-100 animate-pulse">
+            <div className="p-3 bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs rounded-lg font-medium">
               {error}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-brand-dark/70 ml-1">Email Address</label>
+            <label className="text-xs font-medium text-slate-300">Email Address</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/40" size={18} />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
               <input 
                 type="email" 
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all"
-                placeholder="admin@restaurant.com"
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-600 transition-colors"
+                placeholder="admin@balajidhaba.com"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-brand-dark/70 ml-1">Password</label>
+            <label className="text-xs font-medium text-slate-300">Password</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/40" size={18} />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
               <input 
                 type="password" 
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all"
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-600 transition-colors"
                 placeholder="••••••••"
               />
             </div>
@@ -81,11 +88,23 @@ export default function AdminLoginPage() {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-brand-accent text-white font-bold uppercase tracking-widest rounded-xl shadow-[0_6px_0_0_#12301A] hover:translate-y-[2px] hover:shadow-[0_4px_0_0_#12301A] active:translate-y-[6px] active:shadow-[0_0px_0_0_#12301A] transition-all flex justify-center items-center gap-2"
+            className="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-900 font-semibold text-xs rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
           >
-            {loading ? <Loader2 className="animate-spin" size={20} /> : 'Sign In'}
+            {loading ? <Loader2 className="animate-spin" size={16} /> : (
+              <>
+                <span>Sign In to Portal</span>
+                <ArrowRight size={14} />
+              </>
+            )}
           </button>
         </form>
+
+        <div className="pt-4 border-t border-slate-800 text-center">
+          <span className="text-[10px] text-slate-500 font-medium flex items-center justify-center gap-1.5">
+            <ShieldCheck size={12} className="text-emerald-500" />
+            <span>256-Bit SSL Encrypted Admin Portal</span>
+          </span>
+        </div>
       </motion.div>
     </div>
   );

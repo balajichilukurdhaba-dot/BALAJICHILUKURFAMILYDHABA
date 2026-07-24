@@ -242,39 +242,36 @@ export default function ReservationsClient({ initialReservations }: { initialRes
   });
 
   return (
-    <div className="space-y-8 animate-fadeIn font-sans">
-      {/* Title */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-zinc-200">
+    <div className="space-y-6 font-sans">
+      {/* Executive Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200/80">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200">
-            Booking & Reservation Database
-          </span>
-          <h1 className="text-2xl font-display font-black text-zinc-800 mt-2">Reservations Console</h1>
-          <p className="text-zinc-500 font-sans text-xs mt-1">Manage dinner slots, manual table bookings, and customer discount verifications.</p>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Table Reservations & Guest Bookings</h1>
+          <p className="text-xs text-slate-500 mt-1">Manage guest table bookings, walk-ins, and voucher status.</p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Live today display */}
-          <div className="text-right hidden md:block">
-            <div className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Today</div>
-            <div className="text-sm font-black text-zinc-800">
+          <div className="text-right hidden md:block border-r border-slate-200 pr-4 mr-1">
+            <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Today's Date</div>
+            <div className="text-xs font-semibold text-slate-800">
               {new Date(todayValue + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
           </div>
           <button
             onClick={handleManualRefresh}
             title="Refresh reservations"
-            className="res-action-btn flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-zinc-700 hover:bg-zinc-800 text-white font-bold uppercase tracking-wider text-xs shadow-sm transition-all"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-sm transition-colors"
           >
-            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
-            Refresh
+            <RefreshCw size={13} className={isRefreshing ? 'animate-spin text-slate-900' : 'text-slate-500'} />
+            <span>Sync Live</span>
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="res-action-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-900 text-white font-bold uppercase tracking-wider text-xs shadow-sm border border-zinc-700 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-sm transition-colors"
           >
             <Plus size={14} />
-            <span>Manual Entry</span>
+            <span>Create Booking</span>
           </button>
         </div>
       </div>
