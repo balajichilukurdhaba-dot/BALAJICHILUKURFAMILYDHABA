@@ -183,24 +183,7 @@ export default function BackupCMS() {
               </button>
             </div>
 
-            <div className="border border-red-100 bg-red-50/50 rounded-2xl p-5 space-y-3">
-              <span className="text-xs font-bold text-red-800 flex items-center gap-1.5">
-                <AlertTriangle size={14} />
-                <span>Re-seed Factory Defaults</span>
-              </span>
-              <p className="text-[11px] text-red-900/75 leading-relaxed">
-                Overwrites the database with default starter values. Useful for resetting local sandbox modifications or cleaning trash assets. Re-runs `seed-cms.ts`.
-              </p>
-              
-              <button
-                onClick={handleTriggerSeeding}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-wider text-xs rounded-xl shadow-md disabled:opacity-50 transition-all"
-              >
-                {loading ? <Loader2 className="animate-spin" size={14} /> : <RefreshCw size={14} />}
-                <span>Trigger Database Re-seeding</span>
-              </button>
-            </div>
+
           </div>
         </div>
 
