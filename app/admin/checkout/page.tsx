@@ -381,7 +381,7 @@ We look forward to serving you again.`;
                 size="large"
                 required
                 maxLength={10}
-                placeholder="e.g. 9347104569 (10-digit mobile number)" 
+                placeholder="e.g. 9347104569" 
                 prefix={<Phone size={15} className="text-slate-400 mr-1" />}
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
