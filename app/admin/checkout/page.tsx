@@ -144,7 +144,7 @@ function CheckoutRewardsContent() {
       const data = await res.json();
       if (data.success) {
         notification.success({
-          message: 'Voucher Created',
+          title: 'Voucher Created',
           description: `Voucher ${data.token} has been generated for bill ${billNumber}.`,
           placement: 'topRight'
         });
