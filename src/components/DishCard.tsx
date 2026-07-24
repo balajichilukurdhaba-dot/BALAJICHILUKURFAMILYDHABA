@@ -131,19 +131,20 @@ export const DishCard: React.FC<DishCardProps> = ({ dish, onOrderClick, isCompac
           {dish.isOutOfStock ? (
             <button 
               disabled
-              className="relative px-5 py-2.5 bg-zinc-300 text-zinc-500 font-bold text-[10px] tracking-widest uppercase rounded-xl border border-zinc-400 cursor-not-allowed select-none"
+              className="px-4 py-2 bg-slate-100 text-slate-400 font-semibold text-xs rounded-lg border border-slate-200 cursor-not-allowed select-none"
             >
               Sold Out
             </button>
           ) : (
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.04, y: -1 }}
+              whileTap={{ scale: 0.96 }}
               onClick={handleOrder}
-              className="group/btn relative px-4.5 py-2.5 bg-[#12301A] hover:bg-[#1b4325] text-white font-bold text-xs tracking-wider uppercase rounded-xl border border-emerald-900/40 shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center gap-2 select-none"
+              className="px-4 py-2 bg-[#12301A] hover:bg-[#1b4325] text-white font-semibold text-xs rounded-lg shadow-sm hover:shadow-md border border-emerald-800/40 transition-all flex items-center gap-1.5 select-none group"
             >
-              <ShoppingBag size={14} className="text-[#E0B252] group-hover/btn:-rotate-12 transition-transform duration-200" />
-              <span>Order</span>
-              <span className="text-[#E0B252] text-xs font-bold transition-transform duration-200 group-hover/btn:translate-x-0.5">→</span>
-            </button>
+              <ShoppingBag size={13} className="text-[#E0B252] group-hover:scale-110 transition-transform" />
+              <span>Order Now</span>
+            </motion.button>
           )}
         </div>
       </div>

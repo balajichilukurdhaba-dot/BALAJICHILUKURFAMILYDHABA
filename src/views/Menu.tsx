@@ -374,45 +374,29 @@ My Details:
 // ─── OrderTrigger ────────────────────────────────────────────────────────────────
 const OrderTrigger: React.FC<{ dish: Dish; isOutOfStock?: boolean }> = ({ dish, isOutOfStock }) => {
   const [open, setOpen] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [pressed, setPressed] = useState(false);
 
-  const btnStyle: React.CSSProperties = {
-    backgroundColor: isOutOfStock ? '#cbd5e1' : pressed ? '#15803d' : hovered ? '#16a34a' : '#1E4D2B',
-    borderColor: isOutOfStock ? '#94a3b8' : pressed ? '#166534' : hovered ? '#15803d' : 'rgba(193,68,14,0.5)',
-    boxShadow: isOutOfStock
-      ? 'none'
-      : pressed
-      ? '0 0px 0 0 #14532d'
-      : hovered
-      ? '0 1px 0 0 #15803d'
-      : '0 3px 0 0 #12301A',
-    transform: !isOutOfStock && pressed ? 'translateY(3px)' : !isOutOfStock && hovered ? 'translateY(2px)' : 'none',
-    transition: 'all 0.15s ease',
-  };
+  if (isOutOfStock) {
+    return (
+      <button
+        disabled
+        className="px-3 py-1.5 bg-slate-100 text-slate-400 text-xs font-semibold rounded-lg border border-slate-200 cursor-not-allowed select-none"
+      >
+        Sold Out
+      </button>
+    );
+  }
 
   return (
     <>
-      <button
-        disabled={isOutOfStock}
+      <motion.button
+        whileHover={{ scale: 1.04, y: -1 }}
+        whileTap={{ scale: 0.96 }}
         onClick={() => setOpen(true)}
-        onMouseEnter={() => !isOutOfStock && setHovered(true)}
-        onMouseLeave={() => { setHovered(false); setPressed(false); }}
-        onMouseDown={() => !isOutOfStock && setPressed(true)}
-        onMouseUp={() => setPressed(false)}
-        style={btnStyle}
-        className={`relative px-3 py-1.5 font-bold text-[9px] tracking-widest uppercase rounded-full border flex items-center gap-1 select-none ${
-          isOutOfStock ? 'text-zinc-500 cursor-not-allowed' : 'text-[#FFFFFF]'
-        }`}
+        className="px-3.5 py-1.5 bg-[#12301A] hover:bg-[#1b4325] text-white text-xs font-semibold rounded-lg shadow-sm hover:shadow-md border border-emerald-800/40 transition-all flex items-center gap-1.5 select-none group"
       >
-        {isOutOfStock ? (
-          <span>Sold Out</span>
-        ) : (
-          <>
-            <ShoppingBag size={10} /> Order
-          </>
-        )}
-      </button>
+        <ShoppingBag size={12} className="text-[#E0B252] group-hover:scale-110 transition-transform" />
+        <span>Order</span>
+      </motion.button>
       <AnimatePresence>
         {open && <OrderModal dish={dish} onClose={() => setOpen(false)} />}
       </AnimatePresence>
