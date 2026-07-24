@@ -20,6 +20,7 @@ export default function AdminLoginPage() {
     setError('');
 
     if (typeof window !== 'undefined') {
+      document.cookie = "admin_logged_in=true; path=/; max-age=86400";
       localStorage.setItem('admin_logged_in', 'true');
       localStorage.setItem('admin_email', email);
       window.location.href = '/admin';

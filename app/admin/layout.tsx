@@ -104,9 +104,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [pathname, counts.testimonials]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/admin/login');
-    router.refresh();
+    if (typeof window !== 'undefined') {
+      document.cookie = "admin_logged_in=; path=/; max-age=0";
+      localStorage.removeItem('admin_logged_in');
+      localStorage.removeItem('admin_email');
+    }
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      // Ignore
+    }
+    window.location.href = '/admin/login';
   };
 
   const navItems = [

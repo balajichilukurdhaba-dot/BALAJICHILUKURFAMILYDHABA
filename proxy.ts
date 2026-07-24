@@ -91,21 +91,30 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
-  const isLoginRoute = request.nextUrl.pathname === '/admin/login'
-
-  if (isAdminRoute && !isLoginRoute && !session) {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/admin/login'
-    return NextResponse.redirect(redirectUrl)
+  let session = null;
+  try {
+    const { data } = await supabase.auth.getSession();
+    session = data.session;
+  } catch (e) {
+    // Supabase auth error fallback
   }
 
-  if (isLoginRoute && session) {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/admin'
-    return NextResponse.redirect(redirectUrl)
+  const adminCookie = request.cookies.get('admin_logged_in')?.value;
+  const isAuthenticated = !!session || adminCookie === 'true';
+
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
+  const isLoginRoute = request.nextUrl.pathname === '/admin/login';
+
+  if (isAdminRoute && !isLoginRoute && !isAuthenticated) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = '/admin/login';
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (isLoginRoute && isAuthenticated) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = '/admin';
+    return NextResponse.redirect(redirectUrl);
   }
 
   return response
