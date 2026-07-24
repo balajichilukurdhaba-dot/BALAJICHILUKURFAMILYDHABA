@@ -1,16 +1,46 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, Users, User, Phone, Mail, FileText, Loader2, PartyPopper } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Calendar, Clock, Users, User, Phone, FileText, Loader2, PartyPopper, ChevronDown, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const TIME_SLOTS = [
+  { value: '11:00', label: '11:00 AM' },
+  { value: '11:30', label: '11:30 AM' },
+  { value: '12:00', label: '12:00 PM' },
+  { value: '12:30', label: '12:30 PM' },
+  { value: '13:00', label: '01:00 PM' },
+  { value: '13:30', label: '01:30 PM' },
+  { value: '14:00', label: '02:00 PM' },
+  { value: '14:30', label: '02:30 PM' },
+  { value: '15:00', label: '03:00 PM' },
+  { value: '15:30', label: '03:30 PM' },
+  { value: '16:00', label: '04:00 PM' },
+  { value: '16:30', label: '04:30 PM' },
+  { value: '17:00', label: '05:00 PM' },
+  { value: '17:30', label: '05:30 PM' },
+  { value: '18:00', label: '06:00 PM' },
+  { value: '18:30', label: '06:30 PM' },
+  { value: '19:00', label: '07:00 PM' },
+  { value: '19:30', label: '07:30 PM' },
+  { value: '20:00', label: '08:00 PM' },
+  { value: '20:30', label: '08:30 PM' },
+  { value: '21:00', label: '09:00 PM' },
+  { value: '21:30', label: '09:30 PM' },
+  { value: '22:00', label: '10:00 PM' },
+  { value: '22:30', label: '10:30 PM' },
+  { value: '23:00', label: '11:00 PM' },
+];
 
 export const ReservationForm = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
+  const timeDropdownRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
-    branchId: '52ae6a0f-daee-40f5-aa0e-ac44e17d325e', // Use the test branch created earlier
+    branchId: '52ae6a0f-daee-40f5-aa0e-ac44e17d325e',
     customerName: '',
     phone: '',
     email: '',
@@ -20,8 +50,24 @@ export const ReservationForm = () => {
     specialInstructions: ''
   });
 
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (timeDropdownRef.current && !timeDropdownRef.current.contains(e.target as Node)) {
+        setIsTimeDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectTime = (slotValue: string) => {
+    setFormData(prev => ({ ...prev, time: slotValue }));
+    setIsTimeDropdownOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,7 +88,6 @@ export const ReservationForm = () => {
         throw new Error(data.error || 'Failed to make reservation');
       }
 
-      // Success - Redirect to confirmation page with token
       router.push(`/reserve/success?ref=${data.reservation.bookingRef}&token=${encodeURIComponent(data.qrToken)}`);
 
     } catch (err: any) {
@@ -51,8 +96,10 @@ export const ReservationForm = () => {
     }
   };
 
+  const selectedSlot = TIME_SLOTS.find(s => s.value === formData.time) || TIME_SLOTS[16];
+
   return (
-    <div className="w-full max-w-2xl mx-auto bg-[#FFFFFF] rounded-3xl shadow-2xl overflow-hidden border border-brand-dark/10">
+    <div className="w-full max-w-2xl mx-auto bg-[#FFFFFF] rounded-3xl shadow-2xl overflow-hidden border border-brand-dark/10 font-sans">
       <div className="bg-brand-dark p-8 text-center relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10">
           <PartyPopper size={120} className="text-brand-gold" />
@@ -81,7 +128,7 @@ export const ReservationForm = () => {
                 value={formData.customerName}
                 onChange={handleChange}
                 type="text" 
-                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all"
+                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all text-sm"
                 placeholder="John Doe"
               />
             </div>
@@ -97,7 +144,7 @@ export const ReservationForm = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 type="tel" 
-                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all"
+                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all text-sm"
                 placeholder="+91 98765 43210"
               />
             </div>
@@ -116,48 +163,58 @@ export const ReservationForm = () => {
                 onChange={handleChange}
                 type="date" 
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all"
+                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all text-sm"
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          {/* Software Grade Custom Downward Time Picker (Exactly 5 visible items with scroll bar) */}
+          <div className="space-y-1.5 relative" ref={timeDropdownRef}>
             <label className="text-xs font-bold uppercase tracking-wider text-brand-dark/70 ml-1">Time</label>
             <div className="relative">
-              <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/40" size={18} />
-              <select 
-                required 
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all appearance-none"
+              <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/40 z-10 pointer-events-none" size={18} />
+              <button
+                type="button"
+                onClick={() => setIsTimeDropdownOpen(prev => !prev)}
+                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-10 text-left text-brand-dark font-medium text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all flex items-center justify-between shadow-sm hover:border-brand-dark/30"
               >
-                <option value="11:00">11:00 AM</option>
-                <option value="11:30">11:30 AM</option>
-                <option value="12:00">12:00 PM</option>
-                <option value="12:30">12:30 PM</option>
-                <option value="13:00">01:00 PM</option>
-                <option value="13:30">01:30 PM</option>
-                <option value="14:00">02:00 PM</option>
-                <option value="14:30">02:30 PM</option>
-                <option value="15:00">03:00 PM</option>
-                <option value="15:30">03:30 PM</option>
-                <option value="16:00">04:00 PM</option>
-                <option value="16:30">04:30 PM</option>
-                <option value="17:00">05:00 PM</option>
-                <option value="17:30">05:30 PM</option>
-                <option value="18:00">06:00 PM</option>
-                <option value="18:30">06:30 PM</option>
-                <option value="19:00">07:00 PM</option>
-                <option value="19:30">07:30 PM</option>
-                <option value="20:00">08:00 PM</option>
-                <option value="20:30">08:30 PM</option>
-                <option value="21:00">09:00 PM</option>
-                <option value="21:30">09:30 PM</option>
-                <option value="22:00">10:00 PM</option>
-                <option value="22:30">10:30 PM</option>
-                <option value="23:00">11:00 PM</option>
-              </select>
+                <span>{selectedSlot.label}</span>
+                <ChevronDown size={16} className={`text-brand-dark/50 transition-transform duration-200 ${isTimeDropdownOpen ? 'rotate-180 text-brand-dark' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isTimeDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    className="absolute top-full mt-1.5 left-0 w-full bg-white border border-slate-200/90 rounded-xl shadow-xl z-50 p-1 overflow-hidden"
+                  >
+                    {/* Fixed Height shows exactly 5 items (5 x 35px = 175px max height) */}
+                    <div className="max-h-[175px] overflow-y-auto space-y-0.5 pr-1 divide-y divide-slate-50 scrollbar-thin scrollbar-thumb-slate-300">
+                      {TIME_SLOTS.map((slot) => {
+                        const isSelected = slot.value === formData.time;
+                        return (
+                          <button
+                            key={slot.value}
+                            type="button"
+                            onClick={() => handleSelectTime(slot.value)}
+                            className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-center justify-between font-medium ${
+                              isSelected 
+                                ? 'bg-slate-900 text-white font-semibold'
+                                : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{slot.label}</span>
+                            {isSelected && <Check size={14} className="text-emerald-400" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
@@ -170,7 +227,7 @@ export const ReservationForm = () => {
                 name="guests"
                 value={formData.guests}
                 onChange={handleChange}
-                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all appearance-none"
+                className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all appearance-none text-sm"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '10+'].map(num => (
                   <option key={num} value={num}>{num} Person{num !== 1 && 's'}</option>
@@ -189,7 +246,7 @@ export const ReservationForm = () => {
               value={formData.specialInstructions}
               onChange={handleChange}
               rows={3}
-              className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all resize-none"
+              className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all resize-none text-sm"
               placeholder="Allergies, high chair needed, celebrating a birthday..."
             />
           </div>
