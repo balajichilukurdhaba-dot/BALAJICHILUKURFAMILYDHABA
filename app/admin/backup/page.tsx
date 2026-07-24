@@ -486,6 +486,7 @@ function AdminPurgeModal({ isOpen, onClose, onSuccess }: AdminPurgeModalProps) {
   const purgeOptions = [
     { key: 'reservations', label: 'Bookings & Table Reservations' },
     { key: 'orders', label: 'WhatsApp Customer Orders' },
+    { key: 'messages', label: 'Customer Inbox & Contact Messages' },
     { key: 'audits', label: 'Audit Trail Logs & Admin Sessions' },
   ];
 
