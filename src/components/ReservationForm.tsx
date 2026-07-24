@@ -132,6 +132,20 @@ export const ReservationForm = () => {
                 onChange={handleChange}
                 className="w-full bg-white border border-brand-dark/10 rounded-xl py-3 pl-12 pr-4 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-gold transition-all appearance-none"
               >
+                <option value="11:00">11:00 AM</option>
+                <option value="11:30">11:30 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="12:30">12:30 PM</option>
+                <option value="13:00">01:00 PM</option>
+                <option value="13:30">01:30 PM</option>
+                <option value="14:00">02:00 PM</option>
+                <option value="14:30">02:30 PM</option>
+                <option value="15:00">03:00 PM</option>
+                <option value="15:30">03:30 PM</option>
+                <option value="16:00">04:00 PM</option>
+                <option value="16:30">04:30 PM</option>
+                <option value="17:00">05:00 PM</option>
+                <option value="17:30">05:30 PM</option>
                 <option value="18:00">06:00 PM</option>
                 <option value="18:30">06:30 PM</option>
                 <option value="19:00">07:00 PM</option>
@@ -140,6 +154,9 @@ export const ReservationForm = () => {
                 <option value="20:30">08:30 PM</option>
                 <option value="21:00">09:00 PM</option>
                 <option value="21:30">09:30 PM</option>
+                <option value="22:00">10:00 PM</option>
+                <option value="22:30">10:30 PM</option>
+                <option value="23:00">11:00 PM</option>
               </select>
             </div>
           </div>
