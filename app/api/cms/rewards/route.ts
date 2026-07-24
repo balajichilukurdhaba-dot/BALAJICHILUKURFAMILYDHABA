@@ -92,6 +92,9 @@ export async function POST(req: NextRequest) {
     if (!billNo) {
       return NextResponse.json({ success: false, error: 'Bill Number is required' }, { status: 400 });
     }
+    if (!phone || phone.trim() === '' || phone === 'Walk-in' || phone.replace(/\D/g, '').length < 10) {
+      return NextResponse.json({ success: false, error: 'Valid 10-digit customer mobile phone number is required' }, { status: 400 });
+    }
 
     const billAmount = Number(originalBill);
     const pct = discountPercent !== undefined ? Number(discountPercent) : 10;

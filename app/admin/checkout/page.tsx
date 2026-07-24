@@ -122,12 +122,16 @@ function CheckoutRewardsContent() {
       message.error('Please enter a Bill / Invoice Number');
       return;
     }
+    if (!customerPhone.trim() || customerPhone.trim().length < 10) {
+      message.error('Valid 10-digit customer mobile phone number is required');
+      return;
+    }
 
     setGenerating(true);
 
     const payload = {
       originalBill: baseBill,
-      phone: customerPhone.trim() || 'Walk-in',
+      phone: customerPhone.trim(),
       discountValue: calculatedDiscount,
       discountPercent: discountPercent,
       expiryEpoch,
@@ -371,15 +375,17 @@ We look forward to serving you again.`;
 
             <div>
               <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                Customer Mobile Phone
+                Customer Mobile Phone *
               </label>
               <Input 
                 size="large"
-                placeholder="e.g. 9347104569 (Optional for walk-in)" 
+                required
+                maxLength={10}
+                placeholder="e.g. 9347104569 (10-digit mobile number)" 
                 prefix={<Phone size={15} className="text-slate-400 mr-1" />}
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
-                className="rounded-xl text-xs"
+                className="rounded-xl text-xs font-mono"
               />
             </div>
 
@@ -448,9 +454,9 @@ We look forward to serving you again.`;
               type="submit"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
-              disabled={generating || !baseBill || baseBill <= 0 || !billNumber}
+              disabled={generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10}
               className={`w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 select-none shadow-sm ${
-                generating || !baseBill || baseBill <= 0 || !billNumber
+                generating || !baseBill || baseBill <= 0 || !billNumber || !customerPhone.trim() || customerPhone.trim().length < 10
                   ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
                   : 'bg-[#1E4D2B] hover:bg-[#163a20] text-white shadow-emerald-900/10'
               }`}
