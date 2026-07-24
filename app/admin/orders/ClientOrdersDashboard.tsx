@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { MessageCircle, CheckCircle, Calendar, Phone, Search, X, RefreshCw, Truck, Ban, Check, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  MessageCircle, CheckCircle, Calendar, Phone, Search, X, RefreshCw, Truck, Ban, Check, AlertCircle, Clock, MapPin 
+} from 'lucide-react';
 
 interface Order {
   id: string;
@@ -20,13 +22,35 @@ interface ClientOrdersDashboardProps {
   initialOrders: Order[];
 }
 
-const WhatsAppIcon = ({ size = 16 }: { size?: number }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width={size} height={size} fill="currentColor">
+const WhatsAppIcon = ({ size = 15, className = "" }: { size?: number; className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width={size} height={size} fill="currentColor" className={className}>
     <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L3.2 496l131.6-34.5c32.5 17.7 68.9 27 105.8 27 122.4 0 222-99.6 222-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-78.5 20.6 21-76.5-4.4-7.1c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
   </svg>
 );
 
-// Helper to get local date string (YYYY-MM-DD) for any offset from today
+// Format names into proper Title Case
+function formatTitleCase(str: string | null | undefined): string {
+  if (!str || !str.trim()) return 'Walk-in Customer';
+  return str
+    .trim()
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// Format Phone Numbers cleanly (+91 XXXXX XXXXX)
+function formatPhoneNumber(phone: string): string {
+  const clean = phone.replace(/\D/g, '');
+  if (clean.length === 10) {
+    return `+91 ${clean.slice(0, 5)} ${clean.slice(5)}`;
+  } else if (clean.length === 12 && clean.startsWith('91')) {
+    return `+91 ${clean.slice(2, 7)} ${clean.slice(7)}`;
+  }
+  return phone;
+}
+
+// Helper to get local date string (YYYY-MM-DD)
 function getLocalDateStr(daysAgo: number): string {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
@@ -36,7 +60,7 @@ function getLocalDateStr(daysAgo: number): string {
 }
 
 function getWhatsAppMessage(order: { orderRef: string; customerName: string | null; status: string; total: string }): string {
-  const customer = order.customerName || 'Valued Customer';
+  const customer = formatTitleCase(order.customerName);
   const ref = order.orderRef;
   const total = order.total;
   const status = (order.status || '').toLowerCase();
@@ -65,7 +89,6 @@ function getWhatsAppMessage(order: { orderRef: string; customerName: string | nu
 export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDashboardProps) {
   const router = useRouter();
 
-  // local state to handle immediate state update on button click
   const [orders, setOrders] = useState<Order[]>(initialOrders);
 
   useEffect(() => {
@@ -104,45 +127,40 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
     }
   };
 
-  // todayValue is reactive — updates at midnight so the strip always shows the correct "Today"
   const [todayValue, setTodayValue] = useState<string>(() => getLocalDateStr(0));
-
-  // Default to TODAY so the admin sees today's orders immediately
   const [selectedDate, setSelectedDate] = useState<string>(() => getLocalDateStr(0));
   const [searchQuery, setSearchQuery] = useState<string>('');
   const calendarInputRef = useRef<HTMLInputElement>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // ─── Auto-refresh: fetch new orders from DB every 60 seconds ──────────────
+  // Auto-refresh: fetch new orders from DB every 60 seconds
   useEffect(() => {
     const refreshInterval = setInterval(() => {
-      router.refresh(); // re-runs the server component to get latest orders
+      router.refresh();
     }, 60_000);
     return () => clearInterval(refreshInterval);
   }, [router]);
 
-  // ─── Midnight date-roll: detect when the calendar day changes ─────────────
+  // Midnight date-roll check
   useEffect(() => {
     const checkDateRoll = setInterval(() => {
       const newToday = getLocalDateStr(0);
       if (newToday !== todayValue) {
         setTodayValue(newToday);
-        // If the admin was viewing the old "today", snap forward to the new today
         setSelectedDate((prev) => (prev === todayValue ? newToday : prev));
       }
-    }, 60_000); // check every minute
+    }, 60_000);
     return () => clearInterval(checkDateRoll);
   }, [todayValue]);
 
-  // Manual refresh handler
   const handleManualRefresh = () => {
     setIsRefreshing(true);
     router.refresh();
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
-  // Build a full 60-day scrollable date strip (reactive to todayValue)
+  // Build 60-day scrollable date strip
   const recentDays = useMemo(() => {
     const days = [];
     for (let i = 0; i < 60; i++) {
@@ -161,7 +179,6 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
     }
     return days;
   }, [todayValue]);
-
 
   // Filter orders
   const filteredOrders = useMemo(() => {
@@ -194,209 +211,176 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
   }, [orders, selectedDate, statusFilter, searchQuery]);
 
   return (
-    <div className="space-y-8">
-      {/* Title section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="space-y-6 font-sans text-slate-800 antialiased max-w-7xl mx-auto px-2 sm:px-4">
+      {/* Header section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/60">
         <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-brand-accent bg-brand-accent/15 px-3 py-1 rounded-full border border-brand-accent/20">
-            Realtime Feeds
-          </span>
-          <h1 className="text-3xl font-display font-black text-brand-dark mt-3">WhatsApp Orders</h1>
-          <p className="text-brand-dark/60 font-sans text-sm mt-1">Manage delivery and pickup orders sent via WhatsApp client</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-xs font-semibold tracking-wide uppercase text-slate-500">Live Order Stream</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">WhatsApp Orders</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Real-time management for WhatsApp customer orders</p>
         </div>
+
         {/* Right side: live date + refresh button */}
-        <div className="flex items-center gap-3 md:flex-col md:items-end">
-          <div className="text-right">
-            <div className="text-xs font-black uppercase tracking-widest text-brand-dark/40">Today</div>
-            <div className="text-base font-black text-brand-dark">
-              {new Date(todayValue + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Today</div>
+            <div className="text-sm font-semibold text-slate-700">
+              {new Date(todayValue + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             onClick={handleManualRefresh}
-            title="Refresh orders now"
-            className="flex items-center gap-2 px-4 py-2.5 bg-brand-dark text-white rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-brand-dark/85 transition-all active:scale-95"
+            title="Refresh orders"
+            className="flex items-center gap-2 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium shadow-sm transition-all select-none"
           >
             <RefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
-            Refresh
-          </button>
+            <span>Refresh</span>
+          </motion.button>
         </div>
       </div>
 
-
-      {/* Advanced Toolbar */}
-      <div className="bg-white rounded-3xl p-6 border border-brand-gold/10 shadow-sm space-y-4">
-
-        {/* Scrollable Date Card Strip */}
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <Calendar size={15} className="text-brand-gold" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-brand-dark/45">Filter by Date — scroll for older dates</span>
-            <div className="ml-auto flex items-center gap-2">
-              {selectedDate && (
-                <button
-                  onClick={() => setSelectedDate('')}
-                  className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-brand-accent hover:underline"
-                >
-                  <X size={10} /> Clear
-                </button>
-              )}
-              {/* Calendar picker button */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => calendarInputRef.current?.showPicker()}
-                  title="Pick any date from calendar"
-                  className={`date-card-base flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 text-[11px] font-black uppercase tracking-wide ${
-                    selectedDate && recentDays.every(rd => rd.value !== selectedDate)
-                      ? 'date-card-active bg-brand-dark border-brand-dark text-white shadow-md'
-                      : 'bg-[#FAF6EE] border-brand-dark/10 text-brand-dark/55 hover:border-brand-dark/25'
-                  }`}
-                >
-                  <Calendar size={13} />
-                  {selectedDate && recentDays.every(rd => rd.value !== selectedDate)
-                    ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                    : 'Pick Date'
-                  }
-                </button>
-                <input
-                  ref={calendarInputRef}
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="absolute opacity-0 pointer-events-none w-0 h-0 top-0 left-0"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                />
-              </div>
-            </div>
+      {/* Main Filter & Date Toolbar */}
+      <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+        {/* Date Strip Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-slate-600">
+            <Calendar size={15} className="text-slate-400" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Select Date</span>
           </div>
-
-          {/* Horizontally scrollable date cards */}
-          <div
-            className="flex gap-2 overflow-x-auto pb-2 pt-1"
-            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
-          >
-            <style dangerouslySetInnerHTML={{__html: `
-              @keyframes cardPop {
-                0%   { transform: scale(0.88); opacity: 0.4; }
-                60%  { transform: scale(1.10); }
-                100% { transform: scale(1.06); opacity: 1; }
-              }
-              @keyframes todayPulse {
-                0%, 100% { box-shadow: 0 0 0 0 rgba(196,130,61,0.0); }
-                50%       { box-shadow: 0 0 0 5px rgba(196,130,61,0.18); }
-              }
-              @keyframes activeGlow {
-                0%, 100% { box-shadow: 0 4px 18px rgba(30,20,10,0.22); }
-                50%       { box-shadow: 0 4px 24px rgba(30,20,10,0.38); }
-              }
-              .date-card-active  { animation: cardPop 0.28s cubic-bezier(.34,1.56,.64,1) forwards, activeGlow 2.4s ease-in-out 0.3s infinite; }
-              .date-card-today   { animation: todayPulse 2.6s ease-in-out infinite; }
-              .date-card-base    { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
-              .date-card-base:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 6px 18px rgba(0,0,0,0.10); }
-              .date-card-base:active { transform: scale(0.94); }
-
-              .status-tab { transition: all 0.22s cubic-bezier(.34,1.56,.64,1); }
-              .status-tab-active { transform: scale(1.07); box-shadow: 0 3px 12px rgba(196,88,50,0.30); }
-              .status-tab:hover:not(.status-tab-active) { transform: scale(1.04); }
-            `}} />
-
-            {/* "All" card */}
-            <button
-              type="button"
-              onClick={() => setSelectedDate('')}
-              className={`date-card-base flex-shrink-0 flex flex-col items-center justify-center w-[50px] h-[60px] rounded-xl border-2 ${
-                selectedDate === ''
-                  ? 'date-card-active bg-brand-dark border-brand-dark text-white'
-                  : 'bg-[#FAF6EE] border-brand-dark/10 text-brand-dark/60'
-              }`}
-            >
-              <span className={`text-[9px] font-black uppercase tracking-wide ${selectedDate === '' ? 'text-white/60' : 'text-brand-dark/35'}`}>View</span>
-              <span className="text-[13px] font-black mt-0.5 leading-none">All</span>
-            </button>
-
-            {/* Recent date cards — Today first, scroll left for older */}
-            {recentDays.map((day) => {
-              const isActive = selectedDate === day.value;
-              const dateObj = new Date(day.value + 'T00:00:00');
-              const dayName = dateObj.toLocaleDateString('en-IN', { weekday: 'short' });
-              const dayNum = dateObj.getDate();
-              const monthName = dateObj.toLocaleDateString('en-IN', { month: 'short' });
-              const isToday = day.label === 'Today';
-              const isYesterday = day.label === 'Yesterday';
-
-              return (
-                <button
-                  key={day.value}
-                  type="button"
-                  onClick={() => setSelectedDate(isActive ? '' : day.value)}
-                  className={`date-card-base flex-shrink-0 flex flex-col items-center justify-center w-[50px] h-[60px] rounded-xl border-2 ${
-                    isActive
-                      ? 'date-card-active bg-brand-dark border-brand-dark text-white'
-                      : isToday
-                      ? 'date-card-today bg-brand-accent/10 border-brand-accent/40 text-brand-dark'
-                      : 'bg-[#FAF6EE] border-brand-dark/10 text-brand-dark/70'
-                  }`}
-                >
-                  <span className={`text-[9px] font-black uppercase tracking-wide leading-none ${
-                    isActive ? 'text-white/60' : isToday ? 'text-brand-accent' : 'text-brand-dark/35'
-                  }`}>
-                    {isToday ? 'Today' : isYesterday ? 'Yest.' : dayName}
-                  </span>
-                  <span className="text-base font-black leading-tight mt-0.5">{dayNum}</span>
-                  <span className={`text-[9px] font-bold leading-none ${
-                    isActive ? 'text-white/50' : 'text-brand-dark/35'
-                  }`}>{monthName}</span>
-                </button>
-              );
-            })}
+          <div className="flex items-center gap-2">
+            {selectedDate && (
+              <button
+                onClick={() => setSelectedDate('')}
+                className="text-xs font-medium text-slate-500 hover:text-emerald-700 underline transition-colors"
+              >
+                Show All Dates
+              </button>
+            )}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => calendarInputRef.current?.showPicker()}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition-colors flex items-center gap-1.5 select-none"
+              >
+                <Calendar size={13} className="text-slate-400" />
+                <span>
+                  {selectedDate && recentDays.every(rd => rd.value !== selectedDate)
+                    ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                    : 'Calendar'
+                  }
+                </span>
+              </button>
+              <input
+                ref={calendarInputRef}
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="absolute opacity-0 pointer-events-none w-0 h-0 top-0 left-0"
+                tabIndex={-1}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-brand-dark/5" />
+        {/* Scrollable Date Pills Strip */}
+        <div 
+          className="flex gap-2 overflow-x-auto pb-1 pt-1"
+          style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        >
+          {/* "All" Button */}
+          <button
+            type="button"
+            onClick={() => setSelectedDate('')}
+            className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center justify-center min-w-[64px] border ${
+              selectedDate === ''
+                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                : 'bg-slate-50 text-slate-600 border-slate-200/70 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <span className="text-[10px] opacity-70 uppercase tracking-wider">All</span>
+            <span className="font-semibold mt-0.5">Dates</span>
+          </button>
 
-        {/* Search + Status row */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-          {/* Search bar */}
-          <div className="relative flex-grow">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/40" size={15} />
+          {/* Recent Days */}
+          {recentDays.map((day) => {
+            const isActive = selectedDate === day.value;
+            const dateObj = new Date(day.value + 'T00:00:00');
+            const dayName = dateObj.toLocaleDateString('en-IN', { weekday: 'short' });
+            const dayNum = dateObj.getDate();
+            const monthName = dateObj.toLocaleDateString('en-IN', { month: 'short' });
+            const isToday = day.label === 'Today';
+
+            return (
+              <button
+                key={day.value}
+                type="button"
+                onClick={() => setSelectedDate(isActive ? '' : day.value)}
+                className={`flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center justify-center min-w-[62px] border ${
+                  isActive
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                    : isToday
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold'
+                    : 'bg-slate-50 text-slate-600 border-slate-200/70 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                <span className={`text-[10px] uppercase tracking-wider ${isActive ? 'text-slate-300' : isToday ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>
+                  {isToday ? 'Today' : dayName}
+                </span>
+                <span className="font-semibold text-sm mt-0.5 leading-none">{dayNum} {monthName}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="border-t border-slate-100 pt-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search Input */}
+          <div className="relative flex-grow max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, phone, order ref, dish..."
-              className="w-full pl-11 pr-4 py-2.5 bg-[#FAF6EE] border border-brand-dark/10 rounded-2xl font-semibold text-brand-dark text-sm focus:outline-none focus:border-brand-accent transition-all h-[42px]"
+              placeholder="Search by customer name, phone, or order ID..."
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-dark/40 hover:text-brand-dark"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 <X size={13} />
               </button>
             )}
           </div>
 
-          {/* Status tab switcher */}
-          <div className="flex bg-[#FAF6EE] p-1 rounded-2xl border border-brand-dark/5 flex-shrink-0 h-[42px] overflow-x-auto max-w-full gap-0.5">
-            {([
-              { key: 'all',        label: 'All',        active: 'bg-brand-accent text-white shadow-sm' },
-              { key: 'sent',       label: 'Sent',       active: 'bg-zinc-800 text-white shadow-sm' },
-              { key: 'confirmed',  label: 'Confirmed',  active: 'bg-emerald-600 text-white shadow-sm' },
-              { key: 'delivering', label: 'Delivering', active: 'bg-amber-500 text-white shadow-sm' },
-              { key: 'completed',  label: 'Delivered',  active: 'bg-sky-600 text-white shadow-sm' },
-              { key: 'cancelled',  label: 'Cancelled',  active: 'bg-rose-600 text-white shadow-sm' },
-            ] as const).map(({ key, label, active }) => {
+          {/* Status Tabs */}
+          <div className="flex bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 overflow-x-auto gap-1">
+            {[
+              { key: 'all',        label: 'All' },
+              { key: 'sent',       label: 'Sent' },
+              { key: 'confirmed',  label: 'Confirmed' },
+              { key: 'delivering', label: 'Out for Delivery' },
+              { key: 'completed',  label: 'Delivered' },
+              { key: 'cancelled',  label: 'Cancelled' },
+            ].map(({ key, label }) => {
               const isActive = statusFilter === key;
               return (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setStatusFilter(key)}
-                  className={`status-tab px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap ${
-                    isActive ? active : 'text-brand-dark/55 hover:text-brand-dark'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                    isActive
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                   }`}
                 >
                   {label}
@@ -406,191 +390,202 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
           </div>
         </div>
 
-        {/* Filter Summary — always visible */}
-        <div className="flex items-center justify-between border-t border-brand-dark/5 pt-3 text-xs font-semibold text-brand-dark/50">
-          <div>
-            {selectedDate
-              ? <>Showing <span className="text-brand-dark font-black">{filteredOrders.length}</span> orders for <span className="text-brand-dark font-black">{new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span></>
-              : <>Showing <span className="text-brand-dark font-black">{filteredOrders.length}</span> of <span className="text-brand-dark font-black">{initialOrders.length}</span> total orders (all dates)</>
-            }
-          </div>
+        {/* Counter Summary */}
+        <div className="text-xs text-slate-500 font-medium flex items-center justify-between pt-1">
+          <span>
+            Showing <strong className="text-slate-800">{filteredOrders.length}</strong> orders
+            {selectedDate && <> for {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</>}
+          </span>
           {(searchQuery || statusFilter !== 'all') && (
             <button
-              onClick={() => {
-                setSearchQuery('');
-                setStatusFilter('all');
-              }}
-              className="text-brand-accent hover:underline flex items-center gap-1 font-bold uppercase tracking-wider text-[10px]"
+              onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}
+              className="text-xs font-semibold text-emerald-700 hover:underline"
             >
-              <X size={10} /> Clear Filters
+              Reset Filters
             </button>
           )}
         </div>
       </div>
 
-      {/* Grid displays orders as kitchen tickets */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* Orders Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredOrders.length === 0 ? (
-          <div className="col-span-full bg-white rounded-3xl p-16 text-center border border-brand-gold/10 shadow-sm flex flex-col items-center justify-center">
-            <MessageCircle className="text-brand-dark/25 mb-4" size={48} />
-            <h3 className="font-bold text-lg text-brand-dark">No Orders Found</h3>
-            <p className="text-brand-dark/50 text-sm mt-1 max-w-xs leading-relaxed">
-              No orders matched your selected filters. Try changing your search query or date range selection.
+          <div className="col-span-full bg-white rounded-2xl p-12 text-center border border-slate-200/80 shadow-xs flex flex-col items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+              <MessageCircle size={22} />
+            </div>
+            <h3 className="font-bold text-slate-800 text-base">No Orders Found</h3>
+            <p className="text-slate-500 text-xs mt-1 max-w-sm">
+              No orders matched your active filters. Try adjusting your date selection or search query.
             </p>
           </div>
         ) : (
           filteredOrders.map((order) => {
             const items = (order.items as any[]) || [];
-            
+            const formattedCustomerName = formatTitleCase(order.customerName);
+            const formattedPhone = formatPhoneNumber(order.phone);
+            const timeFormatted = new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const status = (order.status || '').toLowerCase();
+            let statusBadgeStyle = "bg-slate-100 text-slate-700 border-slate-200";
+            let statusLabel = "Sent";
+
+            if (status === 'confirmed') {
+              statusBadgeStyle = "bg-emerald-50 text-emerald-800 border-emerald-200";
+              statusLabel = "Confirmed";
+            } else if (status === 'delivering' || status === 'out_for_delivery') {
+              statusBadgeStyle = "bg-amber-50 text-amber-800 border-amber-200";
+              statusLabel = "Out for Delivery";
+            } else if (status === 'completed' || status === 'delivered') {
+              statusBadgeStyle = "bg-sky-50 text-sky-800 border-sky-200";
+              statusLabel = "Delivered";
+            } else if (status === 'cancelled') {
+              statusBadgeStyle = "bg-rose-50 text-rose-800 border-rose-200";
+              statusLabel = "Cancelled";
+            }
+
             return (
-              <motion.div 
-                key={order.id} 
+              <motion.div
+                key={order.id}
                 layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
                 transition={{ duration: 0.2 }}
-                className="bg-white rounded-3xl border border-brand-gold/10 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col relative group"
+                className="bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden"
               >
-                {/* Header Ticket Bar */}
-                <div className="bg-brand-dark p-3.5 px-4.5 text-[#FFFFFF] flex justify-between items-start border-b border-brand-gold/10">
+                {/* Top Card Header */}
+                <div className="p-4 bg-slate-50/60 border-b border-slate-100 flex items-start justify-between gap-3">
                   <div>
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-brand-gold font-bold">
-                      Ref: {order.orderRef}
-                    </span>
-                    <h3 className="font-display font-bold text-sm mt-0.5 text-white">
-                      {order.customerName || 'Anonymous Customer'}
+                    <div className="text-[11px] font-mono font-medium text-slate-400">
+                      #{order.orderRef}
+                    </div>
+                    <h3 className="font-semibold text-base text-slate-900 mt-0.5 leading-snug">
+                      {formattedCustomerName}
                     </h3>
                   </div>
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[8px] font-black uppercase rounded-lg border ${
-                    order.status === 'sent'       ? 'bg-zinc-900/30 text-zinc-400 border-zinc-800/30' :
-                    order.status === 'confirmed'  ? 'bg-emerald-950/30 text-emerald-400 border-emerald-800/30' :
-                    order.status === 'delivering' ? 'bg-amber-950/30 text-amber-400 border-amber-800/30' :
-                    order.status === 'completed'  ? 'bg-sky-950/30 text-sky-400 border-sky-800/30' :
-                    'bg-rose-950/30 text-rose-400 border-rose-800/30'
-                  }`}>
-                    {order.status === 'completed' ? 'Delivered' : order.status}
+                  <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg border ${statusBadgeStyle} select-none`}>
+                    {statusLabel}
                   </span>
                 </div>
 
-                {/* Body Details */}
-                <div className="p-3.5 flex-grow space-y-3 font-sans">
-                  {/* Metadata Info */}
-                  <div className="grid grid-cols-2 gap-4 text-[10px] text-brand-dark/75 border-b border-brand-dark/5 pb-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <Phone size={10} className="text-brand-accent" />
-                      <a href={`tel:${order.phone}`} className="hover:underline font-semibold">{order.phone}</a>
-                      <a
-                        href={`https://wa.me/${order.phone.replace(/\D/g, '').startsWith('91') || order.phone.replace(/\D/g, '').length > 10 ? '' : '91'}${order.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                          getWhatsAppMessage(order)
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-emerald-600 hover:text-emerald-700 ml-1 transition-colors flex items-center justify-center"
-                        title="WhatsApp Chat"
-                      >
-                        <WhatsAppIcon size={11} />
+                {/* Card Body & Metadata */}
+                <div className="p-4 flex-grow space-y-4 text-xs font-sans">
+                  {/* Phone & Time Metadata */}
+                  <div className="flex items-center justify-between text-slate-500 pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <Phone size={13} className="text-slate-400" />
+                      <a href={`tel:${order.phone}`} className="hover:text-emerald-700 transition-colors">
+                        {formattedPhone}
                       </a>
                     </div>
-                    <div className="flex items-center gap-1 justify-end">
-                      <Calendar size={10} className="text-brand-gold" />
-                      <span>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <div className="flex items-center gap-1.5 text-slate-400 font-medium">
+                      <Clock size={13} />
+                      <span>{timeFormatted}</span>
                     </div>
                   </div>
 
-                  {/* Items Breakdown list */}
-                  <div>
-                    <h4 className="text-[8px] font-black uppercase tracking-widest text-brand-dark/50 mb-1.5">
-                       Order Checklist
-                    </h4>
-                    <ul className="space-y-1.5 bg-[#FFFFFF]/30 p-2.5 rounded-xl border border-brand-gold/5 max-h-32 overflow-y-auto">
+                  {/* Checklist Items */}
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                      Ordered Items
+                    </div>
+                    <div className="space-y-2 bg-slate-50/80 p-3 rounded-xl border border-slate-100 max-h-40 overflow-y-auto">
                       {items.map((item, idx) => (
-                        <li key={idx} className="flex justify-between items-start text-xs">
-                          <div className="flex items-center gap-1">
-                            <span className="font-mono font-bold text-brand-accent bg-brand-accent/10 px-1 py-0.2 rounded text-[9px]">
+                        <div key={idx} className="flex items-start justify-between gap-2 text-xs">
+                          <div className="flex items-start gap-2">
+                            <span className="px-1.5 py-0.5 bg-slate-200/70 text-slate-700 font-mono text-[10px] font-bold rounded">
                               {item.quantity}x
                             </span>
-                            <span className="font-semibold text-brand-dark leading-snug">{item.name}</span>
+                            <span className="font-medium text-slate-800 leading-snug">
+                              {item.name}
+                            </span>
                           </div>
-                          <span className="text-brand-dark/70 font-semibold font-mono text-[10px]">
-                            ₹{item.price * item.quantity}
-                          </span>
-                        </li>
+                          {item.price > 0 && (
+                            <span className="font-mono text-slate-600 font-medium whitespace-nowrap">
+                              ₹{item.price * item.quantity}
+                            </span>
+                          )}
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
 
-                {/* Status Action Buttons Row */}
-                <div className="px-3.5 pb-3.5 bg-white flex items-center justify-between gap-2 border-t border-brand-dark/5 pt-3">
-                  <div className="flex-grow flex items-center gap-2">
-                    {order.status === 'sent' && (
-                      <>
-                        <button
-                          onClick={() => handleUpdateOrderStatus(order.id, 'confirmed')}
-                          className="res-action-btn flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-emerald-600/10"
+                {/* Footer Action Buttons */}
+                <div className="p-4 pt-3 bg-white border-t border-slate-100 space-y-3 mt-auto">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-grow">
+                      {status === 'sent' && (
+                        <div className="flex gap-2">
+                          <motion.button
+                            whileHover={{ y: -1 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleUpdateOrderStatus(order.id, 'confirmed')}
+                            className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 select-none"
+                          >
+                            <Check size={14} /> Confirm
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ y: -1 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleUpdateOrderStatus(order.id, 'cancelled')}
+                            className="py-2 px-3 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 font-semibold text-xs rounded-xl border border-slate-200/80 transition-all flex items-center justify-center gap-1.5 select-none"
+                          >
+                            <Ban size={14} /> Cancel
+                          </motion.button>
+                        </div>
+                      )}
+                      {status === 'confirmed' && (
+                        <motion.button
+                          whileHover={{ y: -1 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleUpdateOrderStatus(order.id, 'delivering')}
+                          className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 select-none"
                         >
-                          <Check size={12} /> Confirm
-                        </button>
-                        <button
-                          onClick={() => handleUpdateOrderStatus(order.id, 'cancelled')}
-                          className="res-action-btn flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-rose-600/10"
+                          <Truck size={14} /> Out for Delivery
+                        </motion.button>
+                      )}
+                      {(status === 'delivering' || status === 'out_for_delivery') && (
+                        <motion.button
+                          whileHover={{ y: -1 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleUpdateOrderStatus(order.id, 'completed')}
+                          className="w-full py-2 px-3 bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 select-none"
                         >
-                          <Ban size={12} /> Cancel
-                        </button>
-                      </>
-                    )}
-                    {order.status === 'confirmed' && (
-                      <button
-                        onClick={() => handleUpdateOrderStatus(order.id, 'delivering')}
-                        className="res-action-btn w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-amber-500/10"
-                      >
-                        <Truck size={13} className="animate-pulse" /> Out for Delivery
-                      </button>
-                    )}
-                    {order.status === 'delivering' && (
-                      <button
-                        onClick={() => handleUpdateOrderStatus(order.id, 'completed')}
-                        className="res-action-btn w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-sky-600/10"
-                      >
-                        <CheckCircle size={13} /> Complete &amp; Deliver
-                      </button>
-                    )}
-                    {order.status === 'completed' && (
-                      <div className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 text-emerald-700 font-extrabold text-xs rounded-xl border border-emerald-100/70 shadow-sm">
-                        <Check size={14} className="text-emerald-600" /> Order Delivered
-                      </div>
-                    )}
-                    {order.status === 'cancelled' && (
-                      <div className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-rose-50 text-rose-700 font-extrabold text-xs rounded-xl border border-rose-100/70 shadow-sm">
-                        <AlertCircle size={14} className="text-rose-600" /> Order Cancelled
-                      </div>
-                    )}
+                          <CheckCircle size={14} /> Complete &amp; Deliver
+                        </motion.button>
+                      )}
+                      {(status === 'completed' || status === 'delivered') && (
+                        <div className="w-full py-2 px-3 bg-emerald-50 text-emerald-800 font-semibold text-xs rounded-xl border border-emerald-200/60 flex items-center justify-center gap-1.5">
+                          <CheckCircle size={14} className="text-emerald-600" /> Delivered
+                        </div>
+                      )}
+                      {status === 'cancelled' && (
+                        <div className="w-full py-2 px-3 bg-rose-50 text-rose-800 font-semibold text-xs rounded-xl border border-rose-200/60 flex items-center justify-center gap-1.5">
+                          <AlertCircle size={14} className="text-rose-600" /> Order Cancelled
+                        </div>
+                      )}
+                    </div>
+
+                    {/* WhatsApp Action Button */}
+                    <a
+                      href={`https://wa.me/${order.phone.replace(/\D/g, '').startsWith('91') || order.phone.replace(/\D/g, '').length > 10 ? '' : '91'}${order.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                        getWhatsAppMessage(order)
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Open WhatsApp Chat"
+                      className="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200/70 transition-all flex items-center justify-center flex-shrink-0 shadow-xs"
+                    >
+                      <WhatsAppIcon size={15} />
+                    </a>
                   </div>
 
-                  <a
-                    href={`https://wa.me/${order.phone.replace(/\D/g, '').startsWith('91') || order.phone.replace(/\D/g, '').length > 10 ? '' : '91'}${order.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      getWhatsAppMessage(order)
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Direct WhatsApp Chat"
-                    className="res-action-btn flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-100 hover:bg-[#1E4D2B] text-emerald-700 hover:text-white transition-all shadow-md shadow-emerald-600/10 border border-emerald-200/50"
-                  >
-                    <WhatsAppIcon size={14} />
-                  </a>
-                </div>
-
-                {/* Footer POS bar */}
-                <div className="px-4 py-2.5 bg-[#FFFFFF]/50 border-t border-brand-gold/10 flex justify-between items-center mt-auto">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-brand-dark/55">
-                    Order Total
-                  </span>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-[9px] font-bold text-brand-accent">₹</span>
-                    <span className="text-base font-black text-brand-accent font-mono">
-                      {order.total}
-                    </span>
+                  {/* Order Total Line */}
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                    <span className="font-medium text-slate-400">Order Total</span>
+                    <span className="font-mono font-bold text-slate-900 text-base">₹{order.total}</span>
                   </div>
                 </div>
               </motion.div>
