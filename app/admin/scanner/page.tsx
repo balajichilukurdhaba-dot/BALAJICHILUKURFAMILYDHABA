@@ -69,18 +69,27 @@ export default function ScannerPage() {
       };
 
       try {
-        let stream: MediaStream;
+        let stream: MediaStream | null = null;
+        
+        // 1. First attempt: Strict environment facing mode
         try {
-          // Force back-camera initialization using strict environment mode constraints
           stream = await navigator.mediaDevices.getUserMedia(strictConstraints);
         } catch (strictErr) {
-          console.warn("Strict camera constraints rejected, running fallback constraints:", strictErr);
-          // Fallback constraints if exact environment match is unsupported
-          stream = await navigator.mediaDevices.getUserMedia(looseConstraints);
+          // 2. Second attempt: Loose camera constraints
+          try {
+            stream = await navigator.mediaDevices.getUserMedia(looseConstraints);
+          } catch (looseErr) {
+            // 3. Final attempt: Basic video stream
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            } catch (basicErr) {
+              throw basicErr;
+            }
+          }
         }
 
-        if (!active) {
-          stream.getTracks().forEach(track => track.stop());
+        if (!active || !stream) {
+          if (stream) stream.getTracks().forEach(track => track.stop());
           return;
         }
 
@@ -92,7 +101,11 @@ export default function ScannerPage() {
         video.setAttribute("autoplay", "true");
         video.setAttribute("muted", "true");
 
-        await video.play();
+        try {
+          await video.play();
+        } catch (playErr) {
+          console.warn("Video play interrupted:", playErr);
+        }
 
         // Canvas frame scan loop
         const tick = () => {
@@ -111,11 +124,10 @@ export default function ScannerPage() {
               ctx.drawImage(video, 0, 0, width, height);
               const imageData = ctx.getImageData(0, 0, width, height);
 
-              // 2. SAFARI & MOBILE CHROME STREAM ENGINE FREEZE PROTECTION
-              // Sample pixel grid subset to calculate a hash of the frame
+              // SAFARI & MOBILE CHROME STREAM ENGINE FREEZE PROTECTION
               let sum = 0;
               for (let i = 0; i < imageData.data.length; i += 4000) {
-                sum += imageData.data[i]; // Add red channel component values
+                sum += imageData.data[i];
               }
 
               const now = Date.now();
@@ -125,7 +137,6 @@ export default function ScannerPage() {
                 } else if (now - lastFrameChangeTimeRef.current > 3000) {
                   console.warn("Camera stream freeze detected (3s static frame). Restarting stream...");
                   stopMediaStream();
-                  // Silently cycle the stream session to resume canvas frame loop
                   setRestartCount(prev => prev + 1);
                   return;
                 }
@@ -153,14 +164,16 @@ export default function ScannerPage() {
         requestRef.current = requestAnimationFrame(tick);
 
       } catch (err: any) {
-        console.error("Stream initialization error:", err);
+        console.warn("Camera video source stream unavailable:", err?.name || err);
         if (active) {
           stopMediaStream();
           setUseCamera(false);
           let msg = "Camera hardware unavailable. Switched to manual code verification.";
-          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          if (err?.name === 'NotReadableError' || err?.name === 'TrackStartError') {
+            msg = "Camera video source is currently in use by another application or tab. Switched to manual code entry.";
+          } else if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
             msg = "Camera permission denied by browser. Switched to manual code entry.";
-          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          } else if (err?.name === 'NotFoundError' || err?.name === 'DevicesNotFoundError') {
             msg = "No webcam detected on this device. Switched to manual code entry.";
           }
           setCameraNotice(msg);
