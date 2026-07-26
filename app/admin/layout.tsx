@@ -89,47 +89,106 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch current admin user
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email) setAdminEmail(user.email);
-      } catch (e) {
-        // Auth fallback
-      }
-    })();
-  }, []);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Update seen marker timestamps when pathname changes
-  useEffect(() => {
-    if (pathname === '/admin/orders') {
-      localStorage.setItem('lastSeen_orders', new Date().toISOString());
-      setCounts(prev => ({ ...prev, whatsapp_orders: 0 }));
-    } else if (pathname === '/admin/reservations') {
-      localStorage.setItem('lastSeen_reservations', new Date().toISOString());
-      setCounts(prev => ({ ...prev, reservations: 0 }));
-    } else if (pathname === '/admin/messages') {
-      localStorage.setItem('lastSeen_queries', new Date().toISOString());
-      setCounts(prev => ({ ...prev, queries: 0 }));
-    } else if (pathname === '/admin/testimonials') {
-      localStorage.setItem('last_seen_testimonials_count', counts.testimonials.toString());
-    }
-  }, [pathname, counts.testimonials]);
+  const MAX_SESSION_MS = 6 * 60 * 60 * 1000; // 6 hours
 
-  const handleLogout = async () => {
+  const performLogout = async (reason?: string) => {
     if (typeof window !== 'undefined') {
       document.cookie = "admin_logged_in=; path=/; max-age=0";
+      document.cookie = "admin_login_time=; path=/; max-age=0";
       localStorage.removeItem('admin_logged_in');
       localStorage.removeItem('admin_email');
+      localStorage.removeItem('admin_login_time');
     }
     try {
       await supabase.auth.signOut();
     } catch (e) {
       // Ignore
     }
-    window.location.href = '/admin/login';
+    window.location.href = reason ? `/admin/login?reason=${reason}` : '/admin/login';
   };
+
+  const handleLogout = async () => {
+    await performLogout();
+  };
+
+  // Fetch current admin user & verify 6-hour authentication guard
+  useEffect(() => {
+    if (pathname === '/admin/login') {
+      setIsAuthChecking(false);
+      return;
+    }
+
+    const checkSession = async () => {
+      // Check 6-hour session timestamp expiration
+      if (typeof window !== 'undefined') {
+        const loginTimeStr = localStorage.getItem('admin_login_time') || 
+          document.cookie.split('; ').find(row => row.startsWith('admin_login_time='))?.split('=')[1];
+        
+        if (loginTimeStr) {
+          const loginTime = parseInt(loginTimeStr, 10);
+          if (!isNaN(loginTime) && (Date.now() - loginTime > MAX_SESSION_MS)) {
+            setIsAuthenticated(false);
+            setIsAuthChecking(false);
+            performLogout('expired');
+            return;
+          }
+        }
+      }
+
+      let isAuthed = false;
+      let email = '';
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          isAuthed = true;
+          email = user.email || '';
+        }
+      } catch (e) {
+        // Auth error fallback
+      }
+
+      if (!isAuthed && typeof window !== 'undefined') {
+        const hasCookie = document.cookie.split('; ').some(row => row.startsWith('admin_logged_in=true'));
+        const hasLocalStorage = localStorage.getItem('admin_logged_in') === 'true';
+        if (hasCookie || hasLocalStorage) {
+          isAuthed = true;
+          email = localStorage.getItem('admin_email') || 'admin@balajichilkur.com';
+        }
+      }
+
+      if (!isAuthed) {
+        setIsAuthenticated(false);
+        setIsAuthChecking(false);
+        router.replace('/admin/login');
+      } else {
+        setIsAuthenticated(true);
+        if (email) setAdminEmail(email);
+        setIsAuthChecking(false);
+      }
+    };
+
+    checkSession();
+
+    // Auto-logout timer: check every 30 seconds while session is active
+    const sessionInterval = setInterval(() => {
+      if (typeof window !== 'undefined') {
+        const loginTimeStr = localStorage.getItem('admin_login_time') || 
+          document.cookie.split('; ').find(row => row.startsWith('admin_login_time='))?.split('=')[1];
+        if (loginTimeStr) {
+          const loginTime = parseInt(loginTimeStr, 10);
+          if (!isNaN(loginTime) && (Date.now() - loginTime > MAX_SESSION_MS)) {
+            performLogout('expired');
+          }
+        }
+      }
+    }, 30_000);
+
+    return () => clearInterval(sessionInterval);
+  }, [pathname, router]);
 
   const navItems = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
@@ -152,6 +211,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
+  }
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center text-slate-300">
+        <div className="w-8 h-8 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin mb-4" />
+        <span className="text-xs font-medium text-slate-400">Verifying session...</span>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (

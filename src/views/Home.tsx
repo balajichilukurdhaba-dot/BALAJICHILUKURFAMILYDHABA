@@ -1143,31 +1143,29 @@ export const Home: React.FC = () => {
                   ))}
                 </div>
 
-                {/* Animated Founder Trigger Badge */}
+                {/* Enterprise Founder Trigger Badge */}
                 <motion.div
                   className="absolute bottom-4 right-4 z-20 cursor-pointer"
-                  animate={{
-                    y: [0, -6, 0],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <motion.button
                     onClick={() => setShowFounderModal(true)}
-                    className="group relative flex items-center space-x-2 bg-brand-accent/95 hover:bg-brand-accent text-white px-4 py-2.5 rounded-full shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 active:scale-95 select-none"
-                    whileHover={{
-                      boxShadow: "0 0 20px rgba(46, 204, 113, 0.4)",
-                    }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="group relative flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-900 text-white pl-2 pr-4 py-2 rounded-full shadow-lg border border-slate-700/80 backdrop-blur-md transition-all duration-200 select-none cursor-pointer"
                   >
-                    {/* Animated Steam Pot icon */}
-                    <span className="relative flex h-6 w-6 items-center justify-center text-lg filter drop-shadow">
-                      🍲
-                      <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[9px] animate-bounce opacity-75">💨</span>
-                    </span>
-                    <span className="text-[10px] font-black uppercase tracking-wider font-display">Meet the Founder</span>
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-500 shrink-0 bg-slate-900 relative">
+                      <img
+                        src="/founder-praveen-solanki.jpg"
+                        alt="Praveen Kumar Solanki"
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-[11px] font-bold text-white tracking-tight leading-none">Praveen Kumar Solanki</span>
+                      <span className="text-[9px] text-slate-400 font-medium leading-none mt-0.5">Meet the Founder</span>
+                    </div>
                   </motion.button>
                 </motion.div>
               </div>
@@ -1238,71 +1236,92 @@ export const Home: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-lg select-none"
+                className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md select-none font-sans"
                 onClick={() => setShowFounderModal(false)}
               >
                 <motion.div
-                  initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                  initial={{ scale: 0.92, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.8, opacity: 0, y: 50 }}
-                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                  className="bg-[#FAF6EE] max-w-lg w-full rounded-3xl overflow-hidden shadow-2xl border border-brand-gold/25 relative"
+                  exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 250 }}
+                  className="bg-white max-w-lg w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 relative"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Header decoration */}
-                  <div className="bg-[#1E4D2B] p-6 text-center relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#FFF_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                    
-                    {/* Animated veg bowl floating out */}
-                    <motion.div
-                      initial={{ y: 30, scale: 0.5, rotate: -45 }}
-                      animate={{ y: 0, scale: 1, rotate: 0 }}
-                      transition={{ type: "spring", delay: 0.1, duration: 0.8 }}
-                      className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-3xl mx-auto border border-white/20 shadow-inner"
-                    >
-                      🍲
-                    </motion.div>
-                    <h3 className="font-display font-black text-xl text-[#FFFFFF] mt-4 tracking-wider uppercase">Our Founder's Vision</h3>
-                    <p className="text-[#90EE90] font-sans text-xs uppercase tracking-widest mt-1 font-bold">The Journey of Flavor Since 2018</p>
-                  </div>
+                  {/* Close icon button */}
+                  <button
+                    onClick={() => setShowFounderModal(false)}
+                    className="absolute top-4 right-4 z-20 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors"
+                    aria-label="Close modal"
+                  >
+                    <X size={16} />
+                  </button>
 
-                  {/* Modal content */}
-                  <div className="p-8 space-y-6">
-                    <div className="space-y-4">
-                      <p className="text-brand-dark/95 font-display text-base md:text-lg font-medium leading-relaxed text-center italic">
-                        "A passionate dream born in 2018, realized as a sanctuary of pure vegetarian heritage in 2021."
-                      </p>
-                      <p className="text-brand-dark/75 font-sans text-xs md:text-sm leading-relaxed text-center">
-                        Our founder’s deep passion for starting a restaurant began in 2018, fueled by a desire to create welcoming spaces where families and friends could bond over pure, traditional flavors. After years of careful planning, dedication, and culinary research, he successfully launched his own restaurant in 2021.
-                      </p>
-                    </div>
+                  {/* Executive Header & Large Founder Portrait Card */}
+                  <div className="bg-slate-900 text-white p-6 sm:p-8 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
 
-                    {/* Creative Timeline */}
-                    <div className="relative border-t border-brand-dark/5 pt-6 grid grid-cols-2 gap-4">
-                      <div className="text-center relative">
-                        <div className="w-10 h-10 bg-brand-gold/10 text-brand-gold rounded-full flex items-center justify-center mx-auto text-lg font-bold font-display border border-brand-gold/20 shadow-sm mb-2">
-                          2018
-                        </div>
-                        <h4 className="font-display font-bold text-xs text-brand-dark">The Passion Begins</h4>
-                        <p className="text-[10px] text-brand-dark/60 mt-1 leading-snug">Inspired to build a premium pure veg dining concept.</p>
+                    <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+                      {/* Large Executive Portrait Card */}
+                      <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl border-4 border-slate-700/80 shadow-2xl overflow-hidden bg-slate-950 shrink-0 relative">
+                        <img
+                          src="/founder-praveen-solanki.jpg"
+                          alt="Praveen Kumar Solanki"
+                          className="w-full h-full object-cover object-center"
+                        />
+                        <span className="absolute bottom-2 right-2 p-1 bg-emerald-500 text-white rounded-full shadow-md" title="Verified Founder">
+                          <CheckCircle2 size={14} />
+                        </span>
                       </div>
-                      
-                      <div className="text-center relative">
-                        <div className="absolute left-0 top-5 -translate-x-1/2 w-4 h-0.5 bg-brand-gold/25 hidden md:block"></div>
-                        <div className="w-10 h-10 bg-brand-accent/10 text-[#1E4D2B] rounded-full flex items-center justify-center mx-auto text-lg font-bold font-display border border-brand-accent/20 shadow-sm mb-2">
-                          2021
-                        </div>
-                        <h4 className="font-display font-bold text-xs text-[#1E4D2B]">The Foundation</h4>
-                        <p className="text-[10px] text-brand-dark/60 mt-1 leading-snug">Launched the flagship Balaji Chilkur Family Dhaba.</p>
+
+                      <div className="space-y-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800 text-emerald-400 border border-slate-700">
+                          <CheckCircle2 size={12} /> Verified Founder
+                        </span>
+                        <h3 className="font-bold text-xl text-white tracking-tight leading-snug">Praveen Kumar Solanki</h3>
+                        <p className="text-xs text-slate-300 font-medium">Founder &amp; Managing Director</p>
+                        <p className="text-[11px] text-slate-400 pt-1">Balaji Chilkur Family Dhaba</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Modal footer */}
-                  <div className="px-8 pb-8 pt-2 flex justify-center">
+                  {/* Modal Body */}
+                  <div className="p-6 md:p-8 space-y-6">
+                    {/* Pull Quote */}
+                    <div className="bg-slate-50 border-l-4 border-slate-900 p-4 rounded-r-xl">
+                      <p className="text-xs md:text-sm font-medium text-slate-800 italic leading-relaxed">
+                        "A passionate dream born in 2018, realized as a sanctuary of pure vegetarian dining heritage in 2021."
+                      </p>
+                    </div>
+
+                    {/* Story Description */}
+                    <p className="text-xs md:text-sm text-slate-600 leading-relaxed">
+                      Under the leadership of Praveen Kumar Solanki, our journey began in 2018 with a commitment to create welcoming dining spaces where families and friends bond over pure, traditional flavors. Following years of culinary research and dedication, our flagship restaurant was successfully launched in 2021 near Chilkur Balaji Temple.
+                    </p>
+
+                    {/* Timeline Milestones */}
+                    <div className="pt-4 border-t border-slate-100 space-y-3">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">Key Milestones</span>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60 space-y-1">
+                          <span className="text-xs font-bold text-slate-900 bg-slate-200/80 px-2 py-0.5 rounded-md inline-block">2018</span>
+                          <h4 className="text-xs font-bold text-slate-900 pt-1">The Vision Begins</h4>
+                          <p className="text-[11px] text-slate-500 leading-snug">Inspired to build an authentic pure-veg family dining experience.</p>
+                        </div>
+
+                        <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60 space-y-1">
+                          <span className="text-xs font-bold text-slate-900 bg-slate-200/80 px-2 py-0.5 rounded-md inline-block">2021</span>
+                          <h4 className="text-xs font-bold text-slate-900 pt-1">Flagship Launch</h4>
+                          <p className="text-[11px] text-slate-500 leading-snug">Established the flagship Balaji Chilkur Family Dhaba.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="px-6 pb-6 pt-2 flex justify-end bg-slate-50/50 border-t border-slate-100">
                     <button
                       onClick={() => setShowFounderModal(false)}
-                      className="px-6 py-2.5 bg-brand-dark hover:bg-brand-dark/95 text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                      className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
                     >
                       Close Story
                     </button>

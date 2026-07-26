@@ -18,6 +18,8 @@ async function ensureTable() {
         user_agent   TEXT,
         created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+    `);
+    await prisma.$executeRawUnsafe(`
       ALTER TABLE admin_login_sessions ADD COLUMN IF NOT EXISTS altitude DOUBLE PRECISION;
     `);
   } catch (e) {

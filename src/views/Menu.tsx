@@ -8,7 +8,7 @@ import type { Dish } from '../components/DishCard';
 
 // Balaji Santosh Dhaba restaurant page URLs on delivery platforms
 const SWIGGY_URL = 'https://www.swiggy.com/menu/1035562?source=sharing';
-const ZOMATO_URL = 'https://link.zomato.com/xqzv/rshare?id=143313079bc5b9bbd';
+const ZOMATO_URL = 'https://zomato.onelink.me/xqzv/jr1hhrvj';
 
 // ─── Order Platform Modal ──────────────────────────────────────────────────────
 interface OrderModalProps {
@@ -26,8 +26,8 @@ const OrderModal: React.FC<OrderModalProps> = ({ dish, onClose }) => {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const swiggyItemUrl = `https://www.swiggy.com/search?query=${encodeURIComponent('Balaji Family Dhaba Moinabad ' + dish.name)}`;
-  const zomatoItemUrl = `https://www.zomato.com/search?q=${encodeURIComponent('Balaji Chilkur Family Dhaba Moinabad ' + dish.name)}`;
+  const swiggyItemUrl = SWIGGY_URL;
+  const zomatoItemUrl = ZOMATO_URL;
 
   const numericPrice = useMemo(() => {
     if (typeof dish.price === 'number') return dish.price;

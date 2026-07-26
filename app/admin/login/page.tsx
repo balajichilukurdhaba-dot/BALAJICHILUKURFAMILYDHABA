@@ -1,29 +1,80 @@
 "use client";
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Lock, Mail, Loader2, ShieldCheck, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Lock, Mail, Loader2, ShieldCheck, ArrowRight, Clock } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { motion } from 'framer-motion';
 
-export default function AdminLoginPage() {
+function AdminLoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (searchParams?.get('reason') === 'expired') {
+      setNotice('Your 6-hour admin session has expired for security. Please sign in again.');
+    }
+  }, [searchParams]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setNotice('');
 
-    if (typeof window !== 'undefined') {
-      document.cookie = "admin_logged_in=true; path=/; max-age=86400";
-      localStorage.setItem('admin_logged_in', 'true');
-      localStorage.setItem('admin_email', email);
+    const cleanEmail = email.trim();
+    const cleanPassword = password;
+
+    if (!cleanEmail || !cleanPassword) {
+      setError('Please enter both email address and password.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Strictly authenticate against Supabase Auth
+      const { data, error: supabaseError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPassword,
+      });
+
+      if (supabaseError || !data?.session) {
+        let msg = supabaseError?.message || 'Invalid email or password in Supabase Auth.';
+        if (msg.toLowerCase().includes('invalid api key')) {
+          msg = 'Invalid Supabase API Key: Please update NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file with the "anon" public key (starts with eyJ...) from Supabase Dashboard -> Project Settings -> API.';
+        }
+        setError(msg);
+        setLoading(false);
+        return;
+      }
+
+      // Successful login: persist 6-hour session cookie & localStorage
+      if (typeof window !== 'undefined') {
+        const now = Date.now().toString();
+        document.cookie = "admin_logged_in=true; path=/; max-age=21600";
+        document.cookie = `admin_login_time=${now}; path=/; max-age=21600`;
+        localStorage.setItem('admin_logged_in', 'true');
+        localStorage.setItem('admin_email', cleanEmail);
+        localStorage.setItem('admin_login_time', now);
+      }
+
+      // Record snapshot asynchronously
+      fetch('/api/cms/admin-logins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminEmail: cleanEmail })
+      }).catch(() => {});
+
       window.location.href = '/admin';
+    } catch (err: any) {
+      setError(err?.message || 'An unexpected error occurred during authentication.');
+      setLoading(false);
     }
   };
 
@@ -49,6 +100,13 @@ export default function AdminLoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
+          {notice && (
+            <div className="p-3 bg-amber-950/60 border border-amber-800/80 text-amber-300 text-xs rounded-lg font-medium flex items-start gap-2">
+              <Clock size={15} className="shrink-0 mt-0.5 text-amber-400" />
+              <span>{notice}</span>
+            </div>
+          )}
+
           {error && (
             <div className="p-3 bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs rounded-lg font-medium">
               {error}
@@ -107,5 +165,18 @@ export default function AdminLoginPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-400">
+        <Loader2 className="animate-spin mb-2" size={24} />
+        <span className="text-xs">Loading Admin Console...</span>
+      </div>
+    }>
+      <AdminLoginPageContent />
+    </React.Suspense>
   );
 }

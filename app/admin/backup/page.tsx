@@ -299,20 +299,36 @@ function AdminConfirmCredentialsModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError('Please provide Admin Email and Password');
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError('');
+
+    try {
+      const res = await fetch('/api/admin/verify-credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Authentication failed. Invalid Supabase admin credentials.');
+      }
+
       onConfirm(selectedModels);
       setEmail('');
       setPassword('');
       setError('');
-    }, 400);
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

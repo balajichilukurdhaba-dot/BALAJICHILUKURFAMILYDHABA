@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { logAdminAction } from '@/lib/auth';
+import { verifySupabaseAdminAuth } from '@/lib/verifyAdminAuth';
 
 function getDateCutoff(range?: string, beforeDate?: string): Date | undefined {
   if (!range || range === 'all') return undefined;
@@ -29,10 +30,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password, dataTypes, timelines } = body;
 
-    // Privacy verification: require Admin ID (email) and password
-    if (!email || !password) {
+    // Strict Supabase Auth verification
+    const authResult = await verifySupabaseAdminAuth(email || '', password || '');
+    if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: 'Admin email and password are required for privacy verification.' },
+        { success: false, error: authResult.error || 'Authentication failed. Invalid Supabase Admin credentials.' },
         { status: 401 }
       );
     }
@@ -41,14 +43,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: 'Please select at least one category to delete.' },
         { status: 400 }
-      );
-    }
-
-    const isValidAdmin = email.length > 3 && password.length >= 4;
-    if (!isValidAdmin) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication failed. Invalid Admin ID or password.' },
-        { status: 403 }
       );
     }
 

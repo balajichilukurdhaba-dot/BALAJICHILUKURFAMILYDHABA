@@ -122,15 +122,8 @@ export const Footer: React.FC = () => {
             <li className="flex items-start space-x-3">
               <Clock size={16} className="text-brand-gold shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-[#FFFFFF]">Lunch Service</p>
-                <p className="mt-1 text-[#FFFFFF]/60">11:00 AM – 4:00 PM</p>
-              </div>
-            </li>
-            <li className="flex items-start space-x-3">
-              <Clock size={16} className="text-brand-gold shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold text-[#FFFFFF]">Dinner Service</p>
-                <p className="mt-1 text-[#FFFFFF]/60">6:30 PM – 11:00 PM</p>
+                <p className="font-bold text-[#FFFFFF]">Daily Service</p>
+                <p className="mt-1 text-[#FFFFFF]/60">11:00 AM – 11:00 PM</p>
               </div>
             </li>
           </ul>
