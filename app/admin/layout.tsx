@@ -54,21 +54,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const fetchNotificationCounts = async () => {
     try {
       const params = new URLSearchParams();
-      const lastSeenOrders = localStorage.getItem('lastSeen_orders');
-      const lastSeenReservations = localStorage.getItem('lastSeen_reservations');
-      const lastSeenQueries = localStorage.getItem('lastSeen_queries');
+      const lastSeenOrders = typeof window !== 'undefined' ? localStorage.getItem('lastSeen_orders') : null;
+      const lastSeenReservations = typeof window !== 'undefined' ? localStorage.getItem('lastSeen_reservations') : null;
+      const lastSeenQueries = typeof window !== 'undefined' ? localStorage.getItem('lastSeen_queries') : null;
 
       if (lastSeenOrders) params.set('lastSeen_orders', lastSeenOrders);
       if (lastSeenReservations) params.set('lastSeen_reservations', lastSeenReservations);
       if (lastSeenQueries) params.set('lastSeen_queries', lastSeenQueries);
 
       const res = await fetch(`/api/admin/notifications?${params.toString()}`);
+      if (!res.ok) return;
       const data = await res.json();
       if (data.success && data.counts) {
         setCounts(data.counts);
       }
     } catch (e) {
-      console.error('Failed to load notification counts:', e);
+      // Silently handle transient network fetch errors during dev server rebuilds
     }
   };
 
