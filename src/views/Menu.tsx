@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, SlidersHorizontal, Star, Flame, X, ChevronLeft, ChevronRight, Leaf, ShoppingBag, Loader2, Check } from 'lucide-react';
 import type { Dish } from '../components/DishCard';
 
+import { SIGNATURE_DISHES as STATIC_DISHES } from '../utils/menuData';
+
 // Balaji Santosh Dhaba restaurant page URLs on delivery platforms
 const SWIGGY_URL = 'https://www.swiggy.com/menu/1035562?source=sharing';
 const ZOMATO_URL = 'https://zomato.onelink.me/xqzv/jr1hhrvj';
@@ -920,31 +922,41 @@ export const Menu: React.FC = () => {
   // Flatten active dishes for search, filtering, and deep-linking
   const allDishes = useMemo(() => {
     const list: Dish[] = [];
-    menuCategories.forEach(cat => {
-      cat.dishes.forEach((d: any) => {
-        // Exclude hidden dishes on public page
-        if (d.isHidden) return;
-        list.push({
-          id: d.id,
-          name: d.name,
-          teluguName: d.teluguName || undefined,
-          description: d.description || '',
-          price: d.price,
-          category: cat.name,
-          image: d.image,
-          rating: d.rating,
-          isVegetarian: d.isVegetarian,
-          isBestseller: d.isBestseller,
-          isChefSpecial: d.isChefSpecial,
-          isSeasonal: d.isSeasonal,
-          isOutOfStock: d.isOutOfStock,
-          images: d.images as string[] | undefined,
-          scheduleDays: d.scheduleDays as string[] | undefined,
-          scheduleTimings: d.scheduleTimings || undefined,
-          isRecommended: d.isRecommended
-        });
+    if (menuCategories && Array.isArray(menuCategories)) {
+      menuCategories.forEach(cat => {
+        if (cat && cat.dishes && Array.isArray(cat.dishes)) {
+          cat.dishes.forEach((d: any) => {
+            // Exclude hidden dishes on public page
+            if (d.isHidden) return;
+            list.push({
+              id: d.id,
+              name: d.name,
+              teluguName: d.teluguName || undefined,
+              description: d.description || '',
+              price: d.price,
+              category: cat.name,
+              image: d.image,
+              rating: d.rating,
+              isVegetarian: d.isVegetarian,
+              isBestseller: d.isBestseller,
+              isChefSpecial: d.isChefSpecial,
+              isSeasonal: d.isSeasonal,
+              isOutOfStock: d.isOutOfStock,
+              images: d.images as string[] | undefined,
+              scheduleDays: d.scheduleDays as string[] | undefined,
+              scheduleTimings: d.scheduleTimings || undefined,
+              isRecommended: d.isRecommended
+            });
+          });
+        }
       });
-    });
+    }
+
+    // Fallback to static dishes if DB menu returned 0 items
+    if (list.length === 0) {
+      return STATIC_DISHES;
+    }
+
     return list;
   }, [menuCategories]);
 
