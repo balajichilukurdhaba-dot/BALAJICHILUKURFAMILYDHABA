@@ -48,6 +48,8 @@ function AdminLoginPageContent() {
         let msg = supabaseError?.message || 'Invalid email or password in Supabase Auth.';
         if (msg.toLowerCase().includes('invalid api key')) {
           msg = 'Invalid Supabase API Key: Please update NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file with the "anon" public key (starts with eyJ...) from Supabase Dashboard -> Project Settings -> API.';
+        } else if (msg.toLowerCase().includes('invalid login credentials') || msg.toLowerCase().includes('invalid email or password')) {
+          msg = 'Invalid email or password. Please make sure this email is registered in Supabase Dashboard -> Authentication -> Users for project (wgjrmvybfkgqxlyiscqf).';
         }
         setError(msg);
         setLoading(false);
