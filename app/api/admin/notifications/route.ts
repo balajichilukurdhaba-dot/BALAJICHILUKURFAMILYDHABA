@@ -3,41 +3,45 @@ import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+function parseValidDate(dateStr: string | null): Date | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const lastSeenOrders = searchParams.get('lastSeen_orders');
-    const lastSeenReservations = searchParams.get('lastSeen_reservations');
-    const lastSeenQueries = searchParams.get('lastSeen_queries');
+    const lastSeenOrders = parseValidDate(searchParams.get('lastSeen_orders'));
+    const lastSeenReservations = parseValidDate(searchParams.get('lastSeen_reservations'));
+    const lastSeenQueries = parseValidDate(searchParams.get('lastSeen_queries'));
 
-    // 1. WhatsApp Orders: status = 'sent' AND createdAt > lastSeenOrders (if provided)
-    const whatsappOrders = await prisma.whatsAppOrder.count({
-      where: {
-        status: 'sent',
-        ...(lastSeenOrders ? { createdAt: { gt: new Date(lastSeenOrders) } } : {})
-      }
-    });
+    const [whatsappOrders, reservations, testimonials, queries] = await Promise.all([
+      prisma.whatsAppOrder.count({
+        where: {
+          status: 'sent',
+          ...(lastSeenOrders ? { createdAt: { gt: lastSeenOrders } } : {})
+        }
+      }).catch(() => 0),
 
-    // 2. Reservations: status = 'pending' AND createdAt > lastSeenReservations (if provided)
-    const reservations = await prisma.reservation.count({
-      where: {
-        status: 'pending',
-        ...(lastSeenReservations ? { createdAt: { gt: new Date(lastSeenReservations) } } : {})
-      }
-    });
+      prisma.reservation.count({
+        where: {
+          status: 'pending',
+          ...(lastSeenReservations ? { createdAt: { gt: lastSeenReservations } } : {})
+        }
+      }).catch(() => 0),
 
-    // 3. Testimonials: unapproved (isApproved = false)
-    const testimonials = await prisma.testimonial.count({
-      where: { isApproved: false }
-    });
+      prisma.testimonial.count({
+        where: { isApproved: false }
+      }).catch(() => 0),
 
-    // 4. Contact messages / Queries: isRead = false AND createdAt > lastSeenQueries (if provided)
-    const queries = await prisma.contactMessage.count({
-      where: {
-        isRead: false,
-        ...(lastSeenQueries ? { createdAt: { gt: new Date(lastSeenQueries) } } : {})
-      }
-    });
+      prisma.contactMessage.count({
+        where: {
+          isRead: false,
+          ...(lastSeenQueries ? { createdAt: { gt: lastSeenQueries } } : {})
+        }
+      }).catch(() => 0)
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -50,6 +54,14 @@ export async function GET(request: Request) {
     });
   } catch (error: any) {
     console.error('Error fetching notification counts:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      counts: {
+        whatsapp_orders: 0,
+        reservations: 0,
+        testimonials: 0,
+        queries: 0
+      }
+    });
   }
 }
