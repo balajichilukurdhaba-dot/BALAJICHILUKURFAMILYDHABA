@@ -1278,7 +1278,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     isVegetarian: true
   },
   {
-    id: 'para-8',
+    id: 'para-9',
     name: 'Masala Kulcha',
     teluguName: 'మసాలా కుల్చా',
     description: 'Crispy tandoor-baked stuffed bread filled with spiced potato and paneer masala, topped with nigella seeds.',

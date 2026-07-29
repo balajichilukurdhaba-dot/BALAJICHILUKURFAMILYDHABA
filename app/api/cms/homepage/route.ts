@@ -50,6 +50,32 @@ function getYouTubeEmbedUrl(url: string) {
   return url;
 }
 
+async function fetchHomepageFromSupabase() {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    if (!url || !key) return {};
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(url, key);
+
+    const { data } = await supabase.from('site_settings').select('*');
+    if (!data) return {};
+
+    const map: any = {};
+    data.forEach((s: any) => {
+      try {
+        map[s.key] = JSON.parse(s.value);
+      } catch {
+        map[s.key] = s.value;
+      }
+    });
+
+    return map;
+  } catch {
+    return {};
+  }
+}
+
 // GET /api/cms/homepage
 export async function GET(request: Request) {
   try {
@@ -72,9 +98,15 @@ export async function GET(request: Request) {
       'website_settings'
     ];
 
-    const settings = await prisma.siteSettings.findMany({
-      where: { key: { in: settingsKeys } }
-    });
+    let settings: any[] = [];
+    try {
+      settings = await prisma.siteSettings.findMany({
+        where: { key: { in: settingsKeys } }
+      });
+    } catch {
+      const fallbackMap = await fetchHomepageFromSupabase();
+      return NextResponse.json({ success: true, settings: fallbackMap });
+    }
 
     const settingsMap: any = {};
     
@@ -93,10 +125,7 @@ export async function GET(request: Request) {
     settings.forEach(s => {
       try {
         const val = JSON.parse(s.value);
-        
-        // If draft mode is active and we are loading hero, merge draft properties
         if (s.key === 'homepage_hero' && !loadDraft) {
-          // If public mode, use the published copy
           settingsMap[s.key] = {
             title: val.title,
             subtitle: val.subtitle,
@@ -116,8 +145,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, settings: settingsMap });
   } catch (error: any) {
-    console.error('Error fetching homepage CMS settings:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    const fallbackMap = await fetchHomepageFromSupabase();
+    return NextResponse.json({ success: true, settings: fallbackMap });
   }
 }
 

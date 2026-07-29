@@ -13,6 +13,55 @@ const noCacheHeaders = {
   'Surrogate-Control': 'no-store',
 };
 
+import { GALLERY_PHOTOS } from '@/utils/menuData';
+
+function getDefaultGallery() {
+  const photos = GALLERY_PHOTOS.map((p, i) => ({
+    id: p.id || `photo-${i}`,
+    src: p.src,
+    title: p.title,
+    menuCategory: p.menuCategory || null,
+    menuDishName: p.menuDishName || null,
+    order: i,
+    altText: p.title,
+    isFeatured: i < 6,
+    albumName: 'General',
+  }));
+  const albums = Array.from(new Set(photos.map((p) => p.albumName)));
+  return { photos, albums };
+}
+
+async function fetchGalleryFromSupabase() {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    if (!url || !key) return getDefaultGallery();
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(url, key);
+
+    const { data } = await supabase.from('gallery_photos').select('*').order('order', { ascending: true });
+    if (!data || data.length === 0) return getDefaultGallery();
+
+    const photos = data.map((p: any) => ({
+      id: p.id,
+      src: p.src,
+      title: p.title,
+      menuCategory: p.menu_category || p.menuCategory || null,
+      menuDishName: p.menu_dish_name || p.menuDishName || null,
+      order: p.order ?? 0,
+      altText: p.alt_text || p.altText || p.title,
+      isFeatured: p.is_featured ?? p.isFeatured ?? false,
+      albumName: p.album_name || p.albumName || 'General',
+    }));
+
+    const albums = Array.from(new Set(photos.map(p => p.albumName)));
+
+    return { photos, albums };
+  } catch {
+    return getDefaultGallery();
+  }
+}
+
 // GET /api/cms/gallery
 export async function GET(request: Request) {
   try {
@@ -21,40 +70,45 @@ export async function GET(request: Request) {
     const isFeatured = searchParams.get('featured') === 'true';
     const albumName = searchParams.get('album') || '';
 
-    const where: any = {};
-    if (isFeatured) {
-      where.isFeatured = true;
-    }
-    if (albumName) {
-      where.albumName = albumName;
-    }
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { menuDishName: { contains: search, mode: 'insensitive' } },
-        { menuCategory: { contains: search, mode: 'insensitive' } },
-      ];
-    }
+    let photos: any[] = [];
+    let albums: string[] = [];
 
-    const photos = await prisma.galleryPhoto.findMany({
-      where,
-      orderBy: { order: 'asc' },
-    });
+    try {
+      const where: any = {};
+      if (isFeatured) where.isFeatured = true;
+      if (albumName) where.albumName = albumName;
+      if (search) {
+        where.OR = [
+          { title: { contains: search, mode: 'insensitive' } },
+          { menuDishName: { contains: search, mode: 'insensitive' } },
+          { menuCategory: { contains: search, mode: 'insensitive' } },
+        ];
+      }
 
-    // Also get all unique albums for filter UI
-    const albums = await prisma.galleryPhoto.findMany({
-      select: { albumName: true },
-      distinct: ['albumName'],
-    });
+      photos = await prisma.galleryPhoto.findMany({
+        where,
+        orderBy: { order: 'asc' },
+      });
+
+      const albumData = await prisma.galleryPhoto.findMany({
+        select: { albumName: true },
+        distinct: ['albumName'],
+      });
+      albums = albumData.map(a => a.albumName);
+    } catch {
+      const fallback = await fetchGalleryFromSupabase();
+      photos = fallback.photos;
+      albums = fallback.albums;
+    }
 
     return NextResponse.json({ 
       success: true, 
       photos, 
-      albums: albums.map(a => a.albumName)
+      albums
     }, { headers: noCacheHeaders });
   } catch (error: any) {
-    console.error('Error fetching gallery:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500, headers: noCacheHeaders });
+    const fallback = await fetchGalleryFromSupabase();
+    return NextResponse.json({ success: true, photos: fallback.photos, albums: fallback.albums }, { headers: noCacheHeaders });
   }
 }
 

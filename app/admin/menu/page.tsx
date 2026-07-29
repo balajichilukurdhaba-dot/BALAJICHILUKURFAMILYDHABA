@@ -749,9 +749,9 @@ export default function MenuCMS() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {allDishes.map((dish) => (
+                {allDishes.map((dish, idx) => (
                   <FoodCard 
-                    key={dish.id} 
+                    key={dish.id ? `${dish.id}-${idx}` : `dish-${idx}`} 
                     dish={dish}
                     onToggleStock={handleToggleStock}
                     onToggleHide={handleToggleHide}

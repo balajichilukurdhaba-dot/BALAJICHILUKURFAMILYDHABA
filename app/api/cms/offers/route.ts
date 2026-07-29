@@ -4,6 +4,38 @@ import { getSessionUser, logAdminAction } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
+async function fetchOffersFromSupabase() {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    if (!url || !key) return [];
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(url, key);
+
+    const { data } = await supabase.from('offers').select('*').order('display_priority', { ascending: false });
+    if (!data) return [];
+
+    return data.map((o: any) => ({
+      id: o.id,
+      title: o.title,
+      description: o.description,
+      price: o.price,
+      image: o.image,
+      badge: o.badge || 'Offer',
+      cta: o.cta || 'Order Now',
+      link: o.link || '/menu',
+      isActive: o.is_active ?? o.isActive ?? true,
+      startDate: o.start_date || o.startDate || null,
+      endDate: o.end_date || o.endDate || null,
+      showOnHomepage: o.show_on_homepage ?? o.showOnHomepage ?? true,
+      displayPriority: o.display_priority ?? o.displayPriority ?? 0,
+      branchId: o.branch_id || o.branchId || null
+    }));
+  } catch {
+    return [];
+  }
+}
+
 // GET /api/cms/offers
 export async function GET(request: Request) {
   try {
@@ -12,98 +44,79 @@ export async function GET(request: Request) {
     const activeOnly = searchParams.get('activeOnly') === 'true';
     const homepageOnly = searchParams.get('homepageOnly') === 'true';
 
-    // Auto-seed default campaigns if table is completely empty
-    const totalCount = await prisma.offer.count();
-    if (totalCount === 0) {
-      await prisma.offer.createMany({
-        data: [
-          {
-            title: '10% Off Online Bookings',
-            badge: 'Limited Time',
-            description: JSON.stringify({
-              comboDishes: [],
-              discountType: 'percentage',
-              discountValue: '10',
-              targetBranches: [],
-              text: 'Skip the wait and get 10% off your entire bill when you reserve a table online.'
-            }),
-            price: '-10% OFF',
-            cta: 'Book Now',
-            link: '/reserve',
-            image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
-            isActive: true,
-            showOnHomepage: true,
-            displayPriority: 10
-          },
-          {
-            title: 'Jumbo Family Pack',
-            badge: 'Best Value',
-            description: JSON.stringify({
-              comboDishes: ['Veg Biryani', 'Paneer Butter Masala', 'Tandoori Roti', 'Gulab Jamun'],
-              discountType: 'fixed',
-              discountValue: '1499',
-              targetBranches: [],
-              text: 'Perfect for 4-5 people. Includes Biryani, Curries, Rotis, and Desserts.'
-            }),
-            price: '₹1499',
-            cta: 'Order Now',
-            link: '/menu',
-            image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
-            isActive: true,
-            showOnHomepage: true,
-            displayPriority: 5
-          }
-        ]
+    let offers: any[] = [];
+    try {
+      // Auto-seed default campaigns if table is completely empty
+      const totalCount = await prisma.offer.count();
+      if (totalCount === 0) {
+        await prisma.offer.createMany({
+          data: [
+            {
+              title: '10% Off Online Bookings',
+              badge: 'Limited Time',
+              description: JSON.stringify({
+                comboDishes: [],
+                discountType: 'percentage',
+                discountValue: '10',
+                targetBranches: [],
+                text: 'Skip the wait and get 10% off your entire bill when you reserve a table online.'
+              }),
+              price: '-10% OFF',
+              cta: 'Book Now',
+              link: '/reserve',
+              image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
+              isActive: true,
+              showOnHomepage: true,
+              displayPriority: 10
+            },
+            {
+              title: 'Jumbo Family Pack',
+              badge: 'Best Value',
+              description: JSON.stringify({
+                comboDishes: ['Veg Biryani', 'Paneer Butter Masala', 'Tandoori Roti', 'Gulab Jamun'],
+                discountType: 'fixed',
+                discountValue: '1499',
+                targetBranches: [],
+                text: 'Perfect for 4-5 people. Includes Biryani, Curries, Rotis, and Desserts.'
+              }),
+              price: '₹1499',
+              cta: 'Order Now',
+              link: '/menu',
+              image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
+              isActive: true,
+              showOnHomepage: true,
+              displayPriority: 5
+            }
+          ]
+        });
+      }
+
+      const where: any = {};
+      if (activeOnly) {
+        where.isActive = true;
+        const now = new Date();
+        where.OR = [
+          { startDate: null, endDate: null },
+          { startDate: { lte: now }, endDate: { gte: now } },
+          { startDate: { lte: now }, endDate: null },
+          { startDate: null, endDate: { gte: now } }
+        ];
+      }
+      if (homepageOnly) where.showOnHomepage = true;
+      if (branchId) where.OR = [{ branchId: null }, { branchId }];
+
+      offers = await prisma.offer.findMany({
+        where,
+        orderBy: { displayPriority: 'desc' }
       });
+    } catch {
+      offers = await fetchOffersFromSupabase();
     }
-
-    const where: any = {};
-
-    if (activeOnly) {
-      where.isActive = true;
-      
-      // Auto-expire scheduler check
-      const now = new Date();
-      where.OR = [
-        {
-          startDate: null,
-          endDate: null
-        },
-        {
-          startDate: { lte: now },
-          endDate: { gte: now }
-        },
-        {
-          startDate: { lte: now },
-          endDate: null
-        },
-        {
-          startDate: null,
-          endDate: { gte: now }
-        }
-      ];
-    }
-
-    if (homepageOnly) {
-      where.showOnHomepage = true;
-    }
-
-    if (branchId) {
-      where.OR = [
-        { branchId: null }, // Global offers
-        { branchId: branchId } // Branch-specific offers
-      ];
-    }
-
-    const offers = await prisma.offer.findMany({
-      where,
-      orderBy: { displayPriority: 'desc' }
-    });
 
     return NextResponse.json({ success: true, offers });
   } catch (error: any) {
-    console.error('Error fetching offers:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    const fallback = await fetchOffersFromSupabase();
+    return NextResponse.json({ success: true, offers: fallback });
   }
 }
 

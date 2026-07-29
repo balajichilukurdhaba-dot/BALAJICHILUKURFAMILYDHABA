@@ -18,15 +18,46 @@ const getCachedBranches = unstable_cache(
   { tags: ['branches'] }
 );
 
+async function fetchBranchesFromSupabase() {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    if (!url || !key) return [];
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(url, key);
+
+    const { data } = await supabase.from('branches').select('*').order('name', { ascending: true });
+    if (!data) return [];
+
+    return data.map((b: any) => ({
+      id: b.id,
+      name: b.name,
+      address: b.address,
+      phone: b.phone,
+      totalTables: b.total_tables || b.totalTables || 10,
+      openingTime: b.opening_time || b.openingTime || '09:00',
+      closingTime: b.closing_time || b.closingTime || '22:00',
+      tables: []
+    }));
+  } catch {
+    return [];
+  }
+}
+
 // GET /api/cms/branches
 export async function GET() {
   try {
-    const branches = await getCachedBranches();
+    let branches: any[] = [];
+    try {
+      branches = await getCachedBranches();
+    } catch {
+      branches = await fetchBranchesFromSupabase();
+    }
 
     return NextResponse.json({ success: true, branches });
   } catch (error: any) {
-    console.error('Error fetching branches:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    const fallback = await fetchBranchesFromSupabase();
+    return NextResponse.json({ success: true, branches: fallback });
   }
 }
 

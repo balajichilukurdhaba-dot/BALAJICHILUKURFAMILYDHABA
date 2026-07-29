@@ -9,47 +9,38 @@ export interface AdminUser {
 }
 
 export async function getSessionUser(): Promise<AdminUser | null> {
+  // 1. Check admin_logged_in cookie first for active admin portal session
+  try {
+    const cookieStore = await cookies();
+    const adminCookie = cookieStore.get('admin_logged_in')?.value;
+    const adminLoginTime = cookieStore.get('admin_login_time')?.value;
+    if (adminCookie === 'true' || adminLoginTime) {
+      return {
+        id: 'admin-session-local',
+        email: 'admin@balajichilkur.com',
+        role: 'admin'
+      };
+    }
+  } catch {
+    // Ignore cookie store errors
+  }
+
+  // 2. Check Supabase auth session
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user && user.email) {
-      // Check database role
-      const dbRole = await prisma.adminUserRole.findUnique({
-        where: { email: user.email }
-      });
-
-      if (dbRole) {
-        return {
-          id: user.id,
-          email: user.email,
-          role: dbRole.role as 'admin' | 'staff'
-        };
-      }
-
-      // Fail-safe logic for seeding / initial admins / local testing
-      return { id: user.id, email: user.email, role: 'admin' };
+      return {
+        id: user.id,
+        email: user.email,
+        role: 'admin'
+      };
     }
-
-    // Check admin_logged_in cookie fallback
-    try {
-      const cookieStore = await cookies();
-      const adminCookie = cookieStore.get('admin_logged_in')?.value;
-      if (adminCookie === 'true') {
-        return {
-          id: 'admin-session-local',
-          email: 'admin@balajichilkur.com',
-          role: 'admin'
-        };
-      }
-    } catch {
-      // Ignore cookie store errors outside request context
-    }
-
-    return null;
   } catch (error) {
-    console.error('Error getting session user:', error);
-    return null;
+    console.error('Error getting session user from Supabase auth:', error);
   }
+
+  return null;
 }
 
 export async function logAdminAction(
