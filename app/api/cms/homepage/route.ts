@@ -76,6 +76,13 @@ async function fetchHomepageFromSupabase() {
   }
 }
 
+const noCacheHeaders = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  'Pragma': 'no-cache',
+  'Expires': '0',
+  'Surrogate-Control': 'no-store',
+};
+
 // GET /api/cms/homepage
 export async function GET(request: Request) {
   try {
@@ -105,7 +112,7 @@ export async function GET(request: Request) {
       });
     } catch {
       const fallbackMap = await fetchHomepageFromSupabase();
-      return NextResponse.json({ success: true, settings: fallbackMap });
+      return NextResponse.json({ success: true, settings: fallbackMap }, { headers: noCacheHeaders });
     }
 
     const settingsMap: any = {};
@@ -127,8 +134,8 @@ export async function GET(request: Request) {
         const val = JSON.parse(s.value);
         if (s.key === 'homepage_hero' && !loadDraft) {
           settingsMap[s.key] = {
-            title: val.title,
-            subtitle: val.subtitle,
+            title: val.title || val.draftTitle,
+            subtitle: val.subtitle || val.draftSubtitle,
             videoUrl: val.videoUrl,
             ctaText: val.ctaText,
             ctaLink: val.ctaLink,
@@ -143,10 +150,10 @@ export async function GET(request: Request) {
       }
     });
 
-    return NextResponse.json({ success: true, settings: settingsMap });
+    return NextResponse.json({ success: true, settings: settingsMap }, { headers: noCacheHeaders });
   } catch (error: any) {
     const fallbackMap = await fetchHomepageFromSupabase();
-    return NextResponse.json({ success: true, settings: fallbackMap });
+    return NextResponse.json({ success: true, settings: fallbackMap }, { headers: noCacheHeaders });
   }
 }
 
@@ -179,13 +186,10 @@ export async function POST(request: Request) {
         secondaryCtaLink: heroVal.secondaryCtaLink,
         draftTitle: heroVal.title,
         draftSubtitle: heroVal.subtitle,
-        isPublished: isPublish
+        title: heroVal.title,
+        subtitle: heroVal.subtitle,
+        isPublished: true
       };
-
-      if (isPublish) {
-        newHero.title = heroVal.title;
-        newHero.subtitle = heroVal.subtitle;
-      }
 
       await prisma.siteSettings.upsert({
         where: { key: 'homepage_hero' },
@@ -214,12 +218,16 @@ export async function POST(request: Request) {
         body
       );
 
-      if (isPublish) {
+      try {
         revalidatePath('/');
         revalidatePath('/about');
+        revalidatePath('/menu');
+        revalidatePath('/admin/homepage');
+      } catch (e) {
+        console.error(e);
       }
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, settings: body }, { headers: noCacheHeaders });
     }
 
     // Fallback: singular key-value updates

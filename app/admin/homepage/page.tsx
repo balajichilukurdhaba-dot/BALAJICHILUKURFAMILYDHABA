@@ -142,6 +142,12 @@ export default function HomepageCMS() {
       });
       const data = await res.json();
       if (data.success) {
+        try {
+          const ch = new BroadcastChannel('homepage-updates');
+          ch.postMessage('homepage-updated');
+          ch.close();
+        } catch (e) {}
+
         setSuccessMsg(isPublishing ? 'Changes successfully published live!' : 'Draft saved. Reloading preview...');
         setPreviewKey(prev => prev + 1); // reload preview
         setTimeout(() => setSuccessMsg(null), 4000);
