@@ -20,6 +20,7 @@ interface Order {
 
 interface ClientOrdersDashboardProps {
   initialOrders: Order[];
+  dbError?: string | null;
 }
 
 const WhatsAppIcon = ({ size = 15, className = "" }: { size?: number; className?: string }) => (
@@ -86,7 +87,7 @@ function getWhatsAppMessage(order: { orderRef: string; customerName: string | nu
   }
 }
 
-export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDashboardProps) {
+export default function ClientOrdersDashboard({ initialOrders, dbError }: ClientOrdersDashboardProps) {
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>(initialOrders);
@@ -128,7 +129,7 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
   };
 
   const [todayValue, setTodayValue] = useState<string>(() => getLocalDateStr(0));
-  const [selectedDate, setSelectedDate] = useState<string>(() => getLocalDateStr(0));
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const calendarInputRef = useRef<HTMLInputElement>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -180,28 +181,33 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
     return days;
   }, [todayValue]);
 
-  // Filter orders
+  // Filter orders cleanly with full null-safety
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
+      if (!order) return false;
+
       // 1. Date filter
       if (selectedDate) {
-        const orderDateStr = order.createdAt.split('T')[0];
+        const orderDateStr = typeof order.createdAt === 'string'
+          ? order.createdAt.split('T')[0]
+          : (order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] : '');
         if (orderDateStr !== selectedDate) return false;
       }
 
       // 2. Status filter
-      if (statusFilter !== 'all' && order.status.toLowerCase() !== statusFilter.toLowerCase()) {
+      const statusStr = (order.status || '').toLowerCase();
+      if (statusFilter !== 'all' && statusStr !== statusFilter.toLowerCase()) {
         return false;
       }
 
       // 3. Search query filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        const refMatch = order.orderRef.toLowerCase().includes(query);
+        const refMatch = (order.orderRef || '').toLowerCase().includes(query);
         const nameMatch = (order.customerName || '').toLowerCase().includes(query);
-        const phoneMatch = order.phone.includes(query);
+        const phoneMatch = (order.phone || '').includes(query);
         const itemsMatch = Array.isArray(order.items) && order.items.some((item: any) => 
-          (item.name || '').toLowerCase().includes(query)
+          (item?.name || '').toLowerCase().includes(query)
         );
         if (!refMatch && !nameMatch && !phoneMatch && !itemsMatch) return false;
       }
@@ -212,6 +218,19 @@ export default function ClientOrdersDashboard({ initialOrders }: ClientOrdersDas
 
   return (
     <div className="space-y-6 font-sans text-slate-800 antialiased max-w-7xl mx-auto px-2 sm:px-4">
+      {dbError && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-amber-900 shadow-xs">
+          <AlertCircle className="text-amber-600 flex-shrink-0 mt-0.5" size={18} />
+          <div className="text-xs space-y-1">
+            <h4 className="font-bold text-amber-950 text-sm">Database Connection Warning</h4>
+            <p className="text-amber-800">{dbError}</p>
+            <p className="text-[11px] text-amber-700 pt-1">
+              <strong>Fix:</strong> Log in to your <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="underline font-semibold hover:text-amber-950">Supabase Dashboard</a>, check project <code>wgjrmvybfkgqxlyiscqf</code> status, and click <em>Restore Project / Unpause</em> if it is paused.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/60">
         <div>

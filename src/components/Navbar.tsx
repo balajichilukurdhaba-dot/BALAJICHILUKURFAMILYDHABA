@@ -138,6 +138,14 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    setIsOpen(false);
+    setActiveHash('');
+    if (pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
       <motion.nav
@@ -156,7 +164,7 @@ export const Navbar: React.FC = () => {
           isScrolled ? 'py-3' : 'py-5'
         }`}>
           {/* Logo / Brand Name */}
-          <Link href="/" className="flex items-center space-x-2 md:space-x-3 group">
+          <Link href="/" onClick={handleLogoClick} className="flex items-center space-x-2 md:space-x-3 group">
             <img 
               src="/bsd-logo.png" 
               alt="Balaji Chilkur Family Dhaba Logo" 

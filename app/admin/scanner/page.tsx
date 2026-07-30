@@ -107,52 +107,84 @@ export default function ScannerPage() {
           console.warn("Video play interrupted:", playErr);
         }
 
+        // Native BarcodeDetector hardware acceleration check
+        let barcodeDetector: any = null;
+        if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+          try {
+            barcodeDetector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+          } catch (e) {
+            barcodeDetector = null;
+          }
+        }
+
+        const playScanBeep = () => {
+          try {
+            const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.15);
+          } catch (e) {}
+        };
+
         // Canvas frame scan loop
-        const tick = () => {
+        const tick = async () => {
           if (!active) return;
           if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            
+            // 1. Native Hardware BarcodeDetector Attempt
+            if (barcodeDetector) {
+              try {
+                const barcodes = await barcodeDetector.detect(video);
+                if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                  stopMediaStream();
+                  setUseCamera(false);
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(100);
+                  playScanBeep();
+                  handleScan(barcodes[0].rawValue);
+                  return;
+                }
+              } catch (e) {
+                // Fallback to jsQR
+              }
+            }
+
+            // 2. jsQR Downscaled Engine Attempt (Max 640px for instant 5ms decoding)
+            const maxDim = 640;
+            let width = video.videoWidth;
+            let height = video.videoHeight;
+
+            if (width > maxDim) {
+              const ratio = maxDim / width;
+              width = maxDim;
+              height = Math.round(height * ratio);
+            }
+
             const canvas = canvasRef.current || document.createElement('canvas');
             canvasRef.current = canvas;
-            
-            const width = video.videoWidth;
-            const height = video.videoHeight;
             canvas.width = width;
             canvas.height = height;
 
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
             if (ctx) {
               ctx.drawImage(video, 0, 0, width, height);
               const imageData = ctx.getImageData(0, 0, width, height);
 
-              // SAFARI & MOBILE CHROME STREAM ENGINE FREEZE PROTECTION
-              let sum = 0;
-              for (let i = 0; i < imageData.data.length; i += 4000) {
-                sum += imageData.data[i];
-              }
-
-              const now = Date.now();
-              if (sum === lastFrameHashRef.current) {
-                if (lastFrameChangeTimeRef.current === 0) {
-                  lastFrameChangeTimeRef.current = now;
-                } else if (now - lastFrameChangeTimeRef.current > 3000) {
-                  console.warn("Camera stream freeze detected (3s static frame). Restarting stream...");
-                  stopMediaStream();
-                  setRestartCount(prev => prev + 1);
-                  return;
-                }
-              } else {
-                lastFrameHashRef.current = sum;
-                lastFrameChangeTimeRef.current = now;
-              }
-
-              // Decode frame buffer using jsQR
+              // Decode frame buffer using jsQR with attemptBoth
               const decoded = jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: "dontInvert"
+                inversionAttempts: "attemptBoth"
               });
 
-              if (decoded) {
+              if (decoded && decoded.data) {
                 stopMediaStream();
                 setUseCamera(false);
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(100);
+                playScanBeep();
                 handleScan(decoded.data);
                 return;
               }

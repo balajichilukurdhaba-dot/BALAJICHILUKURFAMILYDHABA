@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Calendar, CheckCircle, Clock, Search, Filter, Phone, Users, Plus, 
   X, Mail, FileText, Loader2, AlertCircle, Edit, Save, Trash2, Check,
-  User, CheckSquare, Square, RefreshCw
+  User, CheckSquare, Square, RefreshCw, XCircle
 } from 'lucide-react';
 
 // Helper: get local YYYY-MM-DD string offset by daysAgo from today
@@ -222,10 +222,11 @@ export default function ReservationsClient({ initialReservations }: { initialRes
       res.phone.includes(searchTerm) ||
       res.bookingRef.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Status filter — All / Confirmed / Pending / Cancelled / Claimed
+    // Status filter — All / Unclaimed / Claimed / Confirmed / Pending / Cancelled
     const matchesStatus =
       statusFilter === 'all'       ? true
-      : statusFilter === 'claimed' ? res.discountVerified === true
+      : statusFilter === 'claimed'   ? res.discountVerified === true
+      : statusFilter === 'unclaimed' ? res.discountVerified !== true
       : res.status === statusFilter;
 
     return matchesSearch && matchesStatus;
@@ -433,13 +434,14 @@ export default function ReservationsClient({ initialReservations }: { initialRes
           />
         </div>
 
-        {/* Filter Tabs — All / Pending / Claimed / Confirmed / Cancelled */}
-        <div className="flex bg-zinc-100 p-1 rounded-xl border border-zinc-200 gap-0.5">
+        {/* Filter Tabs — All / Unclaimed / Claimed / Pending / Confirmed / Cancelled */}
+        <div className="flex bg-zinc-100 p-1 rounded-xl border border-zinc-200 gap-0.5 overflow-x-auto">
           {([
             { key: 'all',       label: 'All',       active: 'bg-zinc-800 text-white shadow-sm res-status-tab-active' },
-            { key: 'pending',   label: 'Pending',    active: 'bg-amber-500 text-white shadow-sm res-status-tab-active shadow-amber-500/30' },
-            { key: 'claimed',   label: 'Claimed',    active: 'bg-violet-600 text-white shadow-sm res-status-tab-active shadow-violet-600/30' },
-            { key: 'confirmed', label: 'Confirmed',  active: 'bg-emerald-600 text-white shadow-sm res-status-tab-active shadow-emerald-600/30' },
+            { key: 'unclaimed', label: 'Unclaimed', active: 'bg-amber-600 text-white shadow-sm res-status-tab-active shadow-amber-600/30' },
+            { key: 'claimed',   label: 'Claimed',    active: 'bg-emerald-600 text-white shadow-sm res-status-tab-active shadow-emerald-600/30' },
+            { key: 'pending',   label: 'Pending',    active: 'bg-zinc-700 text-white shadow-sm res-status-tab-active' },
+            { key: 'confirmed', label: 'Confirmed',  active: 'bg-sky-600 text-white shadow-sm res-status-tab-active shadow-sky-600/30' },
             { key: 'cancelled', label: 'Cancelled',  active: 'bg-rose-600 text-white shadow-sm res-status-tab-active shadow-rose-600/30' },
           ] as const).map(({ key, label, active }) => (
             <button
@@ -500,26 +502,32 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                       </div>
                     </td>
                     <td className="p-5">
-                      <button
-                        onClick={() => handleToggleClaim(res.id, res.discountVerified)}
-                        className={`res-action-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-[9px] uppercase tracking-wider border transition-all ${
-                          res.discountVerified
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-100 hover:bg-emerald-100/50'
-                            : 'bg-zinc-100 text-zinc-800 border-zinc-200 hover:bg-zinc-200'
+                      <div
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider border shadow-2xs ${
+                          res.status === 'cancelled'
+                            ? 'bg-rose-50 text-rose-900 border-rose-200/80'
+                            : res.discountVerified
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
+                            : 'bg-amber-50 text-amber-800 border-amber-200/80'
                         }`}
                       >
-                        {res.discountVerified ? (
+                        {res.status === 'cancelled' ? (
                           <>
-                            <CheckCircle size={10} />
+                            <XCircle size={11} className="text-rose-600" />
+                            <span>{res.discountVerified ? 'Claimed (Cancelled)' : 'Unclaimed (Cancelled)'}</span>
+                          </>
+                        ) : res.discountVerified ? (
+                          <>
+                            <CheckCircle size={11} className="text-emerald-600" />
                             <span>Claimed</span>
                           </>
                         ) : (
                           <>
-                            <Clock size={10} />
+                            <Clock size={11} className="text-amber-600" />
                             <span>Unclaimed</span>
                           </>
                         )}
-                      </button>
+                      </div>
                     </td>
                     <td className="p-5">
                       <select

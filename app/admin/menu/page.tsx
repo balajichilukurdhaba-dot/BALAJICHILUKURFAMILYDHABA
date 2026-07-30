@@ -1235,7 +1235,15 @@ const FoodCard = React.memo(function FoodCard({
       <div>
         {/* Dish Image header */}
         <div className={`relative h-40 bg-zinc-950 overflow-hidden ${dish.isOutOfStock ? 'opacity-50 grayscale' : ''}`}>
-          <img src={dish.image} alt={dish.name} className="w-full h-full object-cover transition-all duration-300" />
+          <img 
+            src={dish.image} 
+            alt={dish.name} 
+            className="w-full h-full object-cover transition-all duration-300" 
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).onerror = null;
+              (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+            }}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
           
           {/* Badges on Image */}
@@ -1281,7 +1289,7 @@ const FoodCard = React.memo(function FoodCard({
               {dish.categoryName}
             </span>
             <span className="font-display font-black text-white text-lg font-mono">
-              ₹{dish.price}
+              {dish.price?.startsWith('₹') ? dish.price : `₹${dish.price}`}
             </span>
           </div>
         </div>

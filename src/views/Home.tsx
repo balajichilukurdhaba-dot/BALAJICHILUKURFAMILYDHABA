@@ -496,65 +496,89 @@ export const Home: React.FC = () => {
   const galleryScrollRef = useRef<HTMLDivElement>(null);
   const galleryDragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0, hasDragged: false });
 
-  useEffect(() => {
-    async function loadCMSData() {
-      try {
-        const previewMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('preview') === 'true';
+  const loadCMSData = React.useCallback(async () => {
+    try {
+      const previewMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('preview') === 'true';
+      const cacheBust = `${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
-        const [settingsRes, menuRes, offersRes, testimonialsRes, galleryRes, branchesRes] = await Promise.all([
-          fetch(`/api/cms/homepage?draft=${previewMode}`),
-          fetch(`/api/cms/menu?cacheBust=${Date.now()}_${Math.random().toString(36).substring(7)}`, {
-            cache: 'no-store',
-            next: { revalidate: 0 },
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, proxy-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0'
+      const [settingsRes, menuRes, offersRes, testimonialsRes, galleryRes, branchesRes] = await Promise.all([
+        fetch(`/api/cms/homepage?draft=${previewMode}&t=${cacheBust}`, { cache: 'no-store' }),
+        fetch(`/api/cms/menu?cacheBust=${cacheBust}`, {
+          cache: 'no-store',
+          next: { revalidate: 0 },
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        }),
+        fetch(`/api/cms/offers?activeOnly=true&homepageOnly=true&t=${cacheBust}`, { cache: 'no-store' }),
+        fetch(`/api/cms/testimonials?approvedOnly=true&t=${cacheBust}`, { cache: 'no-store' }),
+        fetch(`/api/cms/gallery?featured=true&t=${cacheBust}`, { cache: 'no-store' }),
+        fetch(`/api/cms/branches?t=${cacheBust}`, { cache: 'no-store' })
+      ]);
+
+      const [settingsData, menuData, offersData, testimonialsData, galleryData, branchesData] = await Promise.all([
+        settingsRes.json(),
+        menuRes.json(),
+        offersRes.json(),
+        testimonialsRes.json(),
+        galleryRes.json(),
+        branchesRes.json()
+      ]);
+
+      if (settingsData.success) setCmsSettings(settingsData.settings);
+
+      if (menuData.success) {
+        const all: any[] = [];
+        menuData.categories.forEach((cat: any) => {
+          cat.dishes.forEach((d: any) => {
+            if (!d.isHidden) {
+              all.push({ ...d, category: cat.name });
             }
-          }),
-          fetch('/api/cms/offers?activeOnly=true&homepageOnly=true'),
-          fetch('/api/cms/testimonials?approvedOnly=true'),
-          fetch(`/api/cms/gallery?featured=true&t=${Date.now()}`, { cache: 'no-store' }),
-          fetch('/api/cms/branches')
-        ]);
-
-        const [settingsData, menuData, offersData, testimonialsData, galleryData, branchesData] = await Promise.all([
-          settingsRes.json(),
-          menuRes.json(),
-          offersRes.json(),
-          testimonialsRes.json(),
-          galleryRes.json(),
-          branchesRes.json()
-        ]);
-
-        if (settingsData.success) setCmsSettings(settingsData.settings);
-
-        if (menuData.success) {
-          const all: any[] = [];
-          menuData.categories.forEach((cat: any) => {
-            cat.dishes.forEach((d: any) => {
-              if (!d.isHidden) {
-                all.push({ ...d, category: cat.name });
-              }
-            });
           });
-          setDishes(all);
-        }
-
-        if (offersData.success) setOffers(offersData.offers);
-        if (testimonialsData.success) setTestimonials(testimonialsData.testimonials);
-        if (galleryData.success) setGalleryPhotos(galleryData.photos);
-        if (branchesData.success) setBranches(branchesData.branches);
-
-      } catch (error) {
-        console.error('Failed to load CMS data on home:', error);
-      } finally {
-        setLoading(false);
+        });
+        setDishes(all);
       }
-    }
 
-    loadCMSData();
+      if (offersData.success) setOffers(offersData.offers);
+      if (testimonialsData.success) setTestimonials(testimonialsData.testimonials);
+      if (galleryData.success) setGalleryPhotos(galleryData.photos);
+      if (branchesData.success) setBranches(branchesData.branches);
+
+    } catch (error) {
+      console.error('Failed to load CMS data on home:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadCMSData();
+
+    // BroadcastChannel: instant cross-tab invalidation whenever Admin saves
+    const channels: BroadcastChannel[] = [];
+    ['menu-updates', 'gallery-updates', 'offers-updates', 'homepage-updates'].forEach((channelName) => {
+      try {
+        const channel = new BroadcastChannel(channelName);
+        channel.onmessage = () => loadCMSData();
+        channels.push(channel);
+      } catch { /* old browsers */ }
+    });
+
+    const handleFocus = () => loadCMSData();
+    window.addEventListener('focus', handleFocus);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadCMSData();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      channels.forEach(ch => ch.close());
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [loadCMSData]);
 
 
 

@@ -77,6 +77,10 @@ export const DishCard: React.FC<DishCardProps> = ({ dish, onOrderClick, isCompac
           alt={dish.name}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           loading="lazy"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).onerror = null;
+            (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+          }}
         />
         {/* Dark overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />

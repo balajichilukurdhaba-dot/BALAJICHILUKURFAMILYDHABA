@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { headers } from 'next/headers';
+import { logAdminAction } from '@/lib/auth';
 
 // Self-bootstrapping: create table if it doesn't exist yet
 async function ensureTable() {
@@ -96,6 +97,8 @@ export async function POST(req: NextRequest) {
       ip,
       userAgent
     );
+
+    await logAdminAction('admin-session', emailToUse, 'ADMIN_LOGIN', `Admin logged in from IP ${ip}`);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

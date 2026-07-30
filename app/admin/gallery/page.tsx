@@ -554,72 +554,84 @@ export default function GalleryCMS() {
                 {displayedPhotos.map((photo, index) => (
                   <div 
                     key={photo.id} 
-                    className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between group"
+                    className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow"
                   >
-                    <div className="relative aspect-square bg-zinc-950">
-                      <img src={photo.src} alt={photo.altText || photo.title} loading="lazy" className="w-full h-full object-cover" />
-                      
-                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-5">
-                        <div className="w-full flex justify-between items-end">
-                          <div>
-                            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">
-                              {photo.albumName}
-                            </span>
-                            <h4 className="font-display font-bold text-white text-sm leading-tight mt-0.5">
-                              {photo.title}
-                            </h4>
-                          </div>
+                    <div>
+                      {/* Image header with 16:9 aspect ratio */}
+                      <div className="relative aspect-video bg-zinc-950 overflow-hidden">
+                        <img src={photo.src} alt={photo.altText || photo.title} loading="lazy" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/60 via-transparent to-transparent" />
+                        
+                        {/* Featured badge */}
+                        {photo.isFeatured && (
+                          <span className="absolute top-3 right-3 bg-amber-500/90 text-white text-[9px] font-bold px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1 shadow-sm">
+                            ⭐ Homepage
+                          </span>
+                        )}
 
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={() => handleToggleFeatured(photo)}
-                              className={`p-1.5 rounded-lg backdrop-blur-md transition-colors ${
-                                photo.isFeatured 
-                                  ? 'bg-zinc-100 text-zinc-800' 
-                                  : 'bg-black/55 text-zinc-400 hover:bg-black/75'
-                              }`}
-                              title="Feature on Home Page"
-                            >
-                              <Star size={12} fill={photo.isFeatured ? "currentColor" : "none"} />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditingPhoto(photo);
-                                setEditTitle(photo.title);
-                                setEditAltText(photo.altText || '');
-                                setEditAlbum(photo.albumName);
-                                setEditIsFeatured(photo.isFeatured);
-                                setEditMenuCategory(photo.menuCategory || '');
-                                setEditMenuDish(photo.menuDishName || '');
-                              }}
-                              className="p-1.5 rounded-lg bg-black/55 text-zinc-200 hover:bg-black/75 backdrop-blur-md transition-colors"
-                              title="Edit Metadata & File"
-                            >
-                              <Edit size={12} />
-                            </button>
-                          </div>
+                        {/* Display Order badge */}
+                        <span className="absolute top-3 left-3 bg-black/60 text-zinc-200 text-[9px] font-mono font-bold px-2 py-0.5 rounded backdrop-blur-sm">
+                          Order #{photo.displayOrder || index + 1}
+                        </span>
+
+                        {/* Quick action buttons on image */}
+                        <div className="absolute bottom-3 right-3 flex items-center gap-1.5 z-10">
+                          <button
+                            onClick={() => handleToggleFeatured(photo)}
+                            className={`p-1.5 rounded-lg backdrop-blur-md transition-colors ${
+                              photo.isFeatured 
+                                ? 'bg-amber-400 text-zinc-950 font-bold' 
+                                : 'bg-black/60 text-zinc-300 hover:bg-black/80'
+                            }`}
+                            title="Feature on Home Page"
+                          >
+                            <Star size={13} fill={photo.isFeatured ? "currentColor" : "none"} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingPhoto(photo);
+                              setEditTitle(photo.title);
+                              setEditAltText(photo.altText || '');
+                              setEditAlbum(photo.albumName);
+                              setEditIsFeatured(photo.isFeatured);
+                              setEditMenuCategory(photo.menuCategory || '');
+                              setEditMenuDish(photo.menuDishName || '');
+                            }}
+                            className="p-1.5 rounded-lg bg-black/60 text-zinc-200 hover:bg-black/80 backdrop-blur-md transition-colors"
+                            title="Edit Metadata & File"
+                          >
+                            <Edit size={13} />
+                          </button>
                         </div>
                       </div>
 
-                      {/* Display Order Position indicator */}
-                      <span className="absolute top-4 left-4 bg-black/60 text-zinc-300 text-[9px] font-mono font-bold px-2 py-0.5 rounded backdrop-blur-sm">
-                        Order #{photo.displayOrder || index + 1}
-                      </span>
-
-                      {photo.isFeatured && (
-                        <span className="absolute top-4 right-4 bg-amber-500/90 text-white text-[9px] font-bold px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1 shadow-sm">
-                          ⭐ Homepage
-                        </span>
-                      )}
+                      {/* Content Info (Title, Album, linked menu item) */}
+                      <div className="p-4 space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[9px] font-extrabold uppercase tracking-widest text-zinc-400">
+                            {photo.albumName || 'GENERAL'}
+                          </span>
+                        </div>
+                        <h4 className="font-display font-bold text-zinc-900 text-sm leading-snug">
+                          {photo.title || 'Untitled Photo'}
+                        </h4>
+                        {(photo.menuCategory || photo.menuDishName) && (
+                          <div className="text-[10px] text-zinc-500 font-medium pt-0.5">
+                            <span className="inline-block bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded font-semibold text-[9px]">
+                              🔗 {photo.menuCategory}{photo.menuDishName ? ` › ${photo.menuDishName}` : ''}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Bottom Order Sorter Bar & Delete */}
-                    <div className="px-5 py-2.5 bg-zinc-50 border-t border-zinc-200 flex justify-between items-center">
+                    <div className="px-4 py-2.5 bg-zinc-50/80 border-t border-zinc-100 flex justify-between items-center">
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleMove(index, 'up')}
                           disabled={index === 0}
-                          className="p-1 hover:bg-zinc-200 rounded text-zinc-600 disabled:opacity-30"
+                          className="p-1 hover:bg-zinc-200 rounded text-zinc-600 disabled:opacity-30 transition-colors"
                           title="Move Order Up"
                         >
                           <ArrowUp size={14} />
@@ -627,7 +639,7 @@ export default function GalleryCMS() {
                         <button
                           onClick={() => handleMove(index, 'down')}
                           disabled={index === filteredPhotos.length - 1}
-                          className="p-1 hover:bg-zinc-200 rounded text-zinc-600 disabled:opacity-30"
+                          className="p-1 hover:bg-zinc-200 rounded text-zinc-600 disabled:opacity-30 transition-colors"
                           title="Move Order Down"
                         >
                           <ArrowDown size={14} />

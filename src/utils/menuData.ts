@@ -9,9 +9,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A comforting cream-based sweet tomato soup served with crispy bread croutons.',
     price: '₹160 / ₹190',
     category: 'Soups',
-    image: '/tomato-soup.jpg',
+    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'soup-2',
@@ -20,9 +20,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A creamy, sweet soup packed with tender golden sweet corn kernels and subtle spices.',
     price: '₹160 / ₹190',
     category: 'Soups',
-    image: '/sweet-corn-soup.jpg',
+    image: 'https://images.unsplash.com/photo-1603105037880-880cd4edfb5d?auto=format&fit=crop&w=800&q=80',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'soup-3',
@@ -31,9 +31,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A delicious combination of sweet corn and fresh farm vegetables in a mildly spiced broth.',
     price: '₹160 / ₹190',
     category: 'Soups',
-    image: '/veg-corn-soup.jpg',
+    image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80',
     rating: 4.3,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'soup-4',
@@ -42,9 +42,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A spicy and tangy soup loaded with finely chopped fresh vegetables and spices.',
     price: '₹180 / ₹210',
     category: 'Soups',
-    image: '/veg-hot-sour-soup.jpg',
+    image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'soup-5',
@@ -55,7 +55,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Soups',
     image: '/mushroom-soup.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'soup-6',
@@ -64,9 +64,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A popular hot and spicy Indo-Chinese vegetable soup topped with crispy fried noodles.',
     price: '₹180 / ₹210',
     category: 'Soups',
-    image: '/veg-manchow-soup.jpg',
+    image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'soup-7',
@@ -75,9 +75,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Rich, sweet, and extra creamy soup made with fine chopped mushrooms and fresh cream blend.',
     price: '₹180 / ₹210',
     category: 'Soups',
-    image: '/cream-mushroom-soup.jpg',
+    image: '/mushroom-soup.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'soup-8',
@@ -88,7 +88,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Soups',
     image: '/lemon-coriander-soup.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'soup-9',
@@ -97,9 +97,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A healthy and clear vegetable broth simmered with fresh farm vegetables and minimal spices.',
     price: '₹160 / ₹190',
     category: 'Soups',
-    image: '/veg-clear-soup.jpg',
+    image: 'https://images.unsplash.com/photo-1511994298241-608e28f14fde?auto=format&fit=crop&w=800&q=80',
     rating: 4.3,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== STARTERS (16 items) ===================
@@ -110,9 +110,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Fried vegetable dumplings simmered in a rich, spicy, and tangy soy-garlic gravy.',
     price: '₹340',
     category: 'Starters',
-    image: '/wet-manchuria.png',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-2',
@@ -121,9 +121,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy fried vegetable balls tossed with green chillies, garlic, and soy sauce.',
     price: '₹240/ ₹300',
     category: 'Starters',
-    image: '/veg-manchuria-dry.jpg',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-3',
@@ -132,9 +132,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy cauliflower florets tossed in a flavorful Indo-Chinese garlic soy sauce.',
     price: '₹300',
     category: 'Starters',
-    image: '/gobi-manchuria.jpg',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-4',
@@ -145,7 +145,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Starters',
     image: '/paneer-majestic.jpg',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-5',
@@ -154,9 +154,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Veg dumplings tossed in spicy, bold Schezwan sauce with bell peppers and onions.',
     price: '₹320',
     category: 'Starters',
-    image: '/schezwan-manchuria.jpg',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-6',
@@ -167,7 +167,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Starters',
     image: '/paneer-manchuria.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-7',
@@ -176,9 +176,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Tender soya chaap pieces deep-fried and tossed in a spicy Indo-Chinese Manchurian sauce.',
     price: '₹320',
     category: 'Starters',
-    image: '/soya-chaap-manchuria.jpg',
+    image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-8',
@@ -187,9 +187,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy baby corn battered and tossed in a dark, tangy Manchurian soy-garlic sauce.',
     price: '₹320',
     category: 'Starters',
-    image: '/baby-corn-manchuria.jpg',
+    image: '/mushroom-manchuria.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-9',
@@ -198,9 +198,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy baby corn tossed in a creamy, spicy yogurt-based masala with curry leaves.',
     price: '₹310',
     category: 'Starters',
-    image: '/baby-corn-majestic.jpg',
+    image: '/paneer-majestic.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-10',
@@ -209,9 +209,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Paneer cubes stir-fried with capsicum, onion, and green chillies in a tangy soy sauce.',
     price: '₹250 / ₹310',
     category: 'Starters',
-    image: '/chilly-paneer.jpg',
+    image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-11',
@@ -220,9 +220,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Baby corn tossed with bell peppers and green chillies in a spicy Indo-Chinese sauce.',
     price: '₹320',
     category: 'Starters',
-    image: '/chilly-baby-corn.jpg',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-12',
@@ -233,7 +233,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Starters',
     image: '/mushroom-manchuria.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-13',
@@ -242,9 +242,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Fresh mushrooms wok-tossed with green chillies, onion, and capsicum in chilli sauce.',
     price: '₹320',
     category: 'Starters',
-    image: '/chilly-mushroom.jpg',
+    image: '/mushroom-butter-pepper.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-14',
@@ -253,9 +253,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Golden fried sweet corn kernels tossed with buttery spices and tangy seasoning.',
     price: '₹320',
     category: 'Starters',
-    image: '/crispy-corn.jpg',
+    image: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-15',
@@ -264,9 +264,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Marinated paneer chunks skewered and slow-roasted in a clay tandoor oven until charred.',
     price: '₹350',
     category: 'Starters',
-    image: '/tandoori-paneer-tikka.jpg',
+    image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'start-16',
@@ -275,9 +275,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Soya chaap marinated with yogurt and spices, roasted to perfection in a clay tandoor.',
     price: '₹350',
     category: 'Starters',
-    image: '/tandoori-soya-chaap.jpg',
+    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
 
@@ -289,9 +289,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Classic crispy golden potato fries seasoned lightly with salt, served hot.',
     price: '₹270',
     category: 'Special Starters',
-    image: '/french-fries.jpg',
+    image: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&w=800&q=80',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-2',
@@ -302,7 +302,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Special Starters',
     image: '/honey-chilli-potato.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-3',
@@ -311,9 +311,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Tender baby corn cutlets fried to golden perfection and tossed with spices.',
     price: '₹320',
     category: 'Special Starters',
-    image: '/crispy-baby-corn.jpg',
+    image: '/mushroom-butter-pepper.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-4',
@@ -324,7 +324,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Special Starters',
     image: '/mushroom-butter-pepper.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-5',
@@ -333,9 +333,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Spiced paneer cubes tossed in a sweet, tangy, and mildly spicy red sauce.',
     price: '₹320',
     category: 'Special Starters',
-    image: '/sangrila-paneer.jpg',
+    image: '/kundan-paneer.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-6',
@@ -344,9 +344,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Paneer fingers skewered and cooked with house special spices for a smoky flavor.',
     price: '₹350',
     category: 'Special Starters',
-    image: '/stick-paneer.jpg',
+    image: '/paneer-majestic.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-7',
@@ -355,9 +355,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy paneer strips tossed in a spicy, fiery red sauce with cashew nuts and dry chillies.',
     price: '₹350',
     category: 'Special Starters',
-    image: '/dragon-paneer.jpg',
+    image: '/paneer-sixty-five-special.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-8',
@@ -368,7 +368,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Special Starters',
     image: '/narmada-paneer.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-9',
@@ -377,9 +377,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy golden pastry sheets wrapped around spiced mixed stir-fry vegetables.',
     price: '₹350',
     category: 'Special Starters',
-    image: '/veg-spring-roll.jpg',
+    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-10',
@@ -388,9 +388,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Deep-fried bullet-shaped spiced vegetable croquettes, crispy on the outside.',
     price: '₹350',
     category: 'Special Starters',
-    image: '/veg-bullet.jpg',
+    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-11',
@@ -399,9 +399,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'In-house signature style starter featuring spiced tandoori paneer tossed in cream sauce.',
     price: '₹350',
     category: 'Special Starters',
-    image: '/chilkur-special-paneer.jpg',
+    image: '/paneer-sangai.jpg',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splstart-12',
@@ -410,9 +410,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A rich and exotic combination of crispy seasonal veggies sautéed in house secret spices.',
     price: '₹350',
     category: 'Special Starters',
-    image: '/chilkur-special-veg.jpg',
+    image: '/kandhari-veg.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== 65 KI PASAND (7 items) ===================
@@ -423,9 +423,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy fried seasonal mixed veg balls tossed in a rich, spicy temper of curry leaves.',
     price: '₹290',
     category: '65 Ki Pasand',
-    image: '/veg-sixty-five.jpg',
+    image: '/mushroom-sixty-five.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pasand-2',
@@ -434,9 +434,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Golden fried potato cubes tossed with curry leaves, yogurt, and authentic spices.',
     price: '₹290',
     category: '65 Ki Pasand',
-    image: '/aloo-sixty-five.jpg',
+    image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pasand-3',
@@ -445,9 +445,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Marinated soya chaap pieces fried crisp and seasoned in a red chili tempering.',
     price: '₹350',
     category: '65 Ki Pasand',
-    image: '/soya-chaap-sixty-five.jpg',
+    image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pasand-4',
@@ -456,9 +456,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy battered cauliflower florets flavored with red chillies and yogurt coating.',
     price: '₹290',
     category: '65 Ki Pasand',
-    image: '/gobi-sixty-five.jpg',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pasand-5',
@@ -469,7 +469,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: '65 Ki Pasand',
     image: '/paneer-sixty-five-special.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pasand-6',
@@ -478,9 +478,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy fried baby corn spears seasoned with ginger, garlic, and special 65 spices.',
     price: '₹340',
     category: '65 Ki Pasand',
-    image: '/baby-corn-sixty-five.jpg',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pasand-7',
@@ -491,7 +491,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: '65 Ki Pasand',
     image: '/mushroom-sixty-five.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== VEG CURRIES (36 items) ===================
@@ -504,7 +504,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/mix-vegetable.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-2',
@@ -515,7 +515,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/marwadi-veg.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-3',
@@ -526,7 +526,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/mutter-mushroom-masala.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-4',
@@ -537,7 +537,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/mushroom-masala.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-5',
@@ -548,7 +548,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/mushroom-paneer.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-6',
@@ -559,7 +559,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/methi-chaman.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-7',
@@ -570,7 +570,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/plain-palak.jpg',
     rating: 4.2,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-8',
@@ -581,7 +581,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/punjabi-channa-masala.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-9',
@@ -592,7 +592,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/paneer-butter-masala.jpg',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-10',
@@ -603,7 +603,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/paneer-kheema-masala.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-11',
@@ -614,7 +614,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/palak-paneer.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-12',
@@ -625,7 +625,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/paneer-chatpata.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-13',
@@ -636,7 +636,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/paneer-makhanwala.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-14',
@@ -647,7 +647,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/paneer-do-pyaza.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-15',
@@ -658,7 +658,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/paneer-bhurji.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-16',
@@ -669,7 +669,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/paneer-patiala-sweet.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-17',
@@ -680,7 +680,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/paneer-tikka-masala.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-18',
@@ -689,9 +689,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Paneer cubes tempered with whole dry red chillies, mustard seeds, and curry leaves.',
     price: '₹320',
     category: 'Veg Curries',
-    image: '/tadka-paneer.jpg',
+    image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-19',
@@ -700,9 +700,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Fresh button mushrooms sautéed and tempered in rich ghee and spicy dry chillies.',
     price: '₹320',
     category: 'Veg Curries',
-    image: '/tadka-mushroom.png',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-20',
@@ -711,9 +711,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Capsicum shells stuffed with potato-paneer mash and cooked in spicy masala gravy.',
     price: '₹310',
     category: 'Veg Curries',
-    image: '/stuffed-capsicum-masala.jpg',
+    image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-21',
@@ -722,9 +722,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Whole tomatoes hollowed out, stuffed with rich spiced mixture, cooked in curry sauce.',
     price: '₹310',
     category: 'Veg Curries',
-    image: '/stuffed-tomato-masala.jpg',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-22',
@@ -733,9 +733,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Cauliflower florets and green peas cooked in dry Punjabi style onion tomato gravy.',
     price: '₹310',
     category: 'Veg Curries',
-    image: '/special-punjabi-gobi-masala.jpg',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-23',
@@ -744,9 +744,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A royal Mughlai sweet dish of paneer cooked in a rich, creamy white cashew paste.',
     price: '₹320',
     category: 'Veg Curries',
-    image: '/shahi-paneer.jpg',
+    image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-24',
@@ -755,9 +755,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Cottage cheese cooked in a spicy Indo-Chinese Schezwan gravy inside an earthen pot.',
     price: '₹320',
     category: 'Veg Curries',
-    image: '/schezwan-handi-paneer.jpg',
+    image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-25',
@@ -766,9 +766,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Tender soya chaap rolls and fresh paneer cubes cooked in a unified tomato masala gravy.',
     price: '₹280',
     category: 'Veg Curries',
-    image: '/soya-chaap-paneer.png',
+    image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-26',
@@ -777,9 +777,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Tangy and mildly sweet tomato dip cooked with mustard seeds, curry leaves, and spices.',
     price: '₹280',
     category: 'Veg Curries',
-    image: '/tomato-chatni.png',
+    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-27',
@@ -788,9 +788,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Traditional home style tomato preparation cooked in thick tamarind and chilli spices.',
     price: '₹290',
     category: 'Veg Curries',
-    image: '/tomato-curry.png',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
     rating: 4.3,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-28',
@@ -801,7 +801,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/veg-kurma.png',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-29',
@@ -812,7 +812,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/veg-keema-masala.png',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-30',
@@ -821,9 +821,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Seasonal farm veggies prepared in a bold and aromatic gravy loaded with roasted garlic.',
     price: '₹290',
     category: 'Veg Curries',
-    image: '/veg-garlic.jpg',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-31',
@@ -832,9 +832,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Mixed fresh vegetables prepared with a double tempering of sautéed onions.',
     price: '₹310',
     category: 'Veg Curries',
-    image: '/veg-do-pyaaza.png',
+    image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-32',
@@ -845,7 +845,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Veg Curries',
     image: '/veg-kolhapuri.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-33',
@@ -854,9 +854,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Creamy vegetable gravy prepared in traditional Jaipuri style topped with dry papadum.',
     price: '₹320',
     category: 'Veg Curries',
-    image: '/veg-jaipuri.jpg',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-34',
@@ -865,9 +865,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Hearty northern style vegetable curry in thick, mildly spiced tomato paste.',
     price: '₹320',
     category: 'Veg Curries',
-    image: '/veg-punjabi.jpg',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-35',
@@ -876,9 +876,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Tangy and spicy mixed vegetables prepared with pickling spices and green bell peppers.',
     price: '₹320',
     category: 'Veg Curries',
-    image: '/veg-chatpata.png',
+    image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'curry-36',
@@ -887,9 +887,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'A rich sweet curry containing 9 assorted ingredients including fruits, nuts, and veggies.',
     price: '₹320',
     category: 'Veg Curries',
-    image: '/veg-navratan-kurma.jpg',
+    image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== SPECIAL PANEER CURRIES (5 items) ===================
@@ -902,7 +902,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Special Paneer Curries',
     image: '/kundan-paneer.jpg',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splpaneer-2',
@@ -913,7 +913,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Special Paneer Curries',
     image: '/malai-methi-paneer.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splpaneer-3',
@@ -924,7 +924,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Special Paneer Curries',
     image: '/paneer-sangai.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splpaneer-4',
@@ -935,7 +935,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Special Paneer Curries',
     image: '/paneer-kasha-masala.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splpaneer-5',
@@ -944,9 +944,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Rich paneer chunks cooked in a colorful gravy with bell peppers, tomatoes, and butter garnish.',
     price: '₹350',
     category: 'Special Paneer Curries',
-    image: '/zilmil-paneer.jpg',
+    image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== SPECIAL VEG CURRIES (4 items) ===================
@@ -957,9 +957,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Fresh mixed vegetables simmered in a special rich, creamy cashew-based gravy.',
     price: '₹340',
     category: 'Special Veg Curries',
-    image: '/veg-mandakini.jpg',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splveg-2',
@@ -970,7 +970,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Special Veg Curries',
     image: '/kandhari-veg.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splveg-3',
@@ -979,9 +979,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Vibrant green spinach and fenugreek leaves curry topped with fresh cream and grated paneer.',
     price: '₹320',
     category: 'Special Veg Curries',
-    image: '/haryali-methi-chaman.jpg',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'splveg-4',
@@ -990,9 +990,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Chef\'s special mix veg curry loaded with paneer and baby corn in a rich yellow gravy.',
     price: '₹340',
     category: 'Special Veg Curries',
-    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== ROTI (7 items) ===================
@@ -1003,9 +1003,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Whole wheat flatbread baked directly against clay tandoor walls.',
     price: '₹30',
     category: 'Roti',
-    image: '/tandoori-roti.jpg',
+    image: '/kothmir-roti.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'roti-2',
@@ -1014,9 +1014,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Traditional tandoori wheat flatbread coated with rich fresh cow butter.',
     price: '₹35',
     category: 'Roti',
-    image: '/butter-roti.jpg',
+    image: '/kothmir-butter-roti.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'roti-3',
@@ -1025,9 +1025,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Soft and paper-thin hand-stretched flatbread cooked on an inverted tandoor grid.',
     price: '₹55',
     category: 'Roti',
-    image: '/roomali-roti.jpg',
+    image: '/pudina-butter-roti.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'roti-4',
@@ -1038,7 +1038,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Roti',
     image: '/kothmir-roti.jpg',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'roti-5',
@@ -1049,7 +1049,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Roti',
     image: '/pudina-roti.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'roti-6',
@@ -1060,7 +1060,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Roti',
     image: '/kothmir-butter-roti.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'roti-7',
@@ -1071,7 +1071,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Roti',
     image: '/pudina-butter-roti.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== NAAN (11 items) ===================
@@ -1084,7 +1084,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Naan',
     image: '/plain-naan.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'naan-2',
@@ -1093,9 +1093,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Leavened clay-oven flatbread brushed with pure melted butter.',
     price: '₹55',
     category: 'Naan',
-    image: '/butter-naan.jpg',
+    image: '/kothmir-butter-naan.jpg',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'naan-3',
@@ -1106,7 +1106,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Naan',
     image: '/kothmir-naan.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'naan-4',
@@ -1117,7 +1117,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Naan',
     image: '/pudina-butter-naan.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'naan-5',
@@ -1126,9 +1126,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Highly popular flatbread loaded with chopped fresh garlic cloves and butter glaze.',
     price: '₹60',
     category: 'Naan',
-    image: '/garlic-naan.jpg',
+    image: '/kothmir-butter-naan.jpg',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'naan-6',
@@ -1139,7 +1139,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Naan',
     image: '/pudina-naan.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'naan-7',
@@ -1150,7 +1150,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Naan',
     image: '/baby-naan.jpg',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
 
@@ -1161,9 +1161,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Tandoori naan stuffed with a mix of potato mash, paneer, and local spices.',
     price: '₹75',
     category: 'Naan',
-    image: '/stuffed-naan.jpg',
+    image: '/masala-kulcha.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'naan-11',
@@ -1174,7 +1174,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Naan',
     image: '/kothmir-butter-naan.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'naan-12',
@@ -1183,9 +1183,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Spicy stuffed tandoori naan loaded with tangy chatpata masala filling and grilled to perfection.',
     price: '₹75',
     category: 'Naan',
-    image: '/chatpata-naan.jpg',
+    image: '/pudina-butter-naan.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== PARATHA / KULCHA (8 items) ===================
@@ -1196,9 +1196,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Wheat flatbread stuffed with spiced mashed potatoes, baked in tandoor.',
     price: '₹75',
     category: 'Paratha / Kulcha',
-    image: '/aloo-paratha.jpg',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'para-2',
@@ -1209,7 +1209,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Paratha / Kulcha',
     image: '/pudina-paratha.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'para-3',
@@ -1220,7 +1220,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Paratha / Kulcha',
     image: '/plain-paratha.jpg',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'para-4',
@@ -1231,7 +1231,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Paratha / Kulcha',
     image: '/laccha-paratha.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'para-5',
@@ -1242,7 +1242,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Paratha / Kulcha',
     image: '/rajasthani-methi-paratha.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'para-6',
@@ -1253,7 +1253,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Paratha / Kulcha',
     image: '/paneer-kulcha.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'para-7',
@@ -1262,9 +1262,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Special leavened kulcha bread loaded with mixed spices, mashed potatoes, and coriander.',
     price: '₹90',
     category: 'Paratha / Kulcha',
-    image: '/stuff-kulcha.jpg',
+    image: '/masala-kulcha-new.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'para-8',
@@ -1275,7 +1275,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Paratha / Kulcha',
     image: '/paneer-paratha.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'para-9',
@@ -1284,9 +1284,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy tandoor-baked stuffed bread filled with spiced potato and paneer masala, topped with nigella seeds.',
     price: '₹80',
     category: 'Paratha / Kulcha',
-    image: '/masala-kulcha-new.jpg',
+    image: '/masala-kulcha.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== RICE (6 items) ===================
@@ -1299,7 +1299,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Rice',
     image: '/plain-rice.jpg',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rice-2',
@@ -1308,9 +1308,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Comforting rice mixed with thick curd, tempered with mustard seeds, curry leaves, and green chillies.',
     price: '₹210',
     category: 'Rice',
-    image: '/curd-rice.jpg',
+    image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rice-3',
@@ -1321,7 +1321,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Rice',
     image: '/lemon-rice.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rice-4',
@@ -1332,7 +1332,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Rice',
     image: '/jeera-rice.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rice-5',
@@ -1341,9 +1341,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Spicy rice prepared with tangy tomato gravy, fresh curry leaves, and spices.',
     price: '₹230',
     category: 'Rice',
-    image: '/tomato-rice.jpg',
+    image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rice-6',
@@ -1354,7 +1354,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Rice',
     image: '/kaju-jeera-rice.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rice-7',
@@ -1363,9 +1363,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Fragrant steamed basmati rice sautéed with premium cow butter and fresh green herbs.',
     price: '₹220',
     category: 'Rice',
-    image: '/butter-rice.jpg',
+    image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== FRIED RICE (5 items) ===================
@@ -1376,9 +1376,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Aromatic wok-fried basmati rice cooked with finely chopped vegetables and soy sauce.',
     price: '₹250 / ₹220',
     category: 'Fried Rice',
-    image: '/veg-fried-rice.jpg',
+    image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'fried-2',
@@ -1389,7 +1389,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Fried Rice',
     image: '/paneer-fried-rice.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'fried-3',
@@ -1398,9 +1398,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Spicy and fiery fried rice prepared with custom hot Schezwan pepper sauce.',
     price: '₹270',
     category: 'Fried Rice',
-    image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'fried-4',
@@ -1411,7 +1411,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Fried Rice',
     image: '/masala-fried-rice.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'fried-5',
@@ -1422,7 +1422,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Fried Rice',
     image: '/kaju-fried-rice.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== PULAO (6 items) ===================
@@ -1433,9 +1433,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Fragrant basmati rice cooked with whole cardamoms, cinnamon, and mixed vegetables.',
     price: '₹290 / ₹210',
     category: 'Pulao',
-    image: '/veg-pulao.jpg',
+    image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pull-2',
@@ -1444,9 +1444,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Rich sweet-savory rice loaded with sweet corn kernels and whole roasted cashew nuts.',
     price: '₹300',
     category: 'Pulao',
-    image: '/corn-kaju-pulao.jpg',
+    image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pull-3',
@@ -1457,7 +1457,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Pulao',
     image: '/kashmiri-pulao.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pull-4',
@@ -1468,7 +1468,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Pulao',
     image: '/navratan-pulao.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pull-5',
@@ -1479,7 +1479,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Pulao',
     image: '/punjabi-pulao.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pull-6',
@@ -1490,7 +1490,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Pulao',
     image: '/paneer-pulao.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== BIRYANI (8 items) ===================
@@ -1501,9 +1501,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Richly spiced, layered, and aromatic basmati rice cooked on slow steam with fresh veggies.',
     price: '₹290 / ₹220',
     category: 'Biryani',
-    image: '/veg-biryani.jpg',
+    image: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'bir-2',
@@ -1512,9 +1512,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Vegetable biryani baked and served inside an earthen clay pot (Handi) to lock in natural flavors.',
     price: '₹300',
     category: 'Biryani',
-    image: '/handi-biryani.jpg',
+    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'bir-3',
@@ -1523,9 +1523,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Slow-cooked traditional Nizami style layered vegetable biryani sealed with dough.',
     price: '₹300',
     category: 'Biryani',
-    image: '/dum-biryani.jpg',
+    image: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=800&q=80',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'bir-4',
@@ -1536,7 +1536,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Biryani',
     image: '/paneer-biryani.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'bir-5',
@@ -1547,7 +1547,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Biryani',
     image: '/kaju-biryani.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'bir-6',
@@ -1558,7 +1558,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Biryani',
     image: '/mushroom-biryani.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'bir-7',
@@ -1569,7 +1569,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Biryani',
     image: '/kaju-paneer-biryani.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'bir-8',
@@ -1580,7 +1580,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Biryani',
     image: '/hyderabad-biryani.jpg',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== PAPAD (5 items) ===================
@@ -1593,7 +1593,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Papad',
     image: '/roasted-papad.jpg',
     rating: 4.3,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pap-2',
@@ -1602,9 +1602,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Deep-fried crispy lentil flatbread, crunchy and savory.',
     price: '₹40',
     category: 'Papad',
-    image: '/fry-papad.jpg',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pap-3',
@@ -1615,7 +1615,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Papad',
     image: '/masala-papad.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pap-4',
@@ -1624,9 +1624,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy, spicy Amritsari style papad with crushed black pepper kernels.',
     price: '₹85',
     category: 'Papad',
-    image: '/special-punjabi-papad.jpg',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'pap-5',
@@ -1635,9 +1635,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Crispy roasted papad generously brushed with melted butter for a rich, savory taste.',
     price: '₹45',
     category: 'Papad',
-    image: '/butter-papad.jpg',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
 
@@ -1651,7 +1651,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Raita',
     image: '/mix-raita.jpg',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rai-2',
@@ -1662,7 +1662,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Raita',
     image: '/onion-raita.jpg',
     rating: 4.3,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rai-3',
@@ -1671,9 +1671,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Whipped salted curd mixed with tiny fried chickpea flour balls (Bundi) and spices.',
     price: '₹70',
     category: 'Raita',
-    image: '/boondi-raita.jpg',
+    image: '/bundi-raita.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'rai-4',
@@ -1682,9 +1682,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Rich, thick, and fresh home-set cow milk yogurt.',
     price: '₹65',
     category: 'Raita',
-    image: '/curd.jpg',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== SOFT DRINKS (8 items) ===================
@@ -1697,7 +1697,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Soft Drinks',
     image: '/butter-milk.jpg',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'drink-2',
@@ -1706,9 +1706,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Thick, creamy, sweet yogurt beverage served chilled in traditional style.',
     price: '₹80 / ₹100',
     category: 'Soft Drinks',
-    image: '/sweet-lassi.jpg',
+    image: 'https://images.unsplash.com/photo-1571006682858-a458b8a69388?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'drink-3',
@@ -1717,9 +1717,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Thick churned fresh curd drink seasoned with salt, cumin powder, and coriander garnish.',
     price: '₹80 / ₹100',
     category: 'Soft Drinks',
-    image: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80',
+    image: '/lassi-salted.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'drink-4',
@@ -1728,9 +1728,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Assorted aerated soda bottles, served chilled.',
     price: '₹40',
     category: 'Soft Drinks',
-    image: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=80',
     rating: 4.3,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'drink-5',
@@ -1741,7 +1741,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Soft Drinks',
     image: '/mineral-water.jpg',
     rating: 4.4,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'drink-6',
@@ -1750,9 +1750,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Zesty refreshing sweet soda drink with fresh lemon juice.',
     price: '₹70',
     category: 'Soft Drinks',
-    image: '/fresh-lime-soda.jpg',
+    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'drink-7',
@@ -1761,9 +1761,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Salted refreshing soda drink with fresh lemon juice.',
     price: '₹70',
     category: 'Soft Drinks',
-    image: '/fresh-lime-soda.jpg',
+    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80',
     rating: 4.5,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'drink-8',
@@ -1774,7 +1774,7 @@ export const SIGNATURE_DISHES: Dish[] = [
     category: 'Soft Drinks',
     image: '/lassi-salted.jpg',
     rating: 4.6,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== JUMBO FAMILY PACK (3 items) ===================
@@ -1785,9 +1785,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Jumbo take-away container of paneer biryani, serves 3-4 people comfortably.',
     price: '₹725',
     category: 'Jumbo Family Pack',
-    image: '/paneer-biryani-jumbo.jpg',
+    image: '/paneer-biryani.jpg',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'jumbo-2',
@@ -1796,9 +1796,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Jumbo pack of aromatic mushroom biryani, ideal for family take-away.',
     price: '₹725',
     category: 'Jumbo Family Pack',
-    image: '/mushroom-biryani-jumbo.jpg',
+    image: '/mushroom-biryani.jpg',
     rating: 4.7,
-    isVegetarian: true
+    isVegetarian: true,
   },
   {
     id: 'jumbo-3',
@@ -1807,9 +1807,9 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Special layered vegetable dum biryani in family size pack, packed with rich flavor.',
     price: '₹725',
     category: 'Jumbo Family Pack',
-    image: '/veg-biryani-jumbo.jpg',
+    image: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=800&q=80',
     rating: 4.8,
-    isVegetarian: true
+    isVegetarian: true,
   },
 
   // =================== COMBO FAMILY PACK (2 items) ===================
@@ -1820,44 +1820,44 @@ export const SIGNATURE_DISHES: Dish[] = [
     description: 'Full combo pack comprising Veg Manchuria, Paneer Butter Masala, 8pcs of Butter Roti, and Veg Biryani.',
     price: '₹899',
     category: 'Combo Family Pack',
-    image: '/combo-veg-manchuria.jpg',
+    image: '/butter-milk.jpg',
     rating: 4.9,
-    isVegetarian: true
+    isVegetarian: true,
   }
 
 ];
 
 export const GALLERY_PHOTOS = [
   { id: 'g1',  src: '/paneer-butter-masala.jpg',       title: 'Paneer Butter Masala',        menuCategory: 'Veg Curries',     menuDishName: 'Paneer Butter Masala' },
-  { id: 'g2',  src: '/veg-biryani.jpg',                title: 'Veg Hyderabadi Biryani',      menuCategory: 'Biryani',         menuDishName: 'Veg Biryani' },
-  { id: 'g3',  src: '/handi-biryani.jpg',              title: 'Handi Biryani',               menuCategory: 'Biryani',         menuDishName: 'Handi Biryani' },
-  { id: 'g4',  src: '/garlic-butter-naan.jpg',         title: 'Garlic Butter Naan',          menuCategory: 'Naan',            menuDishName: 'Garlic Butter Naan' },
+  { id: 'g2',  src: '/hyderabad-biryani.jpg',                title: 'Veg Hyderabadi Biryani',      menuCategory: 'Biryani',         menuDishName: 'Veg Biryani' },
+  { id: 'g3',  src: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',              title: 'Handi Biryani',               menuCategory: 'Biryani',         menuDishName: 'Handi Biryani' },
+  { id: 'g4',  src: '/kothmir-butter-naan.jpg',         title: 'Garlic Butter Naan',          menuCategory: 'Naan',            menuDishName: 'Garlic Butter Naan' },
   { id: 'g5',  src: '/paneer-tikka-masala.jpg',        title: 'Paneer Tikka Masala',         menuCategory: 'Veg Curries',     menuDishName: 'Paneer Tikka Masala' },
   { id: 'g6',  src: '/kaju-biryani.jpg',               title: 'Kaju Biryani',                menuCategory: 'Biryani',         menuDishName: 'Kaju Biryani' },
   { id: 'g7',  src: '/honey-chilli-potato.jpg',        title: 'Honey Chilli Potato',         menuCategory: 'Starters',        menuDishName: 'Honey Chilli Potato' },
-  { id: 'g8',  src: '/crispy-baby-corn.jpg',           title: 'Crispy Baby Corn',            menuCategory: 'Starters',        menuDishName: 'Crispy Baby Corn' },
+  { id: 'g8',  src: '/mushroom-butter-pepper.jpg',           title: 'Crispy Baby Corn',            menuCategory: 'Starters',        menuDishName: 'Crispy Baby Corn' },
   { id: 'g9',  src: '/paneer-sixty-five-special.jpg',  title: 'Paneer 65 Special',           menuCategory: '65 Specials',     menuDishName: 'Paneer 65' },
   { id: 'g10', src: '/mushroom-butter-pepper.jpg',     title: 'Mushroom Butter Pepper',      menuCategory: 'Starters',        menuDishName: 'Mushroom Butter Pepper' },
-  { id: 'g11', src: '/dragon-paneer.jpg',              title: 'Dragon Paneer',               menuCategory: 'Special Starters',menuDishName: 'Dragon Paneer' },
-  { id: 'g12', src: '/stick-paneer.jpg',               title: 'Stick Paneer',                menuCategory: 'Special Starters',menuDishName: 'Stick Paneer' },
-  { id: 'g13', src: '/veg-spring-roll.jpg',            title: 'Veg Spring Roll',             menuCategory: 'Special Starters',menuDishName: 'Veg Spring Roll' },
-  { id: 'g14', src: '/french-fries.jpg',               title: 'Crispy French Fries',         menuCategory: 'Starters',        menuDishName: 'French Fries' },
-  { id: 'g15', src: '/paneer-kaju-biryani.jpg',        title: 'Kaju Paneer Biryani',         menuCategory: 'Biryani',         menuDishName: 'Kaju Paneer Biryani' },
-  { id: 'g16', src: '/butter-roti.jpg',                title: 'Butter Roti',                 menuCategory: 'Roti',            menuDishName: 'Butter Roti' },
-  { id: 'g17', src: '/rumali-roti-special.jpg',        title: 'Rumali Roti',                 menuCategory: 'Roti',            menuDishName: 'Rumali Roti' },
+  { id: 'g11', src: '/paneer-sixty-five-special.jpg',              title: 'Dragon Paneer',               menuCategory: 'Special Starters',menuDishName: 'Dragon Paneer' },
+  { id: 'g12', src: '/paneer-majestic.jpg',               title: 'Stick Paneer',                menuCategory: 'Special Starters',menuDishName: 'Stick Paneer' },
+  { id: 'g13', src: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',            title: 'Veg Spring Roll',             menuCategory: 'Special Starters',menuDishName: 'Veg Spring Roll' },
+  { id: 'g14', src: '/mix-vegetable.jpg',               title: 'Crispy French Fries',         menuCategory: 'Starters',        menuDishName: 'French Fries' },
+  { id: 'g15', src: '/kaju-paneer-biryani.jpg',        title: 'Kaju Paneer Biryani',         menuCategory: 'Biryani',         menuDishName: 'Kaju Paneer Biryani' },
+  { id: 'g16', src: '/kothmir-butter-roti.jpg',                title: 'Butter Roti',                 menuCategory: 'Roti',            menuDishName: 'Butter Roti' },
+  { id: 'g17', src: '/pudina-butter-roti.jpg',        title: 'Rumali Roti',                 menuCategory: 'Roti',            menuDishName: 'Rumali Roti' },
   { id: 'g19', src: '/palak-paneer.jpg',               title: 'Palak Paneer',                menuCategory: 'Veg Curries',     menuDishName: 'Palak Paneer' },
-  { id: 'g20', src: '/veg-fried-rice.jpg',             title: 'Veg Fried Rice',              menuCategory: 'Fried Rice',      menuDishName: 'Veg Fried Rice' },
-  { id: 'g21', src: '/schezwan-fried-rice.jpg',        title: 'Schezwan Fried Rice',         menuCategory: 'Fried Rice',      menuDishName: 'Schezwan Fried Rice' },
-  { id: 'g22', src: '/corn-kaju-pulao.jpg',            title: 'Corn Kaju Pulao',             menuCategory: 'Pulao',           menuDishName: 'Corn Kaju Pulao' },
+  { id: 'g20', src: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=80',             title: 'Veg Fried Rice',              menuCategory: 'Fried Rice',      menuDishName: 'Veg Fried Rice' },
+  { id: 'g21', src: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=80',        title: 'Schezwan Fried Rice',         menuCategory: 'Fried Rice',      menuDishName: 'Schezwan Fried Rice' },
+  { id: 'g22', src: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',            title: 'Corn Kaju Pulao',             menuCategory: 'Pulao',           menuDishName: 'Corn Kaju Pulao' },
   { id: 'g23', src: '/mushroom-biryani.jpg',           title: 'Mushroom Biryani',            menuCategory: 'Biryani',         menuDishName: 'Mushroom Biryani' },
   { id: 'g23a', src: '/hyderabad-biryani.jpg',          title: 'Hyderabad Biryani',            menuCategory: 'Biryani',         menuDishName: 'Hyderabad Biryani' },
   { id: 'g24', src: '/lemon-rice.jpg',                 title: 'Lemon Rice',                  menuCategory: 'Rice',            menuDishName: 'Lemon Rice' },
-  { id: 'g25', src: '/curd-rice.jpg',                  title: 'Curd Rice',                   menuCategory: 'Rice',            menuDishName: 'Curd Rice' },
-  { id: 'g26', src: '/tomato-soup.jpg',                title: 'Tomato Soup',                 menuCategory: 'Soups',           menuDishName: 'Tomato Soup (Sweet)' },
-  { id: 'g27', src: '/sweet-corn-soup.jpg',            title: 'Sweet Corn Soup',             menuCategory: 'Soups',           menuDishName: 'Sweet Corn Soup' },
-  { id: 'g28', src: '/veg-manchuria-dry.jpg',          title: 'Veg Manchuria Dry',           menuCategory: 'Starters',        menuDishName: 'Veg Manchurian (Dry)' },
-  { id: 'g29', src: '/chilkur-special-paneer.jpg',     title: 'Chilkur Special Paneer',      menuCategory: 'Special Starters',menuDishName: 'Chilkur Special Paneer' },
-  { id: 'g30', src: '/schezwan-handi-paneer.jpg',      title: 'Schezwan Handi Paneer',       menuCategory: 'Veg Curries',     menuDishName: 'Schezwan Handi Paneer' },
+  { id: 'g25', src: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80',                  title: 'Curd Rice',                   menuCategory: 'Rice',            menuDishName: 'Curd Rice' },
+  { id: 'g26', src: '/lemon-coriander-soup.jpg',                title: 'Tomato Soup',                 menuCategory: 'Soups',           menuDishName: 'Tomato Soup (Sweet)' },
+  { id: 'g27', src: 'https://images.unsplash.com/photo-1603105037880-880cd4edfb5d?auto=format&fit=crop&w=800&q=80',            title: 'Sweet Corn Soup',             menuCategory: 'Soups',           menuDishName: 'Sweet Corn Soup' },
+  { id: 'g28', src: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80', title: 'Veg Manchuria Dry', menuCategory: 'Starters', menuDishName: 'Veg Manchurian (Dry)' },
+  { id: 'g29', src: '/paneer-sangai.jpg',     title: 'Chilkur Special Paneer',      menuCategory: 'Special Starters',menuDishName: 'Chilkur Special Paneer' },
+  { id: 'g30', src: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80',      title: 'Schezwan Handi Paneer',       menuCategory: 'Veg Curries',     menuDishName: 'Schezwan Handi Paneer' },
   { id: 'g31', src: '/paneer-chatpata.jpg',            title: 'Paneer Chatpata',             menuCategory: 'Veg Curries',     menuDishName: 'Paneer Chatpata Masala' },
   { id: 'g32', src: '/mix-raita.jpg',                  title: 'Mix Raita',                   menuCategory: 'Raita',           menuDishName: 'Mix Raita' },
   { id: 'g33', src: '/lassi-salted.jpg',               title: 'Salted Lassi',                menuCategory: 'Soft Drinks',     menuDishName: 'Lassi Salted' },

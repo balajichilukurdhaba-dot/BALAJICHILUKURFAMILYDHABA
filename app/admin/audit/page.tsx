@@ -33,11 +33,11 @@ export default function AuditLogsCMS() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const calendarInputRef = useRef<HTMLInputElement>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(() => getLocalDateStr(0));
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [todayValue, setTodayValue] = useState<string>(() => getLocalDateStr(0));
 
   const loginCalendarInputRef = useRef<HTMLInputElement>(null);
-  const [selectedLoginDate, setSelectedLoginDate] = useState<string>(() => getLocalDateStr(0));
+  const [selectedLoginDate, setSelectedLoginDate] = useState<string>('');
 
   const recentDays = useMemo(() => {
     const days = [];

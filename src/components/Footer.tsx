@@ -37,7 +37,7 @@ export const Footer: React.FC = () => {
         
         {/* Brand Info */}
         <div className="flex flex-col space-y-6">
-          <Link href="/" className="flex items-center space-x-2 md:space-x-3 group">
+          <Link href="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center space-x-2 md:space-x-3 group">
             <img 
               src="/bsd-logo.png" 
               alt="Balaji Chilkur Family Dhaba Logo" 

@@ -9,12 +9,20 @@ export interface AdminUser {
 }
 
 export async function getSessionUser(): Promise<AdminUser | null> {
-  // 1. Check admin_logged_in cookie first for active admin portal session
+  // 1. Check admin_logged_in cookie first for active admin portal session (6 hours max)
   try {
     const cookieStore = await cookies();
     const adminCookie = cookieStore.get('admin_logged_in')?.value;
     const adminLoginTime = cookieStore.get('admin_login_time')?.value;
+    
     if (adminCookie === 'true' || adminLoginTime) {
+      if (adminLoginTime) {
+        const loginMs = parseInt(adminLoginTime, 10);
+        const MAX_6_HOURS = 6 * 60 * 60 * 1000;
+        if (!isNaN(loginMs) && (Date.now() - loginMs > MAX_6_HOURS)) {
+          return null; // Expired after 6 hours
+        }
+      }
       return {
         id: 'admin-session-local',
         email: 'admin@balajichilkur.com',

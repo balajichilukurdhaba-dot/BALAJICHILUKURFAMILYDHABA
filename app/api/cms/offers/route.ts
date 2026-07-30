@@ -169,7 +169,8 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, data } = body;
+    const id = body.id;
+    const data = body.data || body;
 
     if (!id || !data) {
       return NextResponse.json({ success: false, error: 'Missing offer ID or data' }, { status: 400 });
@@ -183,19 +184,19 @@ export async function PUT(request: Request) {
     const offer = await prisma.offer.update({
       where: { id },
       data: {
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        image: data.image,
-        badge: data.badge,
-        cta: data.cta,
-        link: data.link,
-        isActive: data.isActive,
-        startDate: data.startDate ? new Date(data.startDate) : null,
-        endDate: data.endDate ? new Date(data.endDate) : null,
-        showOnHomepage: data.showOnHomepage,
-        displayPriority: data.displayPriority,
-        branchId: data.branchId || null
+        title: data.title !== undefined ? data.title : oldVal.title,
+        description: data.description !== undefined ? data.description : oldVal.description,
+        price: data.price !== undefined ? data.price : oldVal.price,
+        image: data.image !== undefined ? data.image : oldVal.image,
+        badge: data.badge !== undefined ? data.badge : oldVal.badge,
+        cta: data.cta !== undefined ? data.cta : oldVal.cta,
+        link: data.link !== undefined ? data.link : oldVal.link,
+        isActive: data.isActive !== undefined ? data.isActive : oldVal.isActive,
+        startDate: data.startDate ? new Date(data.startDate) : (data.startDate === null ? null : oldVal.startDate),
+        endDate: data.endDate ? new Date(data.endDate) : (data.endDate === null ? null : oldVal.endDate),
+        showOnHomepage: data.showOnHomepage !== undefined ? data.showOnHomepage : oldVal.showOnHomepage,
+        displayPriority: data.displayPriority !== undefined ? Number(data.displayPriority) : oldVal.displayPriority,
+        branchId: data.branchId !== undefined ? (data.branchId || null) : oldVal.branchId
       }
     });
 

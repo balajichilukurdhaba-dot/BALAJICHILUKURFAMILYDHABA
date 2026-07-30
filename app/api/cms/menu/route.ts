@@ -201,10 +201,21 @@ export async function GET(request: Request) {
       if (user) canSeeHidden = true;
     }
 
-    // Default: return cached categories grouped with their dishes
+    // Fetch live categories grouped with dishes directly from database
     let categories: any[] = [];
     try {
-      categories = await getCachedMenu(canSeeHidden);
+      categories = await prisma.category.findMany({
+        orderBy: { order: 'asc' },
+        include: {
+          dishes: {
+            where: !canSeeHidden ? { isHidden: false } : undefined,
+            orderBy: { order: 'asc' }
+          }
+        }
+      });
+      if (!categories || categories.length === 0) {
+        categories = await fetchMenuFromSupabase(canSeeHidden);
+      }
     } catch {
       categories = await fetchMenuFromSupabase(canSeeHidden);
     }

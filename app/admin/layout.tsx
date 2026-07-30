@@ -30,6 +30,52 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AntdProvider from '@/components/AntdProvider';
 import AdminLoginSnapshotModal from '@/components/AdminLoginSnapshotModal';
 
+class AdminErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Admin Portal Render Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8 max-w-xl mx-auto my-12 bg-white border border-rose-200 rounded-2xl shadow-sm text-center space-y-4 font-sans">
+          <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto text-xl font-bold">
+            ⚠️
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Dashboard Render Warning</h2>
+            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              {this.state.error?.message || 'A temporary render glitch occurred while loading this section.'}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              window.location.reload();
+            }}
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors"
+          >
+            Reload Section
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -75,7 +121,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     fetchNotificationCounts();
-    const interval = setInterval(fetchNotificationCounts, 15_000);
+    const interval = setInterval(fetchNotificationCounts, 30_000);
     return () => clearInterval(interval);
   }, []);
 
@@ -142,22 +188,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       let isAuthed = false;
       let email = '';
 
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          isAuthed = true;
-          email = user.email || '';
-        }
-      } catch (e) {
-        // Auth error fallback
-      }
-
-      if (!isAuthed && typeof window !== 'undefined') {
+      // 1. Check local session cookie/localStorage first (Fast & offline-safe)
+      if (typeof window !== 'undefined') {
         const hasCookie = document.cookie.split('; ').some(row => row.startsWith('admin_logged_in=true'));
         const hasLocalStorage = localStorage.getItem('admin_logged_in') === 'true';
         if (hasCookie || hasLocalStorage) {
           isAuthed = true;
           email = localStorage.getItem('admin_email') || 'admin@balajichilkur.com';
+        }
+      }
+
+      // 2. Fallback to Supabase Auth check (safely caught to prevent 'Failed to fetch' console error overlays)
+      if (!isAuthed) {
+        try {
+          const res = await supabase.auth.getUser().catch(() => ({ data: { user: null }, error: null }));
+          if (res?.data?.user) {
+            isAuthed = true;
+            email = res.data.user.email || '';
+          }
+        } catch (e) {
+          // Ignore network errors
         }
       }
 
@@ -174,8 +224,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     checkSession();
 
-    // Auto-logout timer: check every 30 seconds while session is active
-    const sessionInterval = setInterval(() => {
+    // Auto-logout timer: check every 15 seconds and on tab focus/visibilitychange
+    const checkExpirationOnFocus = () => {
       if (typeof window !== 'undefined') {
         const loginTimeStr = localStorage.getItem('admin_login_time') || 
           document.cookie.split('; ').find(row => row.startsWith('admin_login_time='))?.split('=')[1];
@@ -186,9 +236,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }
         }
       }
-    }, 30_000);
+    };
 
-    return () => clearInterval(sessionInterval);
+    const sessionInterval = setInterval(checkExpirationOnFocus, 15_000);
+    window.addEventListener('focus', checkExpirationOnFocus);
+    window.addEventListener('visibilitychange', checkExpirationOnFocus);
+
+    return () => {
+      clearInterval(sessionInterval);
+      window.removeEventListener('focus', checkExpirationOnFocus);
+      window.removeEventListener('visibilitychange', checkExpirationOnFocus);
+    };
   }, [pathname, router]);
 
   const navItems = [
@@ -460,18 +518,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Page Content Body */}
           <main className="flex-grow overflow-y-auto p-6 lg:p-8">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={pathname}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                className="max-w-7xl mx-auto w-full"
-              >
+            <div className="max-w-7xl mx-auto w-full">
+              <AdminErrorBoundary>
                 {children}
-              </motion.div>
-            </AnimatePresence>
+              </AdminErrorBoundary>
+            </div>
           </main>
         </div>
 
