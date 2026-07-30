@@ -30,6 +30,40 @@ interface DishCardProps {
   isCompact?: boolean;
 }
 
+export function formatImageUrl(url: string | null | undefined): string {
+  if (!url || typeof url !== 'string' || !url.trim()) {
+    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+  }
+  const cleanUrl = url.trim();
+  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) {
+    return encodeURI(cleanUrl);
+  }
+  if (cleanUrl.startsWith('/')) {
+    return encodeURI(cleanUrl);
+  }
+  return encodeURI(`/${cleanUrl}`);
+}
+
+export function getFallbackFoodImage(dishName: string = '', categoryName: string = ''): string {
+  const name = (dishName + ' ' + categoryName).toLowerCase();
+  if (name.includes('biryani') || name.includes('rice') || name.includes('pulao')) {
+    return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80';
+  }
+  if (name.includes('paneer') || name.includes('tikka') || name.includes('starter') || name.includes('kebab')) {
+    return 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=600&q=80';
+  }
+  if (name.includes('roti') || name.includes('naan') || name.includes('paratha') || name.includes('bread')) {
+    return 'https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&w=600&q=80';
+  }
+  if (name.includes('curry') || name.includes('masala') || name.includes('gravy') || name.includes('dal')) {
+    return 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=600&q=80';
+  }
+  if (name.includes('dessert') || name.includes('sweet') || name.includes('ice cream') || name.includes('gulab')) {
+    return 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80';
+  }
+  return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+}
+
 export const DishCard: React.FC<DishCardProps> = ({ dish, onOrderClick, isCompact }) => {
   const navigate = useRouter();
 
@@ -73,13 +107,13 @@ export const DishCard: React.FC<DishCardProps> = ({ dish, onOrderClick, isCompac
       {/* Image container with luxury reveal */}
       <div className="relative aspect-[4/3] overflow-hidden bg-brand-dark/5">
         <img 
-          src={dish.image} 
+          src={formatImageUrl(dish.image)} 
           alt={dish.name}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           loading="lazy"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).onerror = null;
-            (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+            (e.currentTarget as HTMLImageElement).src = getFallbackFoodImage(dish.name, dish.category);
           }}
         />
         {/* Dark overlay on hover */}

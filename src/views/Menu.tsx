@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, SlidersHorizontal, Star, Flame, X, ChevronLeft, ChevronRight, Leaf, ShoppingBag, Loader2, Check } from 'lucide-react';
 import type { Dish } from '../components/DishCard';
+import { formatImageUrl, getFallbackFoodImage } from '../components/DishCard';
 
 import { SIGNATURE_DISHES as STATIC_DISHES } from '../utils/menuData';
 
@@ -585,10 +586,14 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ category, dishes, onDishClick
             {/* Image */}
             <div className="relative aspect-[4/3] overflow-hidden bg-brand-dark/5">
               <img
-                src={dish.image}
+                src={formatImageUrl(dish.image)}
                 alt={dish.name}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).onerror = null;
+                  (e.currentTarget as HTMLImageElement).src = getFallbackFoodImage(dish.name, dish.category);
+                }}
               />
               {/* Overlay: price badge bottom-left */}
               <div className="absolute bottom-2 left-2 bg-brand-dark/80 text-[#FFFFFF] text-[10px] font-bold font-display px-2 py-0.5 rounded-full backdrop-blur-sm">
