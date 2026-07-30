@@ -586,7 +586,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ category, dishes, onDishClick
             {/* Image */}
             <div className="relative aspect-[4/3] overflow-hidden bg-brand-dark/5">
               <img
-                src={formatImageUrl(dish.image)}
+                src={formatImageUrl(dish.image) || getFallbackFoodImage(dish.name, dish.category)}
                 alt={dish.name}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"

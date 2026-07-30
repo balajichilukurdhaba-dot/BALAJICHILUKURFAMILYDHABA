@@ -32,16 +32,16 @@ interface DishCardProps {
 
 export function formatImageUrl(url: string | null | undefined): string {
   if (!url || typeof url !== 'string' || !url.trim()) {
-    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+    return '';
   }
   const cleanUrl = url.trim();
-  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:')) {
-    return encodeURI(cleanUrl);
+  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:') || cleanUrl.startsWith('blob:')) {
+    return cleanUrl;
   }
   if (cleanUrl.startsWith('/')) {
-    return encodeURI(cleanUrl);
+    return cleanUrl;
   }
-  return encodeURI(`/${cleanUrl}`);
+  return `/${cleanUrl}`;
 }
 
 export function getFallbackFoodImage(dishName: string = '', categoryName: string = ''): string {
@@ -107,7 +107,7 @@ export const DishCard: React.FC<DishCardProps> = ({ dish, onOrderClick, isCompac
       {/* Image container with luxury reveal */}
       <div className="relative aspect-[4/3] overflow-hidden bg-brand-dark/5">
         <img 
-          src={formatImageUrl(dish.image)} 
+          src={formatImageUrl(dish.image) || getFallbackFoodImage(dish.name, dish.category)} 
           alt={dish.name}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           loading="lazy"
