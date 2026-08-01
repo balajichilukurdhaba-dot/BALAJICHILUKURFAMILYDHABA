@@ -34,7 +34,7 @@ export default function ReservationsClient({ initialReservations }: { initialRes
 
   const [reservations, setReservations] = useState<any[]>(initialReservations);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'claimed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'claimed' | 'unclaimed'>('all');
 
   // Modal State for manual entry
   const [showAddModal, setShowAddModal] = useState(false);

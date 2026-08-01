@@ -179,7 +179,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           if (!isNaN(loginTime) && (Date.now() - loginTime > MAX_SESSION_MS)) {
             setIsAuthenticated(false);
             setIsAuthChecking(false);
-            performLogout('expired');
+            performLogout();
             return;
           }
         }

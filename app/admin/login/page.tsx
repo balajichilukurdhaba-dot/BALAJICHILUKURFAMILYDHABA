@@ -11,22 +11,14 @@ function AdminLoginPageContent() {
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  useEffect(() => {
-    if (searchParams?.get('reason') === 'expired') {
-      setNotice('Your 6-hour admin session has expired for security. Please sign in again.');
-    }
-  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setNotice('');
 
     const cleanEmail = email.trim();
     const cleanPassword = password;
@@ -100,13 +92,6 @@ function AdminLoginPageContent() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          {notice && (
-            <div className="p-3 bg-amber-950/60 border border-amber-800/80 text-amber-300 text-xs rounded-lg font-medium flex items-start gap-2">
-              <Clock size={15} className="shrink-0 mt-0.5 text-amber-400" />
-              <span>{notice}</span>
-            </div>
-          )}
-
           {error && (
             <div className="p-3 bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs rounded-lg font-medium">
               {error}
