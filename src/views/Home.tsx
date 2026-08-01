@@ -701,7 +701,7 @@ export const Home: React.FC = () => {
   // Signature dishes = ONLY dishes explicitly marked as isRecommended (Signature) by admin
   const filteredDishes = listDishes.filter(dish => dish.isRecommended === true && !dish.isHidden);
 
-  const listOffers = offers.length > 0 ? offers : [
+  const DEFAULT_OFFERS = React.useMemo(() => [
     {
       id: 'online-booking-offer',
       title: '10% Off Online Bookings',
@@ -722,7 +722,9 @@ export const Home: React.FC = () => {
       image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=1000&auto=format&fit=crop',
       link: '/menu?category=Combo+Family+Pack'
     }
-  ];
+  ], []);
+
+  const listOffers = offers.length > 0 ? offers : DEFAULT_OFFERS;
 
   const listTestimonials = testimonials.length > 0 ? testimonials : STATIC_TESTIMONIALS;
   const uniqueTestimonials = React.useMemo(() => {

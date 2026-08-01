@@ -13,13 +13,17 @@ export async function POST(request: Request) {
 
     const orderRef = 'ORD-' + crypto.randomBytes(3).toString('hex').toUpperCase();
 
+    const numericTotal = typeof total === 'number' 
+      ? total 
+      : parseFloat(String(total).replace(/[^0-9.]/g, '')) || 0;
+
     const order = await prisma.whatsAppOrder.create({
       data: {
         orderRef,
         customerName,
         phone,
         items,
-        total,
+        total: numericTotal,
         status: 'sent'
       }
     });

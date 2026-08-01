@@ -18,22 +18,32 @@ export async function POST(request: Request) {
     // Generate unique booking reference (e.g., RES-83F2A)
     const bookingRef = 'RES-' + crypto.randomBytes(3).toString('hex').toUpperCase();
 
-    // Check branch exists (or fallback for demo purposes)
-    let branch = await prisma.branch.findUnique({ where: { id: branchId } });
+    // Safely check and resolve branch ID
+    let branch = null;
+    try {
+      branch = await prisma.branch.findUnique({ where: { id: branchId } });
+    } catch {
+      branch = null;
+    }
+
     if (!branch) {
-      // Create a default branch if none exists just for the demo
+      branch = await prisma.branch.findFirst();
+    }
+
+    if (!branch) {
       branch = await prisma.branch.create({
         data: {
-          id: branchId,
-          name: 'Chintal Branch',
-          address: 'Main Road, Chintal',
-          phone: '+91 93471 04569',
-          totalTables: 20,
+          name: 'Balaji Dhaba Moinabad Branch',
+          address: 'Chilkur Balaji Temple Road, Moinabad',
+          phone: '+91 99890 00000',
+          totalTables: 30,
           openingTime: '11:00 AM',
           closingTime: '11:00 PM'
         }
       });
     }
+
+    const resolvedBranchId = branch.id;
 
     // Generate HMAC-signed QR token for the 10% discount
     const payload = JSON.stringify({ bookingRef, phone });
@@ -44,11 +54,11 @@ export async function POST(request: Request) {
     const reservation = await prisma.reservation.create({
       data: {
         bookingRef,
-        branchId,
+        branchId: resolvedBranchId,
         customerName,
         phone,
         email,
-        guests: parseInt(guests),
+        guests: parseInt(guests) || 1,
         date: new Date(date),
         time,
         specialInstructions,
