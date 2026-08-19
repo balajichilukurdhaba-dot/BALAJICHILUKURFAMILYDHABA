@@ -32,9 +32,9 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial })
 
       <div className="relative z-10 flex flex-col space-y-6">
         {/* Rating stars */}
-        <div className="flex space-x-1 text-brand-gold">
+        <div className="flex space-x-1 text-amber-400">
           {Array.from({ length: testimonial.rating }).map((_, i) => (
-            <Star key={i} size={16} className="fill-current" />
+            <Star key={i} size={16} className="fill-amber-400 text-amber-400" />
           ))}
         </div>
 

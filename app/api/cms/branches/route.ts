@@ -5,57 +5,19 @@ import { unstable_cache, revalidateTag } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
-const getCachedBranches = unstable_cache(
-  async () => {
-    return prisma.branch.findMany({
+// GET /api/cms/branches
+export async function GET() {
+  try {
+    const branches = await prisma.branch.findMany({
       include: {
         tables: true
       },
       orderBy: { name: 'asc' }
     });
-  },
-  ['branches-list'],
-  { tags: ['branches'] }
-);
-
-async function fetchBranchesFromSupabase() {
-  try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-    if (!url || !key) return [];
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(url, key);
-
-    const { data } = await supabase.from('branches').select('*').order('name', { ascending: true });
-    if (!data) return [];
-
-    return data.map((b: any) => ({
-      id: b.id,
-      name: b.name,
-      address: b.address,
-      phone: b.phone,
-      totalTables: b.total_tables || b.totalTables || 10,
-      openingTime: b.opening_time || b.openingTime || '09:00',
-      closingTime: b.closing_time || b.closingTime || '22:00',
-      tables: []
-    }));
-  } catch {
-    return [];
-  }
-}
-
-// GET /api/cms/branches
-export async function GET() {
-  try {
-    let branches: any[] = [];
-    try {
-      branches = await getCachedBranches();
-    } catch {
-      branches = await fetchBranchesFromSupabase();
-    }
 
     return NextResponse.json({ success: true, branches });
   } catch (error: any) {
+    console.error('Error loading branches from Prisma:', error);
     const fallback = await fetchBranchesFromSupabase();
     return NextResponse.json({ success: true, branches: fallback });
   }

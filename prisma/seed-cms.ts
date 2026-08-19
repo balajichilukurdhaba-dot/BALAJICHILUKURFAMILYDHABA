@@ -13,7 +13,7 @@ async function main() {
     update: {
       name: 'Moinabad Branch',
       address: '4-15/2part, Aziz Nagar, Himayat Sagar Rd, Moinabad, Telangana 500075',
-      phone: '+91 93471 04569',
+      phone: '+91 98494 98681',
       totalTables: 25,
       openingTime: '11:00',
       closingTime: '23:00'
@@ -22,7 +22,7 @@ async function main() {
       id: '52ae6a0f-daee-40f5-aa0e-ac44e17d325e',
       name: 'Moinabad Branch',
       address: '4-15/2part, Aziz Nagar, Himayat Sagar Rd, Moinabad, Telangana 500075',
-      phone: '+91 93471 04569',
+      phone: '+91 98494 98681',
       totalTables: 25,
       openingTime: '11:00',
       closingTime: '23:00'
@@ -34,7 +34,7 @@ async function main() {
     update: {
       name: 'PRAGATHI NAGAR BRANCH',
       address: 'Opposite Pragathi Nagar Lake, Pragathi Nagar, Kukatpally, Hyderabad, Telangana 500090',
-      phone: '+91 93471 04569',
+      phone: '+91 98494 98681',
       totalTables: 15,
       openingTime: '11:00',
       closingTime: '23:00'
@@ -43,7 +43,7 @@ async function main() {
       id: 'a2ae6a0f-daee-40f5-aa0e-ac44e17d325f',
       name: 'PRAGATHI NAGAR BRANCH',
       address: 'Opposite Pragathi Nagar Lake, Pragathi Nagar, Kukatpally, Hyderabad, Telangana 500090',
-      phone: '+91 93471 04569',
+      phone: '+91 98494 98681',
       totalTables: 15,
       openingTime: '11:00',
       closingTime: '23:00'

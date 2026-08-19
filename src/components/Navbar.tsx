@@ -121,18 +121,23 @@ export const Navbar: React.FC = () => {
     { name: 'Contact', path: '/contact', icon: Phone }
   ];
 
-  const handleLinkClick = (path: string) => {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     setIsOpen(false);
     if (path.includes('#')) {
-      const hash = '#' + path.split('#')[1];
+      const parts = path.split('#');
+      const route = parts[0] || '/';
+      const elementId = parts[1];
+      const hash = '#' + elementId;
       setActiveHash(hash);
-      const elementId = path.split('#')[1];
-      setTimeout(() => {
+
+      if (pathname === route) {
+        e.preventDefault();
+        window.history.pushState(null, '', hash);
         const element = document.getElementById(elementId);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 100);
+      }
     } else {
       setActiveHash('');
     }
@@ -183,7 +188,7 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.name}
                 href={link.path}
-                onClick={() => handleLinkClick(link.path)}
+                onClick={(e) => handleLinkClick(e, link.path)}
                 className={`relative font-sans text-sm font-medium tracking-wide uppercase transition-colors duration-300 py-1 ${
                   isLinkActive(link.path) 
                     ? 'text-brand-gold' 
@@ -207,7 +212,7 @@ export const Navbar: React.FC = () => {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-5">
             <a 
-              href="tel:+919347104569" 
+              href="tel:+919849498681" 
               className={`p-2.5 rounded-full border transition-colors flex items-center justify-center ${
                 showScrolledStyle
                   ? 'border-brand-dark/15 text-brand-dark hover:text-brand-accent hover:border-brand-accent'
@@ -314,7 +319,7 @@ export const Navbar: React.FC = () => {
                         <Link
                           key={link.name}
                           href={link.path}
-                          onClick={() => handleLinkClick(link.path)}
+                          onClick={(e) => handleLinkClick(e, link.path)}
                           className={`flex items-center space-x-4 px-4 py-3 rounded-xl transition-all duration-300 ${
                             active
                               ? 'bg-white/15 text-brand-gold font-semibold shadow-inner'
@@ -332,11 +337,11 @@ export const Navbar: React.FC = () => {
                 {/* Bottom Actions and Info */}
                 <div className="flex flex-col space-y-3.5 mt-8 pt-6 border-t border-white/10">
                   <a 
-                    href="tel:+919347104569" 
+                    href="tel:+919849498681" 
                     className="w-full flex justify-center items-center space-x-2 text-white border border-white/20 hover:border-white/50 py-3 rounded-xl font-sans text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:bg-white/5"
                   >
                     <Phone size={14} className="text-brand-gold animate-pulse" />
-                    <span>Call +91 93471 04569</span>
+                    <span>Call +91 98494 98681</span>
                   </a>
                   
                   <Link 

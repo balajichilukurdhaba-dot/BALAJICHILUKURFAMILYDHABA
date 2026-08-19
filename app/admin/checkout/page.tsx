@@ -1055,7 +1055,7 @@ We look forward to serving you again.`;
               <div className="text-center border-b border-slate-900/40 pb-3 mb-3 space-y-1">
                 <h2 className="font-bold text-base uppercase tracking-tight text-slate-900">Balaji Chilkur Family Dhaba</h2>
                 <p className="text-[10px] text-slate-600">Vikarabad Highway, Chilkur X Road, TS</p>
-                <p className="text-[10px] text-slate-600">Ph: +91 93471 04569 | GSTIN: 36ABCDE1234F1Z5</p>
+                <p className="text-[10px] text-slate-600">Ph: +91 98494 98681 | GSTIN: 36ABCDE1234F1Z5</p>
                 <div className="mt-2 inline-block border border-slate-800 px-2 py-0.5 font-bold text-[10px] uppercase">
                   Tax Invoice / Bill Receipt
                 </div>

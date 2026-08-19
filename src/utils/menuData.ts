@@ -1698,68 +1698,178 @@ description: 'Crispy, spicy Amritsari style papad with crushed black pepper kern
 ];
 
 export const GALLERY_PHOTOS = [
-  { id: 'g1',  src: '/dum-biryani.jpg',          title: 'Veg Dum Biryani',        menuCategory: 'Biryani',              menuDishName: 'Dum Biryani' },
-  { id: 'g2',  src: '/paneer-butter-masala.jpg',  title: 'Paneer Butter Masala',   menuCategory: 'Paneer Specialities',  menuDishName: 'Paneer Butter Masala' },
-  { id: 'g3',  src: '/kaju-paneer-biryani.jpg',   title: 'Kaju Paneer Biryani',    menuCategory: 'Biryani',              menuDishName: 'Kaju Paneer Biryani' },
-  { id: 'g4',  src: '/paneer-tikka-masala.jpg',   title: 'Paneer Tikka Masala',    menuCategory: 'Paneer Specialities',  menuDishName: 'Paneer Tikka Masala' },
-  { id: 'g5',  src: '/kaju-butter-masala.jpg',    title: 'Kaju Butter Masala',     menuCategory: 'Special Veg Curries',  menuDishName: 'Kaju Butter Masala' },
-  { id: 'g6',  src: '/butter-naan.jpg',           title: 'Butter Naan',            menuCategory: 'Naan',                 menuDishName: 'Butter Naan' },
-  { id: 'g7',  src: '/paneer-patiala.jpg',        title: 'Paneer Patiala',         menuCategory: 'Paneer Specialities',  menuDishName: 'Paneer Patiala (Sweet)' },
-  { id: 'g8',  src: '/veg-manchuria.jpg',         title: 'Veg Manchuria',          menuCategory: 'Starters',             menuDishName: 'Veg Manchuria' },
-  { id: 'g9',  src: '/kashmiri-pulao.jpg',        title: 'Kashmiri Pulao (Sweet)', menuCategory: 'Pulao',                menuDishName: 'Kashmiri Pulao (Sweet)' },
-  { id: 'g10', src: '/jumbo-family-pack.jpg',     title: 'Jumbo Family Pack',      menuCategory: 'Jumbo Family Pack',    menuDishName: 'Jumbo Family Pack' },
+  { id: 'g1',  src: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80', title: 'Veg Dum Biryani',        menuCategory: 'Biryani Specials',     menuDishName: 'Veg Dum Biryani' },
+  { id: 'g2',  src: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80', title: 'Paneer Butter Masala',   menuCategory: 'Paneer Specials',      menuDishName: 'Paneer Butter Masala' },
+  { id: 'g3',  src: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=800&q=80', title: 'Kaju Paneer Biryani',    menuCategory: 'Biryani Specials',     menuDishName: 'Kaju Paneer Biryani' },
+  { id: 'g4',  src: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=800&q=80', title: 'Paneer Tikka Masala',    menuCategory: 'Paneer Specials',      menuDishName: 'Paneer Tikka Masala' },
+  { id: 'g5',  src: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=800&q=80', title: 'Kaju Butter Masala',     menuCategory: 'Curries',              menuDishName: 'Kaju Butter Masala' },
+  { id: 'g6',  src: 'https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&w=800&q=80', title: 'Butter Naan',            menuCategory: 'Roti & Naan',          menuDishName: 'Butter Naan' },
+  { id: 'g7',  src: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80', title: 'Paneer Patiala',         menuCategory: 'Paneer Specials',      menuDishName: 'Paneer Patiala' },
+  { id: 'g8',  src: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80', title: 'Veg Manchuria',          menuCategory: 'Starters',             menuDishName: 'Veg Manchuria Dry' },
+  { id: 'g9',  src: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80', title: 'Kashmiri Pulao (Sweet)', menuCategory: 'Biryani Specials',     menuDishName: 'Kashmiri Pulao (Sweet)' },
+  { id: 'g10', src: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', title: 'Jumbo Family Pack',      menuCategory: 'Combos & Family Packs',menuDishName: 'Jumbo Family Pack' },
 ];
 
 
 export const TESTIMONIALS = [
   {
     id: 't1',
-    name: 'Pavan Bhadramraju',
-    role: 'Local Guide · 175 reviews',
-    content: 'We ordered Paneer Butter Masala with Butter Naan, the taste was awesome, the hotel appearance was too good, plenty of vegetarian dishes available here.',
+    name: 'Hari Kashyap',
+    role: 'Ambience & Pure Veg Food',
+    content: 'Service is bit late but ambience and food was amazing. Great pure vegetarian options and tasty gravies.',
     rating: 5,
     source: 'Google Reviews',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80',
-    date: 'a year ago'
+    date: '6 months ago',
+    avatar: '/avatars/google-avatar-1.png'
   },
   {
     id: 't2',
     name: 'Nilabh Verma',
-    role: 'Local Guide · 135 reviews',
-    content: "A good family restaurant in Aziz Nagar, Himayat Nagar and Chilkur locality. It's an all vegetarian restaurant and the food quality is good. The price is on the higher side but still ok. There is plenty of parking space. The staff is good.",
+    role: 'Family Dining & Parking Facility',
+    content: "A good family restaurant in Aziz Nagar, Himayat Nagar and Chilkur locality. It's an all vegetarian restaurant and the food quality is good. There is plenty of parking space. The staff is good.",
     rating: 5,
     source: 'Google Reviews',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
-    date: 'a year ago'
+    date: 'a year ago',
+    avatar: '/avatars/google-avatar-2.png'
   },
   {
     id: 't3',
-    name: 'Rakesh Sharma',
-    role: 'Local Guide · 115 reviews',
-    content: 'Good restaurant, friendly staff. Owner is very good and down to earth. Visited with my wife. Loved the food. I also have a farmhouse nearby and we ordered food multiple times from here.',
+    name: 'Pavan Bhadramraju',
+    role: 'Paneer Butter Masala & Butter Naan',
+    content: 'We ordered Paneer Butter Masala with Butter Naan, the taste was awesome, the hotel appearance was too good, plenty of vegetarian dishes available here.',
     rating: 5,
     source: 'Google Reviews',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&h=150&q=80',
-    date: 'a year ago'
+    date: 'a year ago',
+    avatar: '/avatars/google-avatar-3.png'
   },
   {
     id: 't4',
-    name: 'Srinivas Rao',
-    role: 'Local Guide · 48 reviews',
-    content: 'Excellent food quality. Tomato Soup was the perfect start. Paneer 65 was crispy and highly flavorful. Proximity to ORR makes it a very convenient stop for families.',
-    rating: 4,
+    name: 'Rakesh Sharma',
+    role: 'Farmhouse Orders & Family Feasts',
+    content: 'Good restaurant, friendly staff. Owner is very good and down to earth. Visited with my wife. Loved the food. I also have a farmhouse nearby and we ordered food multiple times from here.',
+    rating: 5,
     source: 'Google Reviews',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80',
-    date: '6 months ago'
+    date: 'a year ago',
+    avatar: '/avatars/google-avatar-4.png'
   },
   {
     id: 't5',
-    name: 'Latha Reddy',
-    role: '3 reviews',
-    content: 'The best place for pure veg lovers around Moinabad. We tried their Veg Hyderabadi Biryani and Dum Aloo. Spices were perfectly balanced, and the staff made us feel very welcome.',
+    name: 'Srinivas Mankala',
+    role: 'Pure Veg Lunch & Dinner',
+    content: 'Great vegetarian restaurant serving very tasty food. Reasonable price and good service.',
     rating: 5,
     source: 'Google Reviews',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&h=150&q=80',
-    date: '3 months ago'
+    date: '6 months ago',
+    avatar: '/avatars/google-avatar-5.png'
+  },
+  {
+    id: 't6',
+    name: 'Kedar Shankaar M',
+    role: 'Tandoori Breads & Veg Curries',
+    content: 'Good those who want veg food can surely go. Neat, silent, tasty veg food served in time. Not too costly.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: 'a year ago',
+    avatar: '/avatars/google-avatar-6.png'
+  },
+  {
+    id: 't7',
+    name: 'Anand Kumar',
+    role: 'Weekend Family Dining',
+    content: 'Awesome food and a must go place for all vegetarians. I always go with my family during weekends. Must try. Best vegetarian restaurant nearby. Multiple cuisines for vegetarian lovers.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '2 years ago',
+    avatar: '/avatars/google-avatar-7.png'
+  },
+  {
+    id: 't8',
+    name: 'Sathvik Krishna',
+    role: 'Malai Paneer & Butter Naan',
+    content: "This is a very good place for Veg lovers. You'll love the malai paneer and butter naan here. Many varieties available in veg. Enjoy the food!",
+    rating: 5,
+    source: 'Google Reviews',
+    date: '3 years ago',
+    avatar: '/avatars/google-avatar-8.png'
+  },
+  {
+    id: 't9',
+    name: 'Vijaykant Bilebhavi',
+    role: 'Dal Tadka, Dum Aloo & Rotis',
+    content: 'Nice atmosphere even in non family section. Of course tasty food, veg noodles 5*, Dal Tadka 5*, Dum aalu 4.3*, Rotis 4*.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '3 years ago',
+    avatar: '/avatars/google-avatar-9.png'
+  },
+  {
+    id: 't10',
+    name: 'MOULANA MSK',
+    role: 'Special Veg Biryani',
+    content: 'Super food, very tasty! Best dining experience on the Chilkur route.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '2 months ago',
+    avatar: '/avatars/google-avatar-10.png'
+  },
+  {
+    id: 't11',
+    name: 'Vijay C',
+    role: 'Large Group & Family Gatherings',
+    content: 'We went with a group of 20 and we were well taken care of. Food was delicious and plentiful.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '2 years ago',
+    avatar: '/avatars/google-avatar-11.png'
+  },
+  {
+    id: 't12',
+    name: 'Shreeram Menon',
+    role: 'Hospitality & Fresh Food',
+    content: 'Sambhu has given excellent service, really good food. Great dining experience for our family.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '2 years ago',
+    avatar: '/avatars/google-avatar-12.png'
+  },
+  {
+    id: 't13',
+    name: 'Srikanth Reddy',
+    role: 'Paneer 65 & Kaju Biryani',
+    content: 'You will never forget this place once you visit here, food taste is top notch 👌',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '2 years ago',
+    avatar: '/avatars/google-avatar-13.png'
+  },
+  {
+    id: 't14',
+    name: 'VIJAY KUMAR Naidu',
+    role: 'North Indian Thali & Lunch',
+    content: 'Lunch is very Tasty here. Great place for authentic dhaba food with quick service.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '2 years ago',
+    avatar: '/avatars/google-avatar-14.png'
+  },
+  {
+    id: 't15',
+    name: 'Rishab Akilan',
+    role: 'Pure Veg Specialties',
+    content: 'Really excellent vegetarian dishes, authentic flavors and clean dining area.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '2 years ago',
+    avatar: '/avatars/google-avatar-15.png'
+  },
+  {
+    id: 't16',
+    name: 'Subba Raju Mitta',
+    role: 'Dhaba Style Dal Makhani & Roti',
+    content: 'Good place, authentic dhaba taste and courteous staff service.',
+    rating: 5,
+    source: 'Google Reviews',
+    date: '3 years ago',
+    avatar: '/avatars/google-avatar-2.png'
   }
 ];

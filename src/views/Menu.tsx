@@ -120,7 +120,7 @@ My Details:
 - Name: ${customerName}
 - Phone: ${phone}`;
       
-      const whatsappUrl = `https://wa.me/919347104569?text=${encodeURIComponent(messageText)}`;
+      const whatsappUrl = `https://wa.me/919849498681?text=${encodeURIComponent(messageText)}`;
       window.open(whatsappUrl, '_blank');
       onClose();
     } catch (err) {
@@ -363,7 +363,7 @@ My Details:
             </button>
 
             <p className="text-center text-[10px] text-brand-dark/40 font-sans pt-1">
-              Balaji Chilkur Family Dhaba · Moinabad · +91 93471 04569
+              Balaji Chilkur Family Dhaba · Moinabad · +91 98494 98681
             </p>
           </div>
         )}

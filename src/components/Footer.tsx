@@ -55,7 +55,7 @@ export const Footer: React.FC = () => {
           <div className="flex space-x-4 pt-2">
             {/* Green Call Icon */}
             <a 
-              href="tel:+919347104569" 
+              href="tel:+919849498681" 
               className="w-10 h-10 flex items-center justify-center rounded-full bg-[#2ECC71] hover:scale-110 shadow-md transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20 active:scale-95" 
               aria-label="Call Balaji Dhaba"
             >
@@ -66,7 +66,7 @@ export const Footer: React.FC = () => {
             
             {/* Official WhatsApp Green */}
             <a 
-              href="https://wa.me/919347104569?text=Hi%20Balaji%20Chilkur%20Family%20Dhaba!%20I'd%20like%20to%20make%20an%20inquiry." 
+              href="https://wa.me/919849498681?text=Hi%20Balaji%20Chilkur%20Family%20Dhaba!%20I'd%20like%20to%20make%20an%20inquiry." 
               target="_blank" 
               rel="noopener noreferrer" 
               className="w-10 h-10 flex items-center justify-center rounded-full bg-[#25D366] hover:scale-110 shadow-md transition-all duration-300 hover:shadow-lg hover:shadow-green-600/20 active:scale-95" 
@@ -165,7 +165,7 @@ export const Footer: React.FC = () => {
                 
                 <li className="flex items-center space-x-3 pt-2 border-t border-[#FFFFFF]/10 group">
                   <Phone size={16} className="text-brand-gold shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                  <a href="tel:+919347104569" className="hover:text-brand-gold text-sm font-semibold transition-all duration-300 group-hover:translate-x-0.5 transform inline-block">+91 93471 04569</a>
+                  <a href="tel:+919849498681" className="hover:text-brand-gold text-sm font-semibold transition-all duration-300 group-hover:translate-x-0.5 transform inline-block">+91 98494 98681</a>
                 </li>
               </>
             ) : (
@@ -205,7 +205,17 @@ export const Footer: React.FC = () => {
 
       <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-[#FFFFFF]/10 flex flex-col sm:flex-row justify-between items-center text-xs text-[#FFFFFF]/40">
         <p>© {currentYear} Balaji Chilkur Family Dhaba. All Rights Reserved.</p>
-        <p className="mt-2 sm:mt-0">Designed and Developed to Perfection.</p>
+        <p className="mt-2 sm:mt-0">
+          Designed &amp; Developed by{' '}
+          <a
+            href="https://www.instagram.com/_javid.18/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/75 font-semibold hover:text-brand-gold underline decoration-white/20 hover:decoration-brand-gold transition-colors"
+          >
+            Team Veins
+          </a>
+        </p>
       </div>
     </footer>
   );

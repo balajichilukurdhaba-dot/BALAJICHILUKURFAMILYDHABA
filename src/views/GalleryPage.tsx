@@ -194,6 +194,11 @@ export const GalleryPage: React.FC = () => {
                   src={photo.src}
                   alt={photo.altText || photo.title}
                   onLoad={() => setLoadedImages(prev => ({ ...prev, [photo.id || index]: true }))}
+                  onError={(e) => {
+                    setLoadedImages(prev => ({ ...prev, [photo.id || index]: true }));
+                    (e.currentTarget as HTMLImageElement).onerror = null;
+                    (e.currentTarget as HTMLImageElement).src = '/dhaba_restaurant.png';
+                  }}
                   className={`w-full h-auto object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
                     loadedImages[photo.id || index] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                   }`}

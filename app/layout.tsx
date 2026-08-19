@@ -54,6 +54,18 @@ export const metadata: Metadata = {
       'Authentic Pure Vegetarian North & South Indian Dhaba near Chilkur Balaji Temple.',
     images: ['/dhaba-exterior.jpg'],
   },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   robots: {
     index: true,
     follow: true,
@@ -117,6 +129,11 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <head>
+        <link rel="icon" href="/favicon.svg?v=bsd2026" type="image/svg+xml" />
+        <link rel="icon" href="/favicon-32x32.png?v=bsd2026" type="image/png" sizes="32x32" />
+        <link rel="icon" href="/favicon.png?v=bsd2026" type="image/png" sizes="512x512" />
+        <link rel="icon" href="/favicon.ico?v=bsd2026" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=bsd2026" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

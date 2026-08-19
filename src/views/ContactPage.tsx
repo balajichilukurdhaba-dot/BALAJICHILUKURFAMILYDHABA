@@ -6,7 +6,7 @@ const STATIC_BRANCHES = [
   {
     name: "Moinabad Branch",
     address: "4-15/2part, Aziz Nagar, Himayat Sagar Rd, Moinabad, Telangana 500075",
-    phone: "+91 93471 04569",
+    phone: "+91 98494 98681",
     mapEmbedUrl: "https://maps.google.com/maps?q=Balaji%20Santosh%20Family%20Dhaba%20Aziz%20Nagar%20Himayat%20Sagar%20Rd%20Moinabad%20Telangana&t=&z=15&ie=UTF8&iwloc=&output=embed",
     mapNavUrl: "https://www.google.com/maps/search/?api=1&query=Balaji+Santosh+Family+Dhaba+Aziz+Nagar+Himayat+Sagar+Rd+Moinabad+Telangana",
     rating: "4.1 ★ (63 reviews)",
@@ -16,7 +16,7 @@ const STATIC_BRANCHES = [
   {
     name: "Visit Our Second Branch – Pragathi Nagar",
     address: "Opposite Pragathi Nagar Lake, Pragathi Nagar, Kukatpally, Hyderabad, Telangana 500090",
-    phone: "+91 93471 04569",
+    phone: "+91 98494 98681",
     mapEmbedUrl: "https://maps.google.com/maps?q=Balaji%20Santosh%20Family%20Dhaba%20Pragathi%20Nagar%20Kukatpally%20Hyderabad&t=&z=15&ie=UTF8&iwloc=&output=embed",
     mapNavUrl: "https://www.google.com/maps/search/?api=1&query=Balaji+Santosh+Family+Dhaba+Pragathi+Nagar+Kukatpally+Hyderabad",
     rating: "4.3 ★ (19 reviews)",

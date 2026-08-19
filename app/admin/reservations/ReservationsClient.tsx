@@ -643,7 +643,7 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                 <input
                   type="tel"
                   required
-                  placeholder="e.g. +91 93471 04569"
+                  placeholder="e.g. +91 98494 98681"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full bg-brand-bg border border-brand-dark/10 rounded-xl px-4 py-3 text-xs focus:outline-none"

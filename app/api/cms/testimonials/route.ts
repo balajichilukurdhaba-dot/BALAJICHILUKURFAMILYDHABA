@@ -5,68 +5,25 @@ import { unstable_cache, revalidateTag } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
-const getCachedTestimonials = unstable_cache(
-  async (approvedOnly: boolean) => {
-    const where: any = {};
-    if (approvedOnly) {
-      where.isApproved = true;
-    }
-    return prisma.testimonial.findMany({
-      where,
-      orderBy: { order: 'asc' }
-    });
-  },
-  ['testimonials-list'],
-  { tags: ['testimonials'] }
-);
-
-async function fetchTestimonialsFromSupabase(approvedOnly: boolean) {
-  try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-    if (!url || !key) return [];
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(url, key);
-
-    let query = supabase.from('testimonials').select('*').order('order', { ascending: true });
-    if (approvedOnly) {
-      query = query.eq('is_approved', true);
-    }
-    const { data } = await query;
-    if (!data) return [];
-
-    return data.map((t: any) => ({
-      id: t.id,
-      name: t.name,
-      role: t.role || 'Patron',
-      content: t.content,
-      rating: t.rating ?? 5,
-      source: t.source || 'Google Reviews',
-      avatar: t.avatar || null,
-      date: t.date || 'Recently',
-      isApproved: t.is_approved ?? t.isApproved ?? true,
-      order: t.order ?? 0
-    }));
-  } catch {
-    return [];
-  }
-}
-
 // GET /api/cms/testimonials
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const approvedOnly = searchParams.get('approvedOnly') === 'true';
 
-    let testimonials: any[] = [];
-    try {
-      testimonials = await getCachedTestimonials(approvedOnly);
-    } catch {
-      testimonials = await fetchTestimonialsFromSupabase(approvedOnly);
+    const where: any = {};
+    if (approvedOnly) {
+      where.isApproved = true;
     }
+
+    const testimonials = await prisma.testimonial.findMany({
+      where,
+      orderBy: { order: 'asc' }
+    });
 
     return NextResponse.json({ success: true, testimonials });
   } catch (error: any) {
+    console.error('Error loading testimonials from Prisma:', error);
     const fallback = await fetchTestimonialsFromSupabase(false);
     return NextResponse.json({ success: true, testimonials: fallback });
   }

@@ -176,9 +176,10 @@ export default function ScannerPage() {
               const imageData = ctx.getImageData(0, 0, width, height);
 
               // Decode frame buffer using jsQR with attemptBoth
-              const decoded = jsQR(imageData.data, imageData.width, imageData.height, {
+              const qrFn = typeof jsQR === 'function' ? jsQR : (jsQR as any)?.default;
+              const decoded = typeof qrFn === 'function' ? qrFn(imageData.data, imageData.width, imageData.height, {
                 inversionAttempts: "attemptBoth"
-              });
+              }) : null;
 
               if (decoded && decoded.data) {
                 stopMediaStream();

@@ -11,15 +11,21 @@ import {
   ArrowRight,
   Star,
   X,
-  Quote,
   Calendar,
+  UtensilsCrossed,
   Info,
   Search,
   MessageSquare,
   CheckCircle2,
+  Leaf,
+  Users,
+  Car,
+  Sparkles,
+  Images,
+  BookOpen,
   Loader2
 } from 'lucide-react';
-import { DishCard } from '../components/DishCard';
+import { DishCard, formatImageUrl, getFallbackFoodImage } from '../components/DishCard';
 import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
 import { SIGNATURE_DISHES as STATIC_DISHES, GALLERY_PHOTOS as STATIC_GALLERY, TESTIMONIALS as STATIC_TESTIMONIALS } from '../utils/menuData';
 
@@ -72,12 +78,12 @@ const CircularReviewCard: React.FC<CircularReviewCardProps> = ({ testimonial, on
 
         {/* Stars + Date */}
         <div className="flex items-center justify-between mt-3.5">
-          <div className="flex gap-0.5 text-brand-gold">
+          <div className="flex gap-0.5 text-amber-400">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
                 size={12}
-                className={i < testimonial.rating ? 'fill-current text-[#1E4D2B]' : 'text-zinc-200'}
+                className={i < testimonial.rating ? 'fill-amber-400 text-amber-400' : 'text-zinc-200'}
               />
             ))}
           </div>
@@ -152,10 +158,6 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ testimonial, onClose }) => {
           <X size={16} />
         </button>
 
-        <div className="absolute top-2 right-6 text-brand-gold/10 pointer-events-none select-none">
-          <Quote size={100} />
-        </div>
-
         <div className="text-center relative z-10">
           <div className="relative w-20 h-20 mx-auto mb-4">
             <img
@@ -173,12 +175,12 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ testimonial, onClose }) => {
             {testimonial.role}
           </p>
 
-          <div className="flex justify-center gap-1 my-4 text-brand-gold">
+          <div className="flex justify-center gap-1 my-4 text-amber-400">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                size={16}
-                className={i < testimonial.rating ? 'fill-current text-brand-gold' : 'text-brand-dark/20'}
+                size={18}
+                className={i < testimonial.rating ? 'fill-amber-400 text-amber-400' : 'text-zinc-200'}
               />
             ))}
           </div>
@@ -334,7 +336,7 @@ const SubmitReviewModal: React.FC<SubmitReviewModalProps> = ({ onClose }) => {
                   Overall Rating *
                 </label>
                 <div className="flex items-center gap-2">
-                  <div className="flex gap-1 text-brand-gold">
+                  <div className="flex gap-1 text-amber-400">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         type="button"
@@ -346,12 +348,12 @@ const SubmitReviewModal: React.FC<SubmitReviewModalProps> = ({ onClose }) => {
                       >
                         <Star
                           size={24}
-                          className={(hoverRating || rating) >= star ? 'fill-current text-brand-gold' : 'text-brand-dark/20'}
+                          className={(hoverRating || rating) >= star ? 'fill-amber-400 text-amber-400' : 'text-zinc-300'}
                         />
                       </button>
                     ))}
                   </div>
-                  <span className="text-xs font-bold text-brand-dark/60 ml-2 font-mono">
+                  <span className="text-xs font-bold text-amber-600 ml-2 font-mono">
                     {ratingLabels[hoverRating || rating]}
                   </span>
                 </div>
@@ -434,7 +436,7 @@ const HOME_BRANCHES = [
   {
     name: "Moinabad Branch",
     address: "4-15/2part, Aziz Nagar, Himayat Sagar Rd, Moinabad, Telangana 500075",
-    phone: "+91 93471 04569",
+    phone: "+91 98494 98681",
     mapEmbedUrl: "https://maps.google.com/maps?q=Balaji%20Santosh%20Family%20Dhaba%20Aziz%20Nagar%20Himayat%20Sagar%20Rd%20Moinabad%20Telangana&t=&z=15&ie=UTF8&iwloc=&output=embed",
     mapNavUrl: "https://www.google.com/maps/search/?api=1&query=Balaji+Santosh+Family+Dhaba+Aziz+Nagar+Himayat+Sagar+Rd+Moinabad+Telangana",
     openingTime: "11:00",
@@ -443,7 +445,7 @@ const HOME_BRANCHES = [
   {
     name: "Visit Our Second Branch – Pragathi Nagar",
     address: "Opposite Pragathi Nagar Lake, Pragathi Nagar, Kukatpally, Hyderabad, Telangana 500090",
-    phone: "+91 93471 04569",
+    phone: "+91 98494 98681",
     mapEmbedUrl: "https://maps.google.com/maps?q=Balaji%20Santosh%20Family%20Dhaba%20Pragathi%20Nagar%20Kukatpally%20Hyderabad&t=&z=15&ie=UTF8&iwloc=&output=embed",
     mapNavUrl: "https://www.google.com/maps/search/?api=1&query=Balaji+Santosh+Family+Dhaba+Pragathi+Nagar+Kukatpally+Hyderabad",
     openingTime: "11:00",
@@ -496,80 +498,87 @@ export const Home: React.FC = () => {
   const galleryScrollRef = useRef<HTMLDivElement>(null);
   const galleryDragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0, hasDragged: false });
 
-  const loadCMSData = React.useCallback(async () => {
+  const isFetchingRef = useRef(false);
+  const lastFetchTimeRef = useRef(0);
+
+  const safeFetchJson = async (url: string) => {
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
+
+  const loadCMSData = React.useCallback(async (isFocusTrigger = false) => {
+    const now = Date.now();
+    if (isFocusTrigger && now - lastFetchTimeRef.current < 10000) {
+      return;
+    }
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    lastFetchTimeRef.current = now;
+
     try {
       const previewMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('preview') === 'true';
-      const cacheBust = `${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-      const [settingsRes, menuRes, offersRes, testimonialsRes, galleryRes, branchesRes] = await Promise.all([
-        fetch(`/api/cms/homepage?draft=${previewMode}&t=${cacheBust}`, { cache: 'no-store' }),
-        fetch(`/api/cms/menu?cacheBust=${cacheBust}`, {
-          cache: 'no-store',
-          next: { revalidate: 0 },
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, proxy-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        }),
-        fetch(`/api/cms/offers?activeOnly=true&homepageOnly=true&t=${cacheBust}`, { cache: 'no-store' }),
-        fetch(`/api/cms/testimonials?approvedOnly=true&t=${cacheBust}`, { cache: 'no-store' }),
-        fetch(`/api/cms/gallery?featured=true&t=${cacheBust}`, { cache: 'no-store' }),
-        fetch(`/api/cms/branches?t=${cacheBust}`, { cache: 'no-store' })
-      ]);
+      const cacheBust = `${now}_${Math.random().toString(36).substring(7)}`;
 
       const [settingsData, menuData, offersData, testimonialsData, galleryData, branchesData] = await Promise.all([
-        settingsRes.json(),
-        menuRes.json(),
-        offersRes.json(),
-        testimonialsRes.json(),
-        galleryRes.json(),
-        branchesRes.json()
+        safeFetchJson(`/api/cms/homepage?draft=${previewMode}&t=${cacheBust}`),
+        safeFetchJson(`/api/cms/menu?cacheBust=${cacheBust}`),
+        safeFetchJson(`/api/cms/offers?activeOnly=true&homepageOnly=true&t=${cacheBust}`),
+        safeFetchJson(`/api/cms/testimonials?approvedOnly=true&t=${cacheBust}`),
+        safeFetchJson(`/api/cms/gallery?featured=true&t=${cacheBust}`),
+        safeFetchJson(`/api/cms/branches?t=${cacheBust}`)
       ]);
 
-      if (settingsData.success) setCmsSettings(settingsData.settings);
+      if (settingsData?.success) setCmsSettings(settingsData.settings);
 
-      if (menuData.success) {
+      if (menuData?.success && Array.isArray(menuData.categories)) {
         const all: any[] = [];
         menuData.categories.forEach((cat: any) => {
-          cat.dishes.forEach((d: any) => {
-            if (!d.isHidden) {
-              all.push({ ...d, category: cat.name });
-            }
-          });
+          if (Array.isArray(cat.dishes)) {
+            cat.dishes.forEach((d: any) => {
+              if (!d.isHidden) {
+                all.push({ ...d, category: cat.name });
+              }
+            });
+          }
         });
         setDishes(all);
       }
 
-      if (offersData.success) setOffers(offersData.offers);
-      if (testimonialsData.success) setTestimonials(testimonialsData.testimonials);
-      if (galleryData.success) setGalleryPhotos(galleryData.photos);
-      if (branchesData.success) setBranches(branchesData.branches);
+      if (offersData?.success && Array.isArray(offersData.offers)) setOffers(offersData.offers);
+      if (testimonialsData?.success && Array.isArray(testimonialsData.testimonials)) setTestimonials(testimonialsData.testimonials);
+      if (galleryData?.success && Array.isArray(galleryData.photos)) setGalleryPhotos(galleryData.photos);
+      if (branchesData?.success && Array.isArray(branchesData.branches)) setBranches(branchesData.branches);
 
     } catch (error) {
-      console.error('Failed to load CMS data on home:', error);
+      console.warn('Failed to load CMS data on home:', error);
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadCMSData();
+    loadCMSData(false);
 
     // BroadcastChannel: instant cross-tab invalidation whenever Admin saves
     const channels: BroadcastChannel[] = [];
     ['menu-updates', 'gallery-updates', 'offers-updates', 'homepage-updates'].forEach((channelName) => {
       try {
         const channel = new BroadcastChannel(channelName);
-        channel.onmessage = () => loadCMSData();
+        channel.onmessage = () => loadCMSData(false);
         channels.push(channel);
       } catch { /* old browsers */ }
     });
 
-    const handleFocus = () => loadCMSData();
+    const handleFocus = () => loadCMSData(true);
     window.addEventListener('focus', handleFocus);
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') loadCMSData();
+      if (document.visibilityState === 'visible') loadCMSData(true);
     };
     document.addEventListener('visibilitychange', handleVisibility);
 
@@ -579,6 +588,30 @@ export const Home: React.FC = () => {
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [loadCMSData]);
+
+  // Immediate smooth scrolling on hash navigation (e.g. /#reviews)
+  useEffect(() => {
+    const scrollToHash = () => {
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const id = window.location.hash.replace('#', '');
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    };
+
+    scrollToHash();
+    const t1 = setTimeout(scrollToHash, 150);
+    const t2 = setTimeout(scrollToHash, 500);
+
+    window.addEventListener('hashchange', scrollToHash);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener('hashchange', scrollToHash);
+    };
+  }, []);
 
 
 
@@ -709,7 +742,7 @@ export const Home: React.FC = () => {
       price: '-10%',
       badge: 'Limited Time',
       cta: 'Book Now',
-      image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1000&auto=format&fit=crop',
+      image: '/online-booking-offer.jpg',
       link: '/reserve'
     },
     {
@@ -719,7 +752,7 @@ export const Home: React.FC = () => {
       price: '₹1499',
       badge: 'Best Value',
       cta: 'Order Now',
-      image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=1000&auto=format&fit=crop',
+      image: '/jumbo-family-pack.jpg',
       link: '/menu?category=Combo+Family+Pack'
     }
   ], []);
@@ -859,9 +892,9 @@ export const Home: React.FC = () => {
       {sectionsMap.hero && (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white p-2 md:p-3">
           {/* Full-Screen Background Video — all devices */}
-          <div className="absolute inset-2 md:inset-3 z-0 overflow-hidden rounded-3xl bg-brand-dark">
+          <div className="absolute inset-2 md:inset-3 z-0 overflow-hidden rounded-3xl bg-brand-dark pointer-events-none">
             {/* Fallback background colour while video loads */}
-            <div className="absolute inset-0 bg-brand-dark rounded-3xl" />
+            <div className="absolute inset-0 bg-brand-dark rounded-3xl pointer-events-none" />
 
             {/* YouTube Video or MP4 video */}
             {heroData.videoUrl?.includes('.mp4') || heroData.videoUrl?.includes('video/upload') ? (
@@ -874,7 +907,7 @@ export const Home: React.FC = () => {
                 onCanPlay={(e) => {
                   e.currentTarget.playbackRate = 1.35;
                 }}
-                className="w-full h-full object-cover opacity-100 absolute inset-0"
+                className="w-full h-full object-cover opacity-100 absolute inset-0 pointer-events-none"
               />
             ) : (
               <iframe
@@ -894,17 +927,17 @@ export const Home: React.FC = () => {
                   minWidth: '56.25vh',
                   minHeight: '100vh',
                 }}
-                className="opacity-95"
+                className="opacity-95 pointer-events-none"
               />
             )}
 
             {/* Premium luxury dark radial gradient overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.05)_0%,_rgba(0,0,0,0.25)_60%,_rgba(0,0,0,0.55)_100%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.05)_0%,_rgba(0,0,0,0.25)_60%,_rgba(0,0,0,0.55)_100%)] pointer-events-none" />
           </div>
 
           {/* Hero Content Overlay */}
-          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center pt-20">
-            <span className="text-[#FFFFFF] text-[9px] font-bold uppercase tracking-[0.25em] bg-brand-accent/20 border border-brand-accent/40 px-5 py-2 rounded-full backdrop-blur-md mb-8 animate-pulse font-sans">
+          <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center pt-20 pointer-events-auto">
+            <span className="text-[#FFFFFF] text-[9px] font-bold uppercase tracking-[0.25em] bg-brand-accent/20 border border-brand-accent/40 px-5 py-2 rounded-full backdrop-blur-md mb-8 animate-pulse font-sans select-none">
               Balaji Chilkur Family Dhaba
             </span>
             <h1 className="font-display text-4xl md:text-7xl font-semibold text-[#FFFFFF] leading-tight drop-shadow-2xl uppercase tracking-wider">
@@ -913,18 +946,22 @@ export const Home: React.FC = () => {
             <p className="text-xs md:text-sm text-[#FFFFFF]/70 font-sans uppercase tracking-[0.15em] max-w-2xl mx-auto leading-loose mt-6 drop-shadow-md">
               {heroData.subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row items-center gap-5 mt-12">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mt-8 sm:mt-10 relative z-30 w-full max-w-xl mx-auto">
               <Link
-                href={heroData.ctaLink}
-                className="w-full sm:w-auto bg-brand-accent hover:bg-brand-accent/90 text-[#FFFFFF] px-8 py-4.5 rounded-full font-bold uppercase tracking-wider shadow-lg shadow-brand-accent/25 transition-all text-xs block"
+                href={heroData.ctaLink || '/reserve'}
+                onClick={() => navigate.push(heroData.ctaLink || '/reserve')}
+                className="w-auto min-w-[190px] sm:min-w-[230px] px-5 py-3 sm:px-8 sm:py-4 bg-[#1E4D2B] hover:bg-[#163820] text-white rounded-full font-sans font-bold uppercase tracking-wider text-[11px] sm:text-xs md:text-sm shadow-xl shadow-black/30 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 inline-flex items-center justify-center gap-2 sm:gap-2.5 border border-white/20 cursor-pointer select-none text-center"
               >
-                {heroData.ctaText}
+                <Calendar size={16} className="text-brand-gold shrink-0 sm:w-[18px] sm:h-[18px]" />
+                <span>{heroData.ctaText || 'Reserve A Table'}</span>
               </Link>
               <Link
-                href={heroData.secondaryCtaLink}
-                className="w-full sm:w-auto bg-transparent hover:bg-[#FFFFFF]/10 border-2 border-[#FFFFFF] text-[#FFFFFF] px-8 py-4.5 rounded-full font-bold uppercase tracking-wider transition-all text-xs block"
+                href={heroData.secondaryCtaLink || '/menu'}
+                onClick={() => navigate.push(heroData.secondaryCtaLink || '/menu')}
+                className="w-auto min-w-[190px] sm:min-w-[230px] px-5 py-3 sm:px-8 sm:py-4 bg-white/10 hover:bg-white/25 active:scale-95 text-white rounded-full font-sans font-bold uppercase tracking-wider text-[11px] sm:text-xs md:text-sm backdrop-blur-md border-2 border-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 inline-flex items-center justify-center gap-2 sm:gap-2.5 cursor-pointer select-none text-center"
               >
-                {heroData.secondaryCtaText}
+                <UtensilsCrossed size={16} className="text-white shrink-0 sm:w-[18px] sm:h-[18px]" />
+                <span>{heroData.secondaryCtaText || 'Order Online'}</span>
               </Link>
             </div>
           </div>
@@ -991,7 +1028,7 @@ export const Home: React.FC = () => {
           <div className="flex justify-center mt-12">
             <Link
               href="/menu"
-              className="bg-brand-accent hover:bg-brand-accent/90 text-[#FFFFFF] px-8 py-4 rounded-full font-bold uppercase tracking-wider shadow-lg shadow-brand-accent/25 transition-all text-sm flex items-center justify-center space-x-2"
+              className="bg-brand-accent hover:bg-brand-accent/90 text-[#FFFFFF] px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold uppercase tracking-wider shadow-lg shadow-brand-accent/25 transition-all text-xs sm:text-sm flex items-center justify-center space-x-2"
             >
               <span>Explore Full Menu</span>
               <ArrowRight size={16} />
@@ -1016,24 +1053,25 @@ export const Home: React.FC = () => {
               <div
                 key={offer.id}
                 onClick={() => navigate.push(offer.link)}
-                className="relative rounded-3xl overflow-hidden min-h-[320px] flex items-center bg-zinc-950 text-[#FFFFFF] group cursor-pointer border border-brand-gold/10 hover:border-brand-gold/25 transition-all duration-500 shadow-md hover-lift"
+                className="relative rounded-3xl overflow-hidden min-h-[340px] flex items-center bg-zinc-900 text-[#FFFFFF] group cursor-pointer border border-brand-gold/15 hover:border-brand-gold/35 transition-all duration-500 shadow-xl hover-lift"
               >
-                {/* Offer Image */}
+                {/* Offer Image - Full Card Bright HD */}
                 <div className="absolute inset-0 z-0">
                   <img
                     src={offer.image}
                     alt={offer.title}
-                    className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-cover opacity-100 brightness-105 contrast-105 group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
+                  {/* Seamless smooth gradient fade directly integrated with image */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 via-50% to-transparent" />
                 </div>
 
-                {/* Offer Content */}
+                {/* Offer Content directly on image */}
                 <div className="relative z-10 p-8 md:p-12 max-w-md">
-                  <span className="text-[9px] font-bold uppercase tracking-widest bg-brand-gold/20 border border-brand-gold/45 text-brand-gold px-3 py-1 rounded-md">
+                  <span className="text-[9px] font-bold uppercase tracking-widest bg-brand-gold/20 border border-brand-gold/45 text-brand-gold px-3 py-1 rounded-md drop-shadow-md">
                     {offer.badge}
                   </span>
-                  <h3 className="font-display text-2xl md:text-3xl font-semibold mt-5 text-[#FFFFFF] tracking-wide">
+                  <h3 className="font-display text-2xl md:text-3xl font-semibold mt-5 text-[#FFFFFF] tracking-wide drop-shadow-lg">
                     {offer.title}
                   </h3>
                   {(() => {
@@ -1054,46 +1092,9 @@ export const Home: React.FC = () => {
                     return (
                       <>
                         {descText && (
-                          <p className="text-xs text-[#FFFFFF]/80 mt-3 font-sans leading-relaxed">
+                          <p className="text-xs text-[#FFFFFF]/80 mt-3 font-sans leading-relaxed drop-shadow-md">
                             {descText}
                           </p>
-                        )}
-                        {dishes.length > 0 ? (
-                          <div className="mt-3.5">
-                            {dishes.length > 3 ? (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOfferDishSearch('');
-                                  setModalSelectedCategory('ALL');
-                                  setViewOfferDishesModal({ title: offer.title, dishes, price: offer.price });
-                                }}
-                                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/25 border border-white/25 text-white text-xs font-medium px-3.5 py-1.5 rounded-lg backdrop-blur-md shadow-sm transition-all cursor-pointer group/btn"
-                              >
-                                <span>{dishes.length > 50 ? 'Valid on All Menu Items' : `Valid on ${dishes.length} selected items`}</span>
-                                {dishes.length <= 50 && (
-                                  <span className="text-[10px] font-bold text-brand-gold group-hover/btn:underline flex items-center gap-1">
-                                    View Dishes <Info size={12} />
-                                  </span>
-                                )}
-                              </button>
-                            ) : (
-                              <div className="flex flex-wrap gap-1.5">
-                                {dishes.map((d, i) => (
-                                  <span key={i} className="bg-white/10 border border-white/20 text-white/90 text-xs font-medium px-2.5 py-1 rounded-lg backdrop-blur-md">
-                                    {d}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="mt-3.5">
-                            <span className="inline-flex items-center bg-white/10 border border-white/20 text-white/90 text-xs font-medium px-3 py-1.5 rounded-lg backdrop-blur-md shadow-sm">
-                              Valid on All Menu Items
-                            </span>
-                          </div>
                         )}
                       </>
                     );
@@ -1151,6 +1152,10 @@ export const Home: React.FC = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1.0, ease: "easeInOut" }}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).onerror = null;
+                      (e.currentTarget as HTMLImageElement).src = '/dhaba_restaurant.png';
+                    }}
                     className="w-full h-full object-cover absolute inset-0"
                   />
                 </AnimatePresence>
@@ -1219,15 +1224,15 @@ export const Home: React.FC = () => {
                 </p>
               </div>
 
-              {/* Elegant highlights grid with stagger loading entry */}
-              <div className="grid grid-cols-2 gap-3.5 mt-8">
+              {/* Elegant highlights grid with professional vector icons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-8">
                 {[
-                  { icon: '✔', label: '100% Pure Vegetarian' },
-                  { icon: '🌿', label: 'Fresh Ingredients' },
-                  { icon: '👨‍👩‍👧', label: 'Family Friendly' },
-                  { icon: '🚗', label: 'Spacious Parking' },
-                  { icon: '✨', label: 'Premium Dining Experience' },
-                  { icon: '⭐', label: 'Highly Rated' }
+                  { icon: <CheckCircle2 size={18} className="text-[#1E4D2B] shrink-0" />, label: '100% Pure Vegetarian' },
+                  { icon: <Leaf size={18} className="text-[#1E4D2B] shrink-0" />, label: 'Fresh Ingredients' },
+                  { icon: <Users size={18} className="text-[#1E4D2B] shrink-0" />, label: 'Family Friendly' },
+                  { icon: <Car size={18} className="text-[#1E4D2B] shrink-0" />, label: 'Spacious Parking' },
+                  { icon: <Sparkles size={18} className="text-[#1E4D2B] shrink-0" />, label: 'Premium Dining Experience' },
+                  { icon: <Star size={18} className="text-[#1E4D2B] shrink-0 fill-[#1E4D2B]" />, label: 'Highly Rated' }
                 ].map((h, i) => (
                   <motion.div
                     key={i}
@@ -1235,21 +1240,24 @@ export const Home: React.FC = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.06, duration: 0.5, ease: "easeOut" }}
-                    className="flex items-center space-x-2.5 bg-white p-3.5 rounded-2xl border border-brand-gold/15 shadow-sm hover:scale-[1.02] transition-all duration-300 hover:border-brand-gold/30 select-none"
+                    className="flex items-center space-x-3 bg-white p-3.5 rounded-xl border border-brand-dark/10 shadow-sm hover:border-[#1E4D2B]/30 hover:shadow-md transition-all duration-200 select-none"
                   >
-                    <span className="text-base shrink-0">{h.icon}</span>
+                    <div className="w-7 h-7 rounded-lg bg-[#1E4D2B]/10 flex items-center justify-center shrink-0">
+                      {h.icon}
+                    </div>
                     <span className="text-xs font-bold text-brand-dark/85 font-sans tracking-wide">{h.label}</span>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="mt-10">
+              <div className="mt-10 flex justify-center md:justify-start">
                 <Link
                   href="/about"
-                  className="inline-flex items-center space-x-2 text-sm font-bold uppercase tracking-widest text-[#1E4D2B] hover:text-brand-dark transition-colors duration-300"
+                  className="group inline-flex items-center gap-2 sm:gap-2.5 px-5 py-3 sm:px-7 sm:py-3.5 rounded-full bg-[#1E4D2B] hover:bg-[#163820] active:scale-95 text-white font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider shadow-lg shadow-[#1E4D2B]/20 hover:shadow-xl hover:scale-105 transition-all duration-200 border border-[#1E4D2B]/30 select-none cursor-pointer"
                 >
+                  <BookOpen size={16} className="text-brand-gold shrink-0 group-hover:scale-110 transition-transform" />
                   <span>Our Story</span>
-                  <ArrowRight size={16} />
+                  <ArrowRight size={15} className="shrink-0 transform group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </motion.div>
@@ -1362,20 +1370,23 @@ export const Home: React.FC = () => {
       {/* 6. PHOTO GALLERY SECTION */}
       {sectionsMap.gallery && (
         <section className="py-24 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center md:items-end mb-16 text-center md:text-left">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-brand-accent">Visual feast</span>
               <h2 className="font-display text-3xl md:text-5xl font-black text-brand-dark mt-3">
                 Capturing Culinary Art
               </h2>
             </div>
-            <Link
-              href="/gallery"
-              className="group inline-flex items-center space-x-2 text-sm font-bold uppercase tracking-widest text-brand-accent mt-4 md:mt-0"
-            >
-              <span>View Full Gallery</span>
-              <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
+            <div className="mt-6 md:mt-0 flex justify-center md:justify-end w-full md:w-auto">
+              <Link
+                href="/gallery"
+                className="group inline-flex items-center gap-2 sm:gap-2.5 px-5 py-3 sm:px-7 sm:py-3.5 rounded-full bg-[#1E4D2B] hover:bg-[#163820] active:scale-95 text-white font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider shadow-lg shadow-[#1E4D2B]/20 hover:shadow-xl hover:scale-105 transition-all duration-200 border border-[#1E4D2B]/30 select-none cursor-pointer"
+              >
+                <Images size={16} className="text-brand-gold shrink-0 group-hover:rotate-6 transition-transform" />
+                <span>View Full Gallery</span>
+                <ArrowRight size={15} className="shrink-0 transform group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
           </div>
 
           {/* Draggable & Scrollable Auto-Scrolling Gallery Container */}
@@ -1408,10 +1419,14 @@ export const Home: React.FC = () => {
                     }}
                   >
                     <img
-                      src={photo.src}
+                      src={formatImageUrl(photo.src) || getFallbackFoodImage(photo.title, photo.menuCategory)}
                       alt={photo.title}
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       loading="lazy"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).onerror = null;
+                        (e.currentTarget as HTMLImageElement).src = getFallbackFoodImage(photo.title, photo.menuCategory);
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-brand-dark/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                       <p className="font-display font-bold text-[#FFFFFF] text-base leading-tight">
@@ -1428,16 +1443,34 @@ export const Home: React.FC = () => {
 
       {/* 7. TESTIMONIALS SECTION */}
       {sectionsMap.testimonials && (
-        <section id="reviews" className="py-24 bg-[#ECE3D4]/50 border-t border-brand-dark/5 overflow-hidden">
+        <section id="reviews" className="py-24 bg-[#ECE3D4]/50 border-t border-brand-dark/5 overflow-hidden scroll-mt-24">
           <div className="max-w-7xl mx-auto px-6 md:px-12 mb-16">
             <div className="text-center max-w-3xl mx-auto">
               <span className="text-xs font-bold uppercase tracking-widest text-brand-accent">Verified Feedback</span>
               <h2 className="font-display text-3xl md:text-5xl font-black text-brand-dark mt-3">
                 Words From Our Patrons
               </h2>
-              <p className="text-xs text-brand-dark/50 uppercase tracking-widest font-semibold mt-2">
-                Click any review card to read full patron feedback or leave your own review!
-              </p>
+
+              {/* Google Rating Summary Badge */}
+              <div className="inline-flex items-center gap-2.5 bg-white px-4 py-2 rounded-full border border-brand-dark/10 shadow-sm mt-4">
+                <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335" />
+                </svg>
+                <div className="flex items-center gap-1">
+                  <span className="font-bold text-xs text-brand-dark">4.0</span>
+                  <div className="flex text-amber-500">
+                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                    <Star size={12} className="text-zinc-300" />
+                  </div>
+                </div>
+                <span className="text-[11px] text-zinc-500 font-medium">(70+ Google Reviews)</span>
+              </div>
 
               <div className="mt-6 flex justify-center">
                 <button
