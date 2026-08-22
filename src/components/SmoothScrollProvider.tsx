@@ -5,11 +5,22 @@ import { usePathname } from 'next/navigation';
 
 export default function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isAdminOrLogin = pathname?.startsWith('/admin') || pathname === '/login';
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
-    // Only initialize global smooth scroll for non-admin pages
+    // Only initialize global smooth scroll for public website pages
     if (typeof window === 'undefined') return;
+
+    if (isAdminOrLogin) {
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+        lenisRef.current = null;
+      }
+      document.documentElement.classList.remove('lenis', 'lenis-smooth', 'lenis-stopped');
+      document.body.classList.remove('lenis', 'lenis-smooth', 'lenis-stopped');
+      return;
+    }
 
     const lenis = new Lenis({
       lerp: 0.08,
@@ -41,15 +52,17 @@ export default function SmoothScrollProvider({ children }: { children: React.Rea
       }
       lenis.destroy();
       lenisRef.current = null;
+      document.documentElement.classList.remove('lenis', 'lenis-smooth', 'lenis-stopped');
+      document.body.classList.remove('lenis', 'lenis-smooth', 'lenis-stopped');
     };
-  }, []);
+  }, [isAdminOrLogin]);
 
   // Reset scroll to top smoothly on route navigation
   useEffect(() => {
-    if (lenisRef.current && !pathname?.startsWith('/admin')) {
+    if (lenisRef.current && !isAdminOrLogin) {
       lenisRef.current.scrollTo(0, { immediate: true });
     }
-  }, [pathname]);
+  }, [pathname, isAdminOrLogin]);
 
   return <>{children}</>;
 }

@@ -567,7 +567,7 @@ export const Home: React.FC = () => {
 
     // BroadcastChannel: instant cross-tab invalidation whenever Admin saves
     const channels: BroadcastChannel[] = [];
-    ['menu-updates', 'gallery-updates', 'offers-updates', 'homepage-updates'].forEach((channelName) => {
+    ['menu-updates', 'gallery-updates', 'offers-updates', 'homepage-updates', 'testimonials-updates'].forEach((channelName) => {
       try {
         const channel = new BroadcastChannel(channelName);
         channel.onmessage = () => loadCMSData(false);

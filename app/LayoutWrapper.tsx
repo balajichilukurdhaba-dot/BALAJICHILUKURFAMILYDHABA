@@ -9,14 +9,14 @@ import SmoothScrollProvider from '../src/components/SmoothScrollProvider';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdmin = pathname?.startsWith('/admin');
+  const isAdminOrLogin = pathname?.startsWith('/admin') || pathname === '/login';
 
   return (
     <SmoothScrollProvider>
-      {!isAdmin && <DiscountPopup />}
-      {!isAdmin && <Navbar />}
+      {!isAdminOrLogin && <DiscountPopup />}
+      {!isAdminOrLogin && <Navbar />}
       <main className="flex-grow">
-        {isAdmin ? (
+        {isAdminOrLogin ? (
           children
         ) : (
           <motion.div
@@ -30,7 +30,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           </motion.div>
         )}
       </main>
-      {!isAdmin && <Footer />}
+      {!isAdminOrLogin && <Footer />}
     </SmoothScrollProvider>
   );
 }

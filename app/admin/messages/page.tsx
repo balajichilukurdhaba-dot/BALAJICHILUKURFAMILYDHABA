@@ -122,57 +122,83 @@ export default function MessagesCMS() {
     }
   };
 
+  // Normalizes phone to valid international format
+  const normalizePhone = (rawPhone: string) => {
+    if (!rawPhone) return '';
+    const digits = rawPhone.replace(/\D/g, '');
+    if (digits.length === 10) return `91${digits}`;
+    if (digits.length === 12 && digits.startsWith('91')) return digits;
+    if (digits.length === 11 && digits.startsWith('0')) return `91${digits.slice(1)}`;
+    if (digits.length > 10) return digits;
+    return `91${digits}`;
+  };
+
   // Build a WhatsApp deep link with phone + pre-filled message quoting the original query
-  const buildWhatsAppUrl = (phone: string, customerName: string, originalMessage: string, replyBody: string) => {
-    // Strip non-digits and ensure Indian country code prefix
-    const digits = phone.replace(/\D/g, '');
-    const normalized = digits.startsWith('91') ? digits : `91${digits}`;
-    const text = `Hi ${customerName}! 👋\n\nRegarding your query:\n_"${originalMessage}"_\n\n${replyBody}\n\n— Balaji Dhaba Team`;
+  const buildWhatsAppUrl = (phone: string, customerName: string, originalMessage: string, replyBody?: string) => {
+    const normalized = normalizePhone(phone);
+    if (!normalized) return '';
+    let text = '';
+    if (replyBody && replyBody.trim()) {
+      text = `Hi ${customerName}! 👋\n\nRegarding your inquiry:\n_"${originalMessage || 'Balaji Dhaba Inquiry'}"_\n\n${replyBody.trim()}\n\n— Balaji Santosh Family Dhaba`;
+    } else {
+      text = `Hi ${customerName}! 👋 Greetings from Balaji Santosh Family Dhaba. We received your inquiry regarding "${originalMessage || 'Dining / Reservation'}". How can we assist you today?`;
+    }
     return `https://wa.me/${normalized}?text=${encodeURIComponent(text)}`;
   };
 
-  const handleSendReply = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!replyText.trim() || !selectedMessageId) return;
+  const handleSendReply = async (openWhatsAppDirect = true) => {
+    if (!selectedMessageId) return;
 
     const activeMsg = messages.find(m => m.id === selectedMessageId);
     if (!activeMsg) return;
 
-    setSendingReply(true);
     const trimmedReply = replyText.trim();
     
-    try {
-      const res = await fetch('/api/cms/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Balaji Dhaba Admin',
-          email: 'admin@balajidhaba.com',
-          phone: activeMsg.phone,
-          subject: `Re: ${activeMsg.subject || 'Inquiry'}`,
-          message: `[REPLY TO ${activeMsg.name}]: ${trimmedReply}`
-        })
-      });
+    // If reply text is entered, save it to database
+    if (trimmedReply) {
+      setSendingReply(true);
+      try {
+        await fetch('/api/cms/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'Balaji Dhaba Admin',
+            email: 'admin@balajidhaba.com',
+            phone: activeMsg.phone,
+            subject: `Re: ${activeMsg.subject || 'Inquiry'}`,
+            message: `[REPLY TO ${activeMsg.name}]: ${trimmedReply}`
+          })
+        });
 
-      const newReply = {
-        id: `reply-${Date.now()}`,
-        message: trimmedReply,
-        createdAt: new Date().toISOString(),
-        isAdmin: true
-      };
+        const newReply = {
+          id: `reply-${Date.now()}`,
+          message: trimmedReply,
+          createdAt: new Date().toISOString(),
+          isAdmin: true
+        };
 
-      setRepliesStore(prev => ({
-        ...prev,
-        [selectedMessageId]: [...(prev[selectedMessageId] || []), newReply]
-      }));
+        setRepliesStore(prev => ({
+          ...prev,
+          [selectedMessageId]: [...(prev[selectedMessageId] || []), newReply]
+        }));
 
-      setMessages(prev => prev.map(m => m.id === selectedMessageId ? { ...m, isReplied: true } : m));
-      setReplyText('');
-    } catch (err) {
-      console.error('Failed to dispatch reply:', err);
-    } finally {
-      setSendingReply(false);
+        setMessages(prev => prev.map(m => m.id === selectedMessageId ? { ...m, isReplied: true } : m));
+      } catch (err) {
+        console.error('Failed to dispatch reply to database:', err);
+      } finally {
+        setSendingReply(false);
+      }
     }
+
+    // Launch WhatsApp
+    if (openWhatsAppDirect && activeMsg.phone) {
+      const waUrl = buildWhatsAppUrl(activeMsg.phone, activeMsg.name, activeMsg.message, trimmedReply);
+      if (waUrl && typeof window !== 'undefined') {
+        window.open(waUrl, '_blank');
+      }
+    }
+
+    setReplyText('');
   };
 
   // Filter messages based on search query
@@ -249,7 +275,7 @@ export default function MessagesCMS() {
               </div>
             </div>
 
-            {/* Scrollable list — padded card grid, scrolls up when full */}
+            {/* Scrollable list */}
             <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1 no-scrollbar">
               {filteredMessages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center text-zinc-400">
@@ -348,68 +374,95 @@ export default function MessagesCMS() {
             </div>
           </div>
 
-          {/* Right Panel: Active Chat Window (WhatsApp Beige wallpaper style) */}
+          {/* Right Panel: Active Chat Window */}
           <div className="lg:col-span-8 bg-[#efeae2] flex flex-col h-full overflow-hidden relative">
             {/* Tiled overlay pattern simulation */}
             <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[radial-gradient(#111b21_1px,transparent_1px)] [background-size:16px_16px]" />
 
             {activeMessage ? (
               <>
-                {/* Active Chat Header: WhatsApp Web Gray Header style */}
-                <div className="p-3 bg-[#f0f2f5] border-b border-zinc-200 flex justify-between items-center z-10 relative">
-                  <div className="flex items-center gap-3">
+                {/* Active Chat Header */}
+                <div className="p-3.5 bg-[#f0f2f5] border-b border-zinc-200 flex justify-between items-center z-10 relative">
+                  <div className="flex items-center gap-3 min-w-0">
                     {/* Header Avatar */}
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs bg-zinc-200 text-zinc-700 shadow-sm uppercase">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs bg-zinc-200 text-zinc-700 shadow-sm uppercase shrink-0">
                       {activeMessage.name ? activeMessage.name.trim().split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase() : "?"}
                     </div>
                     
-                    <div className="space-y-0.5">
-                      <h3 className="font-bold text-sm text-[#111b21] leading-tight">{activeMessage.name}</h3>
-                      <div className="flex items-center gap-3 text-[10px] text-zinc-500 font-medium">
-                        <span className="flex items-center gap-0.5">
-                          <Phone size={10} className="text-zinc-400" />
-                          {activeMessage.phone}
-                        </span>
+                    <div className="space-y-0.5 min-w-0">
+                      <h3 className="font-bold text-sm text-[#111b21] leading-tight truncate">{activeMessage.name}</h3>
+                      <div className="flex items-center gap-3 text-[11px] text-zinc-500 font-medium flex-wrap">
+                        <a 
+                          href={`tel:${activeMessage.phone}`}
+                          className="flex items-center gap-1 hover:text-emerald-700 transition-colors font-mono font-semibold"
+                          title="Click to call"
+                        >
+                          <Phone size={11} className="text-zinc-400" />
+                          <span>{activeMessage.phone}</span>
+                        </a>
                         {activeMessage.email && (
-                          <span className="flex items-center gap-0.5">
-                            <Mail size={10} className="text-zinc-400" />
-                            {activeMessage.email}
-                          </span>
+                          <a 
+                            href={`mailto:${activeMessage.email}`}
+                            className="flex items-center gap-1 hover:text-emerald-700 transition-colors"
+                            title="Click to email"
+                          >
+                            <Mail size={11} className="text-zinc-400" />
+                            <span className="truncate max-w-[150px]">{activeMessage.email}</span>
+                          </a>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  <span className="text-[8px] font-extrabold bg-[#00a884]/10 text-[#00a884] border border-[#00a884]/20 px-2 py-0.5 rounded-full uppercase">
-                    {activeMessage.email ? 'Web Form Sub' : 'WhatsApp'}
-                  </span>
+                  {/* Header Action Buttons */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {activeMessage.phone && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = buildWhatsAppUrl(activeMessage.phone, activeMessage.name, activeMessage.message, '');
+                          if (url) window.open(url, '_blank');
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-[11px] shadow-xs transition-all cursor-pointer"
+                        title="Start direct WhatsApp chat"
+                      >
+                        <svg viewBox="0 0 32 32" width="14" height="14" fill="white">
+                          <path d="M16 2C8.28 2 2 8.28 2 16c0 2.46.66 4.76 1.8 6.76L2 30l7.44-1.76A13.93 13.93 0 0016 30c7.72 0 14-6.28 14-14S23.72 2 16 2zm0 25.4a11.37 11.37 0 01-5.8-1.58l-.42-.25-4.42 1.05 1.1-4.28-.28-.44A11.4 11.4 0 014.6 16C4.6 9.7 9.7 4.6 16 4.6S27.4 9.7 27.4 16 22.3 27.4 16 27.4zm6.26-8.54c-.34-.17-2.02-1-2.34-1.1-.32-.12-.54-.17-.77.17-.23.34-.88 1.1-1.08 1.33-.2.22-.4.25-.74.08-.34-.17-1.44-.53-2.74-1.7-1.01-.9-1.7-2.01-1.9-2.35-.2-.34-.02-.52.15-.69.15-.15.34-.4.51-.6.17-.2.22-.34.33-.57.12-.23.06-.43-.03-.6-.08-.17-.76-1.84-1.05-2.52-.27-.65-.55-.56-.76-.57h-.65c-.23 0-.6.08-.91.4-.31.32-1.18 1.15-1.18 2.8s1.2 3.25 1.37 3.47c.17.22 2.37 3.62 5.74 5.08.8.34 1.43.55 1.92.7.8.25 1.54.22 2.12.13.65-.1 2.02-.83 2.3-1.62.28-.8.28-1.48.2-1.62-.09-.14-.3-.22-.64-.4z"/>
+                        </svg>
+                        <span>WhatsApp Chat</span>
+                      </button>
+                    )}
+                    <span className="text-[9px] font-extrabold bg-[#00a884]/10 text-[#00a884] border border-[#00a884]/20 px-2 py-1 rounded-full uppercase">
+                      {activeMessage.email ? 'Web Form Sub' : 'WhatsApp'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Messages Stream: Scrollable conversation bubble area */}
                 <div className="flex-grow overflow-y-auto p-6 space-y-4 z-10 relative">
-                  {/* Incoming Client Query Bubble (White WhatsApp style) */}
+                  {/* Incoming Client Query Bubble */}
                   <div className="flex justify-start max-w-[85%]">
-                    <div className="bg-white text-[#111b21] rounded-lg rounded-tl-none p-3 shadow-sm relative space-y-1">
+                    <div className="bg-white text-[#111b21] rounded-lg rounded-tl-none p-3.5 shadow-sm relative space-y-1 border border-zinc-200/40">
                       {activeMessage.subject && (
-                        <div className="font-bold text-[9px] uppercase tracking-wider text-brand-accent/80 mb-0.5">
+                        <div className="font-bold text-[10px] uppercase tracking-wider text-emerald-800 mb-0.5">
                           Subject: {activeMessage.subject}
                         </div>
                       )}
-                      <p className="text-[12px] font-sans leading-relaxed pr-6">{activeMessage.message}</p>
+                      <p className="text-xs font-sans leading-relaxed pr-6 text-slate-800">{activeMessage.message}</p>
                       
-                      <div className="text-[8px] text-zinc-400 text-right font-medium block mt-1">
+                      <div className="text-[9px] text-zinc-400 text-right font-medium block mt-1">
                         {new Date(activeMessage.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
                       </div>
                     </div>
                   </div>
 
-                  {/* Outgoing Reply History (Soft Light Green WhatsApp style) */}
+                  {/* Outgoing Reply History */}
                   {(repliesStore[activeMessage.id] || []).map((reply: any) => (
                     <div key={reply.id} className="flex justify-end max-w-[85%] ml-auto">
-                      <div className="bg-[#d9fdd3] text-[#111b21] rounded-lg rounded-tr-none p-3 shadow-sm relative space-y-1">
-                        <p className="text-[12px] font-sans leading-relaxed text-left pr-8">{reply.message}</p>
+                      <div className="bg-[#d9fdd3] text-[#111b21] rounded-lg rounded-tr-none p-3.5 shadow-sm relative space-y-1 border border-emerald-200/40">
+                        <p className="text-xs font-sans leading-relaxed text-left pr-8 text-slate-900">{reply.message}</p>
                         
-                        <div className="text-[8px] text-zinc-400 flex items-center justify-end gap-1 mt-1 font-medium select-none">
+                        <div className="text-[9px] text-zinc-400 flex items-center justify-end gap-1 mt-1 font-medium select-none">
                           <span>{new Date(reply.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
                           <CheckCheck size={12} className="text-[#53bdeb]" />
                         </div>
@@ -420,40 +473,41 @@ export default function MessagesCMS() {
                   <div ref={chatEndRef} />
                 </div>
 
-                {/* Bottom Reply Bar: WhatsApp redirect style */}
-                <div className="p-3 bg-[#f0f2f5] border-t border-zinc-200 flex gap-2 items-center z-10 relative">
+                {/* Bottom Reply Bar */}
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendReply(true);
+                  }}
+                  className="p-3 bg-[#f0f2f5] border-t border-zinc-200 flex gap-2 items-center z-10 relative"
+                >
                   <input
                     type="text"
                     placeholder={`Type a reply to ${activeMessage.name.split(" ")[0]}...`}
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && replyText.trim() && activeMessage.phone) {
-                        window.open(buildWhatsAppUrl(activeMessage.phone, activeMessage.name, activeMessage.message, replyText.trim()), '_blank');
-                        setReplyText('');
-                      }
-                    }}
-                    className="w-full bg-white border border-transparent focus:border-zinc-200 rounded-full px-4 py-2 text-xs text-[#111b21] focus:outline-none placeholder-zinc-400 shadow-sm"
+                    className="w-full bg-white border border-transparent focus:border-emerald-600 rounded-full px-4 py-2.5 text-xs text-[#111b21] focus:outline-none placeholder-zinc-400 shadow-xs font-medium"
                   />
 
-                  {/* WhatsApp Open Button */}
+                  {/* WhatsApp Send & Open Button */}
                   <button
-                    type="button"
-                    disabled={!replyText.trim() || !activeMessage.phone}
-                    onClick={() => {
-                      if (!replyText.trim() || !activeMessage.phone) return;
-                      window.open(buildWhatsAppUrl(activeMessage.phone, activeMessage.name, activeMessage.message, replyText.trim()), '_blank');
-                      setReplyText('');
-                    }}
-                    title={activeMessage.phone ? `Open WhatsApp chat with ${activeMessage.name}` : 'No phone number available'}
-                    className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-md transition-all disabled:opacity-40 cursor-pointer bg-[#25D366] hover:bg-[#1ebe5d] active:scale-95"
+                    type="submit"
+                    disabled={sendingReply}
+                    title={activeMessage.phone ? `Send reply & open WhatsApp chat with ${activeMessage.name}` : 'No phone number'}
+                    className="h-10 px-4 rounded-full flex items-center justify-center gap-2 shrink-0 shadow-sm transition-all cursor-pointer bg-[#25D366] hover:bg-[#1ebe5d] active:scale-95 text-white font-bold text-xs"
                   >
-                    {/* Official WhatsApp logo SVG */}
-                    <svg viewBox="0 0 32 32" width="22" height="22" fill="white" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M16 2C8.28 2 2 8.28 2 16c0 2.46.66 4.76 1.8 6.76L2 30l7.44-1.76A13.93 13.93 0 0016 30c7.72 0 14-6.28 14-14S23.72 2 16 2zm0 25.4a11.37 11.37 0 01-5.8-1.58l-.42-.25-4.42 1.05 1.1-4.28-.28-.44A11.4 11.4 0 014.6 16C4.6 9.7 9.7 4.6 16 4.6S27.4 9.7 27.4 16 22.3 27.4 16 27.4zm6.26-8.54c-.34-.17-2.02-1-2.34-1.1-.32-.12-.54-.17-.77.17-.23.34-.88 1.1-1.08 1.33-.2.22-.4.25-.74.08-.34-.17-1.44-.53-2.74-1.7-1.01-.9-1.7-2.01-1.9-2.35-.2-.34-.02-.52.15-.69.15-.15.34-.4.51-.6.17-.2.22-.34.33-.57.12-.23.06-.43-.03-.6-.08-.17-.76-1.84-1.05-2.52-.27-.65-.55-.56-.76-.57h-.65c-.23 0-.6.08-.91.4-.31.32-1.18 1.15-1.18 2.8s1.2 3.25 1.37 3.47c.17.22 2.37 3.62 5.74 5.08.8.34 1.43.55 1.92.7.8.25 1.54.22 2.12.13.65-.1 2.02-.83 2.3-1.62.28-.8.28-1.48.2-1.62-.09-.14-.3-.22-.64-.4z"/>
-                    </svg>
+                    {sendingReply ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <svg viewBox="0 0 32 32" width="16" height="16" fill="white" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M16 2C8.28 2 2 8.28 2 16c0 2.46.66 4.76 1.8 6.76L2 30l7.44-1.76A13.93 13.93 0 0016 30c7.72 0 14-6.28 14-14S23.72 2 16 2zm0 25.4a11.37 11.37 0 01-5.8-1.58l-.42-.25-4.42 1.05 1.1-4.28-.28-.44A11.4 11.4 0 014.6 16C4.6 9.7 9.7 4.6 16 4.6S27.4 9.7 27.4 16 22.3 27.4 16 27.4zm6.26-8.54c-.34-.17-2.02-1-2.34-1.1-.32-.12-.54-.17-.77.17-.23.34-.88 1.1-1.08 1.33-.2.22-.4.25-.74.08-.34-.17-1.44-.53-2.74-1.7-1.01-.9-1.7-2.01-1.9-2.35-.2-.34-.02-.52.15-.69.15-.15.34-.4.51-.6.17-.2.22-.34.33-.57.12-.23.06-.43-.03-.6-.08-.17-.76-1.84-1.05-2.52-.27-.65-.55-.56-.76-.57h-.65c-.23 0-.6.08-.91.4-.31.32-1.18 1.15-1.18 2.8s1.2 3.25 1.37 3.47c.17.22 2.37 3.62 5.74 5.08.8.34 1.43.55 1.92.7.8.25 1.54.22 2.12.13.65-.1 2.02-.83 2.3-1.62.28-.8.28-1.48.2-1.62-.09-.14-.3-.22-.64-.4z"/>
+                        </svg>
+                        <span className="hidden sm:inline">{replyText.trim() ? 'Send WhatsApp' : 'WhatsApp'}</span>
+                      </>
+                    )}
                   </button>
-                </div>
+                </form>
               </>
             ) : (
               <div className="flex-grow flex flex-col items-center justify-center text-zinc-400 z-10 relative">

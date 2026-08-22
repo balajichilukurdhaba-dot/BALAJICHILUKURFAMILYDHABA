@@ -4,17 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Input, InputNumber, Select, Space, Tooltip, Modal, Badge, App
-} from 'antd';
-import { 
-  WhatsAppOutlined, CopyOutlined, DownloadOutlined, CloseCircleOutlined, CheckCircleOutlined, SearchOutlined
-} from '@ant-design/icons';
-import { 
-  DollarSign, Phone, Award, QrCode, Loader2, Sparkles, CheckCircle2, Ticket, FileText, Calendar, Search, RefreshCw, X, ArrowUpRight, Printer, Plus, Trash2, ShoppingCart, SlidersHorizontal, Check
+  DollarSign, Phone, Award, QrCode, Loader2, Sparkles, CheckCircle2, Ticket, FileText, Calendar, Search, RefreshCw, X, ArrowUpRight, Printer, Plus, Trash2, ShoppingCart, SlidersHorizontal, Check, Copy, Download, MessageCircle, AlertCircle, XCircle
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
-
-const { Option } = Select;
 
 // Itemized Bill TypeScript interfaces
 interface BillItem {
@@ -51,18 +43,24 @@ interface Coupon {
   cancelledAt?: string;
 }
 
-function CheckoutRewardsContent() {
-  const { message, notification } = App.useApp();
+export default function CheckoutRewardsPage() {
   const router = useRouter();
+
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   // Active client-side heartbeat hook
   useEffect(() => {
     const interval = setInterval(() => {
-      router.refresh();
-      loadVouchersList(); // Refresh ledger in sync
-    }, 4000);
+      loadVouchersList();
+    }, 8000);
     return () => clearInterval(interval);
-  }, [router]);
+  }, []);
 
   // Vouchers List Ledger state
   const [vouchers, setVouchers] = useState<Coupon[]>([]);
@@ -145,17 +143,17 @@ function CheckoutRewardsContent() {
 
     setSelectedMenuDishId('');
     setItemQty(1);
-    message.success(`Added ${dish.name} (x${qty}) to bill`);
+    showToast(`Added ${dish.name} (x${qty}) to bill`);
   };
 
   // Add custom manual item & custom price
   const handleAddCustomItem = () => {
     if (!customItemName.trim()) {
-      message.error('Please enter item name');
+      showToast('Please enter item name', 'error');
       return;
     }
     if (customItemPrice === null || customItemPrice < 0) {
-      message.error('Please enter valid unit price');
+      showToast('Please enter valid unit price', 'error');
       return;
     }
 
@@ -176,26 +174,7 @@ function CheckoutRewardsContent() {
     setCustomItemName('');
     setCustomItemPrice(null);
     setItemQty(1);
-    message.success(`Added custom item ${newItem.name}`);
-  };
-
-  // Update quantity or unit price for any item in real time
-  const handleUpdateItem = (id: string, field: 'quantity' | 'unitPrice', val: number) => {
-    const updated = orderItems.map(item => {
-      if (item.id === id) {
-        const newQty = field === 'quantity' ? Math.max(1, val) : item.quantity;
-        const newPrice = field === 'unitPrice' ? Math.max(0, val) : item.unitPrice;
-        return {
-          ...item,
-          quantity: newQty,
-          unitPrice: newPrice,
-          totalPrice: newQty * newPrice
-        };
-      }
-      return item;
-    });
-    setOrderItems(updated);
-    updateBaseBillFromItems(updated);
+    showToast(`Added custom item ${newItem.name}`);
   };
 
   // Remove item from bill
@@ -261,15 +240,15 @@ function CheckoutRewardsContent() {
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!baseBill || baseBill <= 0) {
-      message.error('Valid base bill total is required');
+      showToast('Valid base bill total is required', 'error');
       return;
     }
     if (!billNumber.trim()) {
-      message.error('Please enter a Bill / Invoice Number');
+      showToast('Please enter a Bill / Invoice Number', 'error');
       return;
     }
     if (!customerPhone.trim() || customerPhone.trim().length < 10) {
-      message.error('Valid 10-digit customer mobile phone number is required');
+      showToast('Valid 10-digit customer mobile phone number is required', 'error');
       return;
     }
 
@@ -293,13 +272,8 @@ function CheckoutRewardsContent() {
       });
       const data = await res.json();
       if (data.success) {
-        notification.success({
-          title: 'Voucher Created',
-          description: `Voucher ${data.token} has been generated for bill ${billNumber}.`,
-          placement: 'topRight'
-        });
+        showToast(`Voucher ${data.token} generated successfully!`);
 
-        // Set active coupon for immediate preview card
         const createdCoupon: Coupon = {
           token: data.token,
           billNo: billNumber.trim(),
@@ -317,22 +291,20 @@ function CheckoutRewardsContent() {
         setActiveCoupon(createdCoupon);
         loadVouchersList();
         
-        // Reset input fields
         setBaseBill(null);
         setBillNumber('');
         setCustomerPhone('');
       } else {
-        message.error(data.error || 'Failed to create reward voucher');
+        showToast(data.error || 'Failed to create reward voucher', 'error');
       }
     } catch (err) {
       console.error('Failed to generate reward:', err);
-      message.error('Network failure generating token');
+      showToast('Network failure generating token', 'error');
     } finally {
       setGenerating(false);
     }
   };
 
-  // Compile target verification URL
   const getVerificationUrl = (coupon: Coupon) => {
     const token = coupon.token;
     const billNo = encodeURIComponent(coupon.billNo);
@@ -343,34 +315,17 @@ function CheckoutRewardsContent() {
     return `https://balajichilkur.com/menu?claimBonusToken=${token}&billNo=${billNo}&rewardAmt=${rewardAmt}&discountPercent=${discountPercent}&expiry=${expiry}`;
   };
 
-  // WhatsApp click-to-chat compilation
   const getWhatsAppRedirectionUrl = (coupon: Coupon) => {
     const cleanPhone = coupon.phone.replace(/\D/g, '');
     const prefix = cleanPhone.startsWith('91') || cleanPhone.length > 10 ? '' : '91';
     const targetPhone = `${prefix}${cleanPhone}`;
     const expiryStr = new Date(coupon.expiryEpoch).toISOString().split('T')[0];
 
-    const messageText = `*Balaji Chilkur Family Dhaba* 🌾
-Thank you for dining with us! We hope you loved our food and hospitality.
-
-Here is your exclusive Next-Visit Loyalty Reward Voucher details:
-🎫 *Voucher Code:* ${coupon.token}
-🧾 *Bill Number:* ${coupon.billNo}
-💵 *Bill Amount:* ₹${coupon.originalBill}
-📈 *Discount Rate:* ${coupon.discountPercent}%
-🎁 *Discount Value:* ₹${coupon.discountValue}
-📅 *Expiry Date:* ${expiryStr} (17 Days Validity)
-
-*Instructions for Redemption:*
-Scan the QR code or click the link below to load your voucher. Present this voucher screen to the counter on checkout.
-🔗 Link: ${getVerificationUrl(coupon)}
-
-We look forward to serving you again.`;
+    const messageText = `*Balaji Chilkur Family Dhaba* 🌾\nThank you for dining with us! We hope you loved our food and hospitality.\n\nHere is your exclusive Next-Visit Loyalty Reward Voucher details:\n🎫 *Voucher Code:* ${coupon.token}\n🧾 *Bill Number:* ${coupon.billNo}\n💵 *Bill Amount:* ₹${coupon.originalBill}\n📈 *Discount Rate:* ${coupon.discountPercent}%\n🎁 *Discount Value:* ₹${coupon.discountValue}\n📅 *Expiry Date:* ${expiryStr} (17 Days Validity)\n\n*Instructions for Redemption:*\nScan the QR code or click the link below to load your voucher. Present this voucher screen to the counter on checkout.\n🔗 Link: ${getVerificationUrl(coupon)}\n\nWe look forward to serving you again.`;
 
     return `https://wa.me/${targetPhone}?text=${encodeURIComponent(messageText)}`;
   };
 
-  // Download QR matrix code as file locally
   const downloadQRCodeFile = (token: string) => {
     const canvas = document.getElementById(`qr-canvas-${token}`) as HTMLCanvasElement;
     if (canvas) {
@@ -381,19 +336,17 @@ We look forward to serving you again.`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      message.success('QR Code downloaded successfully.');
+      showToast('QR Code downloaded successfully.');
     } else {
-      message.error('QR code element not found.');
+      showToast('QR code element not found.', 'error');
     }
   };
 
-  // Copy voucher token clipboard helper
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    message.success('Voucher code copied to clipboard!');
+    showToast('Voucher code copied to clipboard!');
   };
 
-  // Cancel Voucher
   const cancelVoucher = async (token: string) => {
     try {
       const res = await fetch(`/api/cms/rewards?token=${encodeURIComponent(token)}`, {
@@ -401,7 +354,7 @@ We look forward to serving you again.`;
       });
       const data = await res.json();
       if (data.success) {
-        message.success('Voucher has been successfully cancelled.');
+        showToast('Voucher has been successfully cancelled.');
         loadVouchersList();
         if (activeCoupon?.token === token) {
           setActiveCoupon(prev => prev ? { ...prev, isCancelled: true } : null);
@@ -410,15 +363,14 @@ We look forward to serving you again.`;
           setViewVoucherModal(prev => prev ? { ...prev, isCancelled: true } : null);
         }
       } else {
-        message.error(data.error || 'Failed to cancel voucher');
+        showToast(data.error || 'Failed to cancel voucher', 'error');
       }
     } catch (err) {
       console.error('Failed to cancel voucher:', err);
-      message.error('Network failure cancelling voucher');
+      showToast('Network failure cancelling voucher', 'error');
     }
   };
 
-  // Mark Redeemed Manually
   const redeemVoucherManually = async (token: string) => {
     try {
       const res = await fetch('/api/cms/rewards', {
@@ -428,7 +380,7 @@ We look forward to serving you again.`;
       });
       const data = await res.json();
       if (data.success) {
-        message.success('Voucher successfully marked as redeemed.');
+        showToast('Voucher successfully marked as redeemed.');
         loadVouchersList();
         if (activeCoupon?.token === token) {
           setActiveCoupon(prev => prev ? { ...prev, isUsed: true } : null);
@@ -437,15 +389,14 @@ We look forward to serving you again.`;
           setViewVoucherModal(prev => prev ? { ...prev, isUsed: true } : null);
         }
       } else {
-        message.error(data.error || 'Failed to redeem voucher');
+        showToast(data.error || 'Failed to redeem voucher', 'error');
       }
     } catch (err) {
       console.error('Failed to redeem voucher:', err);
-      message.error('Network failure redeeming voucher');
+      showToast('Network failure redeeming voucher', 'error');
     }
   };
 
-  // Filter vouchers by search query
   const filteredVouchers = vouchers.filter(v => {
     if (!v) return false;
     const query = searchQuery.toLowerCase();
@@ -457,6 +408,25 @@ We look forward to serving you again.`;
 
   return (
     <div className="space-y-6 font-sans text-slate-800 antialiased max-w-7xl mx-auto px-2 sm:px-4">
+      {/* Toast Alert */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-xl shadow-lg border text-xs font-semibold flex items-center gap-2 ${
+              toast.type === 'success' 
+                ? 'bg-emerald-950 text-emerald-200 border-emerald-800' 
+                : 'bg-rose-950 text-rose-200 border-rose-800'
+            }`}
+          >
+            {toast.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+            <span>{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/60">
         <div>
@@ -491,31 +461,36 @@ We look forward to serving you again.`;
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
                   Bill / Invoice Number *
                 </label>
-                <Input 
-                  size="large"
-                  required
-                  placeholder="e.g. INV-2026-00125" 
-                  prefix={<FileText size={15} className="text-slate-400 mr-1" />}
-                  value={billNumber}
-                  onChange={(e) => setBillNumber(e.target.value.toUpperCase())}
-                  className="rounded-xl text-xs font-mono font-semibold"
-                />
+                <div className="relative">
+                  <FileText size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input 
+                    type="text"
+                    required
+                    placeholder="e.g. INV-2026-00125" 
+                    value={billNumber}
+                    onChange={(e) => setBillNumber(e.target.value.toUpperCase())}
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
                   Base Bill Total (₹) *
                 </label>
-                <InputNumber
-                  size="large"
-                  required
-                  min={1}
-                  placeholder="e.g. 1500" 
-                  prefix={<span className="text-slate-400 font-bold text-xs mr-1">₹</span>}
-                  value={baseBill}
-                  onChange={(val) => setBaseBill(val)}
-                  className="w-full rounded-xl"
-                />
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                  <input 
+                    type="number"
+                    required
+                    min="1"
+                    step="any"
+                    placeholder="e.g. 1500" 
+                    value={baseBill === null ? '' : baseBill}
+                    onChange={(e) => setBaseBill(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
+                  />
+                </div>
               </div>
             </div>
 
@@ -523,53 +498,52 @@ We look forward to serving you again.`;
               <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
                 Customer Mobile Phone *
               </label>
-              <Input 
-                size="large"
-                required
-                maxLength={10}
-                placeholder="e.g. 9876543210" 
-                prefix={<Phone size={15} className="text-slate-400 mr-1" />}
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
-                className="rounded-xl text-xs font-mono"
-              />
+              <div className="relative">
+                <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="tel"
+                  required
+                  maxLength={10}
+                  placeholder="e.g. 9876543210" 
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
+                />
+              </div>
             </div>
-
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
                   Promotion Category
                 </label>
-                <Select
-                  size="large"
+                <select
                   value={discountCategory}
-                  onChange={handleCategoryChange}
-                  className="w-full rounded-xl"
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
                 >
-                  <Option value="Business Dining">Business Dining (15%)</Option>
-                  <Option value="Happy Hour">Happy Hour (12%)</Option>
-                  <Option value="Loyalty Reward">Loyalty Reward (10%)</Option>
-                  <Option value="Weekend Delight">Weekend Delight (20%)</Option>
-                  <Option value="Festive Benefit">Festive Benefit (10%)</Option>
-                  <Option value="House Courtesy">House Courtesy (100%)</Option>
-                  <Option value="Exceptional Approval">Exceptional Approval (Custom %)</Option>
-                </Select>
+                  <option value="Business Dining">Business Dining (15%)</option>
+                  <option value="Happy Hour">Happy Hour (12%)</option>
+                  <option value="Loyalty Reward">Loyalty Reward (10%)</option>
+                  <option value="Weekend Delight">Weekend Delight (20%)</option>
+                  <option value="Festive Benefit">Festive Benefit (10%)</option>
+                  <option value="House Courtesy">House Courtesy (100%)</option>
+                  <option value="Exceptional Approval">Exceptional Approval (Custom %)</option>
+                </select>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
                   Discount Rate (%)
                 </label>
-                <InputNumber
-                  size="large"
-                  min={0}
-                  max={100}
-                  step={0.01}
-                  precision={2}
+                <input 
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
                   value={discountPercent}
-                  onChange={(val) => setDiscountPercent(val !== null ? val : 0)}
-                  className="w-full rounded-xl"
+                  onChange={(e) => setDiscountPercent(Number(e.target.value || 0))}
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all"
                 />
               </div>
             </div>
@@ -596,7 +570,7 @@ We look forward to serving you again.`;
               </div>
             ) : null}
 
-            {/* HIGH-CONTRAST PRIMARY BUTTON */}
+            {/* PRIMARY BUTTON */}
             <motion.button 
               type="submit"
               whileHover={{ y: -1 }}
@@ -685,13 +659,13 @@ We look forward to serving you again.`;
                   onClick={() => copyToClipboard(activeCoupon.token)}
                   className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
                 >
-                  <CopyOutlined /> Copy Code
+                  <Copy size={13} /> Copy Code
                 </button>
                 <button 
                   onClick={() => downloadQRCodeFile(activeCoupon.token)}
                   className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
                 >
-                  <DownloadOutlined /> Download QR
+                  <Download size={13} /> Download QR
                 </button>
               </div>
 
@@ -702,7 +676,7 @@ We look forward to serving you again.`;
                   rel="noopener noreferrer"
                   className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 select-none mt-2"
                 >
-                  <WhatsAppOutlined /> Send WhatsApp Voucher
+                  <MessageCircle size={14} /> Send WhatsApp Voucher
                 </a>
               )}
             </div>
@@ -815,52 +789,47 @@ We look forward to serving you again.`;
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          <Tooltip title="View Pass Details">
-                            <button 
-                              onClick={() => setViewVoucherModal(v)}
-                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
-                            >
-                              <QrCode size={14} />
-                            </button>
-                          </Tooltip>
-                          <Tooltip title="Copy Token">
-                            <button 
-                              onClick={() => copyToClipboard(v.token)}
-                              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
-                            >
-                              <CopyOutlined size={14} />
-                            </button>
-                          </Tooltip>
+                          <button 
+                            onClick={() => setViewVoucherModal(v)}
+                            title="View Pass Details"
+                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
+                          >
+                            <QrCode size={14} />
+                          </button>
+                          <button 
+                            onClick={() => copyToClipboard(v.token)}
+                            title="Copy Token"
+                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
+                          >
+                            <Copy size={14} />
+                          </button>
                           {v.phone && v.phone !== 'Walk-in' && (
-                            <Tooltip title="Send WhatsApp">
-                              <a 
-                                href={getWhatsAppRedirectionUrl(v)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-1.5 hover:bg-emerald-50 rounded-lg text-emerald-600 transition-colors"
-                              >
-                                <WhatsAppOutlined size={14} />
-                              </a>
-                            </Tooltip>
+                            <a 
+                              href={getWhatsAppRedirectionUrl(v)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Send WhatsApp"
+                              className="p-1.5 hover:bg-emerald-50 rounded-lg text-emerald-600 transition-colors"
+                            >
+                              <MessageCircle size={14} />
+                            </a>
                           )}
                           {!disableActions && (
                             <>
-                              <Tooltip title="Mark Redeemed">
-                                <button 
-                                  onClick={() => redeemVoucherManually(v.token)}
-                                  className="p-1.5 hover:bg-sky-50 rounded-lg text-sky-600 transition-colors"
-                                >
-                                  <CheckCircleOutlined size={14} />
-                                </button>
-                              </Tooltip>
-                              <Tooltip title="Cancel Voucher">
-                                <button 
-                                  onClick={() => cancelVoucher(v.token)}
-                                  className="p-1.5 hover:bg-rose-50 rounded-lg text-rose-600 transition-colors"
-                                >
-                                  <CloseCircleOutlined size={14} />
-                                </button>
-                              </Tooltip>
+                              <button 
+                                onClick={() => redeemVoucherManually(v.token)}
+                                title="Mark Redeemed"
+                                className="p-1.5 hover:bg-sky-50 rounded-lg text-sky-600 transition-colors"
+                              >
+                                <CheckCircle2 size={14} />
+                              </button>
+                              <button 
+                                onClick={() => cancelVoucher(v.token)}
+                                title="Cancel Voucher"
+                                className="p-1.5 hover:bg-rose-50 rounded-lg text-rose-600 transition-colors"
+                              >
+                                <XCircle size={14} />
+                              </button>
                             </>
                           )}
                         </div>
@@ -875,332 +844,133 @@ We look forward to serving you again.`;
       </div>
 
       {/* View Voucher Details Modal */}
-      <Modal
-        title={
-          <div className="flex items-center gap-2 font-semibold text-slate-900 text-base">
-            <Ticket size={18} className="text-[#1E4D2B]" />
-            <span>Voucher Pass Details</span>
-          </div>
-        }
-        open={!!viewVoucherModal}
-        onCancel={() => setViewVoucherModal(null)}
-        footer={null}
-        width={420}
-        styles={{ body: { padding: '12px 0' } }}
-      >
+      <AnimatePresence>
         {viewVoucherModal && (
-          <div className="text-center space-y-4 font-sans text-slate-800">
-            <div className="inline-block p-4 bg-white border border-slate-200/90 rounded-2xl mx-auto shadow-xs">
-              <QRCodeCanvas 
-                id={`qr-canvas-${viewVoucherModal.token}`} 
-                value={getVerificationUrl(viewVoucherModal)} 
-                size={160} 
-                includeMargin 
-              />
-            </div>
-            
-            <div className="space-y-1">
-              <div className="font-mono text-sm font-bold text-slate-800">{viewVoucherModal.token}</div>
-              <div>
-                {viewVoucherModal.isCancelled ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                    Cancelled
-                  </span>
-                ) : viewVoucherModal.isUsed ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-                    Redeemed
-                  </span>
-                ) : Date.now() > viewVoucherModal.expiryEpoch ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                    Expired
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    Active Pass
-                  </span>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setViewVoucherModal(null)}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl p-6 shadow-2xl border border-slate-200 max-w-md w-full relative z-10 space-y-4"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2 font-semibold text-slate-900 text-base">
+                  <Ticket size={18} className="text-[#1E4D2B]" />
+                  <span>Voucher Pass Details</span>
+                </div>
+                <button 
+                  onClick={() => setViewVoucherModal(null)}
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="text-center space-y-4 font-sans text-slate-800">
+                <div className="inline-block p-4 bg-white border border-slate-200/90 rounded-2xl mx-auto shadow-xs">
+                  <QRCodeCanvas 
+                    id={`qr-canvas-${viewVoucherModal.token}`} 
+                    value={getVerificationUrl(viewVoucherModal)} 
+                    size={160} 
+                    includeMargin 
+                  />
+                </div>
+                
+                <div className="space-y-1">
+                  <div className="font-mono text-sm font-bold text-slate-800">{viewVoucherModal.token}</div>
+                  <div>
+                    {viewVoucherModal.isCancelled ? (
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                        Cancelled
+                      </span>
+                    ) : viewVoucherModal.isUsed ? (
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                        Redeemed
+                      </span>
+                    ) : Date.now() > viewVoucherModal.expiryEpoch ? (
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                        Expired
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Active Pass
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 text-left text-xs space-y-2 font-sans">
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-400">Bill Number:</span>
+                    <span className="font-mono font-semibold text-slate-800">{viewVoucherModal.billNo}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-400">Base Receipt Bill:</span>
+                    <span className="font-bold text-slate-800">₹{viewVoucherModal.originalBill}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-400">Promotion Category:</span>
+                    <span className="font-semibold text-slate-800">{viewVoucherModal.discountCategory}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-400">Discount Rate:</span>
+                    <span className="font-bold text-slate-800">{viewVoucherModal.discountPercent.toFixed(2)}%</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-400">Loyalty Benefit Credit:</span>
+                    <strong className="text-emerald-700 font-bold">₹{viewVoucherModal.discountValue}</strong>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-400">Customer Mobile:</span>
+                    <span className="font-medium text-slate-800">{viewVoucherModal.phone}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-400">Issued On:</span>
+                    <span className="font-mono text-slate-700">{new Date(viewVoucherModal.createdAt).toISOString().split('T')[0]}</span>
+                  </div>
+                  <div className="flex justify-between pb-0.5">
+                    <span className="text-slate-400">Expiry Date:</span>
+                    <span className="font-mono font-semibold text-rose-600">{new Date(viewVoucherModal.expiryEpoch).toISOString().split('T')[0]}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={() => copyToClipboard(viewVoucherModal.token)}
+                    className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
+                  >
+                    <Copy size={13} /> Copy Code
+                  </button>
+                  <button 
+                    onClick={() => downloadQRCodeFile(viewVoucherModal.token)}
+                    className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
+                  >
+                    <Download size={13} /> Download QR
+                  </button>
+                </div>
+
+                {viewVoucherModal.phone && viewVoucherModal.phone !== 'Walk-in' && (
+                  <a 
+                    href={getWhatsAppRedirectionUrl(viewVoucherModal)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 select-none block mt-2 text-center"
+                  >
+                    <MessageCircle size={14} className="inline mr-1" /> Send WhatsApp Voucher
+                  </a>
                 )}
               </div>
-            </div>
-
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 text-left text-xs space-y-2 font-sans">
-              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
-                <span className="text-slate-400">Bill Number:</span>
-                <span className="font-mono font-semibold text-slate-800">{viewVoucherModal.billNo}</span>
-              </div>
-              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
-                <span className="text-slate-400">Base Receipt Bill:</span>
-                <span className="font-bold text-slate-800">₹{viewVoucherModal.originalBill}</span>
-              </div>
-              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
-                <span className="text-slate-400">Promotion Category:</span>
-                <span className="font-semibold text-slate-800">{viewVoucherModal.discountCategory}</span>
-              </div>
-              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
-                <span className="text-slate-400">Discount Rate:</span>
-                <span className="font-bold text-slate-800">{viewVoucherModal.discountPercent.toFixed(2)}%</span>
-              </div>
-              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
-                <span className="text-slate-400">Loyalty Benefit Credit:</span>
-                <strong className="text-emerald-700 font-bold">₹{viewVoucherModal.discountValue}</strong>
-              </div>
-              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
-                <span className="text-slate-400">Customer Mobile:</span>
-                <span className="font-medium text-slate-800">{viewVoucherModal.phone}</span>
-              </div>
-              <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
-                <span className="text-slate-400">Issued On:</span>
-                <span className="font-mono text-slate-700">{new Date(viewVoucherModal.createdAt).toISOString().split('T')[0]}</span>
-              </div>
-              <div className="flex justify-between pb-0.5">
-                <span className="text-slate-400">Expiry Date:</span>
-                <span className="font-mono font-semibold text-rose-600">{new Date(viewVoucherModal.expiryEpoch).toISOString().split('T')[0]}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button 
-                onClick={() => copyToClipboard(viewVoucherModal.token)}
-                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
-              >
-                <CopyOutlined /> Copy Code
-              </button>
-              <button 
-                onClick={() => downloadQRCodeFile(viewVoucherModal.token)}
-                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 select-none"
-              >
-                <DownloadOutlined /> Download QR
-              </button>
-            </div>
-
-            {viewVoucherModal.phone && viewVoucherModal.phone !== 'Walk-in' && (
-              <a 
-                href={getWhatsAppRedirectionUrl(viewVoucherModal)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 select-none block mt-2"
-              >
-                <WhatsAppOutlined /> Send WhatsApp Voucher
-              </a>
-            )}
+            </motion.div>
           </div>
         )}
-      </Modal>
-
-      {/* ONLINE BILL PRINTING MODAL FOR ALL PAPER SIZES */}
-      <Modal
-        open={showPrintModal}
-        onCancel={() => setShowPrintModal(false)}
-        footer={null}
-        width={paperSize === 'A4' ? 820 : paperSize === 'A5' ? 620 : 440}
-        title={
-          <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-            <Printer size={16} className="text-[#1E4D2B]" />
-            <span>Online Bill &amp; Receipt Printer</span>
-          </div>
-        }
-      >
-        <div className="space-y-4 pt-2 font-sans">
-          {/* Paper Size Selector Tabs */}
-          <div className="bg-slate-100 p-1.5 rounded-xl flex items-center justify-between gap-1 text-xs font-medium">
-            <span className="text-slate-500 font-semibold px-2 uppercase text-[10px] hidden sm:inline">Paper Format:</span>
-            <div className="grid grid-cols-4 gap-1 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => setPaperSize('80mm')}
-                className={`py-1.5 px-3 rounded-lg transition-all text-center text-xs ${
-                  paperSize === '80mm' ? 'bg-[#1E4D2B] text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-                }`}
-              >
-                80mm POS
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaperSize('58mm')}
-                className={`py-1.5 px-3 rounded-lg transition-all text-center text-xs ${
-                  paperSize === '58mm' ? 'bg-[#1E4D2B] text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-                }`}
-              >
-                58mm Mini
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaperSize('A4')}
-                className={`py-1.5 px-3 rounded-lg transition-all text-center text-xs ${
-                  paperSize === 'A4' ? 'bg-[#1E4D2B] text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-                }`}
-              >
-                A4 Invoice
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaperSize('A5')}
-                className={`py-1.5 px-3 rounded-lg transition-all text-center text-xs ${
-                  paperSize === 'A5' ? 'bg-[#1E4D2B] text-white font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-                }`}
-              >
-                A5 Half Page
-              </button>
-            </div>
-          </div>
-
-          {/* Printable Bill Receipt Preview Area */}
-          <div className="bg-slate-200/60 p-4 rounded-xl max-h-[60vh] overflow-y-auto flex justify-center">
-            <div
-              id="printable-bill-area"
-              className={`bg-white text-slate-900 shadow-md p-4 rounded border border-slate-300 font-mono transition-all ${
-                paperSize === '58mm' ? 'w-[220px] text-[10px]' : paperSize === '80mm' ? 'w-[300px] text-xs' : paperSize === 'A5' ? 'w-[500px] text-xs font-sans' : 'w-[700px] text-sm font-sans'
-              }`}
-            >
-              {/* Header */}
-              <div className="text-center border-b border-slate-900/40 pb-3 mb-3 space-y-1">
-                <h2 className="font-bold text-base uppercase tracking-tight text-slate-900">Balaji Chilkur Family Dhaba</h2>
-                <p className="text-[10px] text-slate-600">Vikarabad Highway, Chilkur X Road, TS</p>
-                <p className="text-[10px] text-slate-600">Ph: +91 98494 98681 | GSTIN: 36ABCDE1234F1Z5</p>
-                <div className="mt-2 inline-block border border-slate-800 px-2 py-0.5 font-bold text-[10px] uppercase">
-                  Tax Invoice / Bill Receipt
-                </div>
-              </div>
-
-              {/* Bill Meta Details */}
-              <div className="text-[11px] border-b border-slate-900/40 pb-2 mb-3 space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Bill / Inv No:</span>
-                  <span className="font-bold">{billNumber || 'BSD-POS-001'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Date &amp; Time:</span>
-                  <span>{new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Customer Phone:</span>
-                  <span className="font-bold">{customerPhone || 'Walk-in Guest'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Promotion:</span>
-                  <span>{discountCategory} ({discountPercent}%)</span>
-                </div>
-              </div>
-
-              {/* Items Table */}
-              <div className="border-b border-slate-900/40 pb-3 mb-3">
-                <table className="w-full text-left text-[11px]">
-                  <thead>
-                    <tr className="border-b border-slate-800 font-bold">
-                      <th className="py-1">Item Description</th>
-                      <th className="py-1 text-center">Qty</th>
-                      <th className="py-1 text-right">Rate</th>
-                      <th className="py-1 text-right">Amt</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {orderItems.length > 0 ? (
-                      orderItems.map((item) => (
-                        <tr key={item.id}>
-                          <td className="py-1 font-medium">{item.name}</td>
-                          <td className="py-1 text-center">{item.quantity}</td>
-                          <td className="py-1 text-right">₹{item.unitPrice}</td>
-                          <td className="py-1 text-right font-semibold">₹{item.totalPrice}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td className="py-1 font-medium" colSpan={3}>Dhaba Dining Bill Amount</td>
-                        <td className="py-1 text-right font-semibold">₹{baseBill || 0}</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Totals Calculation Summary */}
-              <div className="text-[11px] space-y-1 border-b border-slate-900/40 pb-3 mb-3">
-                <div className="flex justify-between text-slate-700">
-                  <span>Gross Subtotal:</span>
-                  <span>₹{baseBill || 0}</span>
-                </div>
-                {calculatedDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-800 font-medium">
-                    <span>Discount ({discountPercent}%):</span>
-                    <span>-₹{calculatedDiscount.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-bold text-sm text-slate-900 pt-1 border-t border-slate-800">
-                  <span>Net Payable Amount:</span>
-                  <span>₹{finalBill.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Footer & QR */}
-              <div className="text-center text-[10px] space-y-2 pt-1">
-                {activeCoupon && (
-                  <div className="flex flex-col items-center justify-center my-2">
-                    <QRCodeCanvas value={`https://balajichilkur.com/menu?claimBonusToken=${activeCoupon.token}`} size={70} />
-                    <span className="font-bold text-[9px] mt-1">Token: {activeCoupon.token}</span>
-                  </div>
-                )}
-                <p className="font-semibold text-slate-800">Thank you for dining at Balaji Chilkur Family Dhaba!</p>
-                <p className="text-slate-500">Please visit again. Have a delicious day!</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Modal Footer Controls */}
-          <div className="flex items-center justify-between pt-2">
-            <span className="text-xs text-slate-500">Selected Format: <strong className="text-slate-900">{paperSize}</strong></span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setShowPrintModal(false)}
-                className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors"
-              >
-                Close Preview
-              </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="py-2 px-4 bg-[#1E4D2B] hover:bg-[#163a20] text-white font-semibold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
-              >
-                <Printer size={15} />
-                <span>Print Bill Now</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Global CSS for Window Print */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          body * {
-            visibility: hidden !important;
-          }
-          #printable-bill-area, #printable-bill-area * {
-            visibility: visible !important;
-          }
-          #printable-bill-area {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: ${paperSize === '58mm' ? '58mm' : paperSize === '80mm' ? '80mm' : '100%'} !important;
-            margin: 0 !important;
-            padding: 10px !important;
-            box-shadow: none !important;
-            border: none !important;
-          }
-          @page {
-            size: ${paperSize === '80mm' ? '80mm auto' : paperSize === '58mm' ? '58mm auto' : paperSize === 'A4' ? 'A4 portrait' : 'A5 portrait'};
-            margin: 0;
-          }
-        }
-      ` }} />
+      </AnimatePresence>
     </div>
-  );
-}
-
-export default function CheckoutRewardsPage() {
-  return (
-    <App>
-      <CheckoutRewardsContent />
-    </App>
   );
 }

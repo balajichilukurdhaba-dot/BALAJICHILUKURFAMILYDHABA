@@ -317,7 +317,7 @@ export default async function AdminDashboard() {
                       <div className="text-[11px] text-slate-500">{res.phone}</div>
                     </td>
                     <td className="px-4 sm:px-5 py-3.5 text-slate-700">
-                      <div className="font-medium">{res.date.toLocaleDateString()}</div>
+                      <div className="font-medium" suppressHydrationWarning>{new Date(res.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
                       <div className="text-[11px] text-slate-500">{res.time}</div>
                     </td>
                     <td className="px-4 sm:px-5 py-3.5 font-medium text-slate-900">{res.guests} Guests</td>

@@ -1,6 +1,4 @@
-import { ThemeConfig } from 'antd';
-
-export const antdTheme: ThemeConfig = {
+export const antdTheme: Record<string, any> = {
   token: {
     colorPrimary: '#1E4D2B', // Brand Orange
     colorBgLayout: '#FFFFFF', // Warm Cream brand canvas tone

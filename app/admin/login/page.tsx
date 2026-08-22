@@ -90,15 +90,18 @@ function AdminLoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 font-sans selection:bg-slate-800 selection:text-white antialiased relative overflow-hidden">
+    <div 
+      className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 py-8 sm:py-12 font-sans selection:bg-slate-800 selection:text-white antialiased relative overflow-y-auto"
+      data-lenis-prevent
+    >
       {/* Subtle Background Mesh Overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
 
       <motion.div 
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="w-full max-w-sm bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 p-8 space-y-6 relative z-10"
+        className="w-full max-w-sm bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 p-8 space-y-6 relative z-10 my-auto"
       >
         <div className="flex flex-col items-center text-center space-y-2">
           <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/80 flex items-center justify-center p-2 shadow-sm">

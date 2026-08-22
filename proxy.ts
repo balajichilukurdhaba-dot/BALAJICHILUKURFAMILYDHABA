@@ -44,8 +44,17 @@ export async function proxy(request: NextRequest) {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const isValidUrl = sanitizedUrl.startsWith('http://') || sanitizedUrl.startsWith('https://');
 
+  const adminCookie = request.cookies.get('admin_logged_in')?.value;
+  const loginTimeStr = request.cookies.get('admin_login_time')?.value;
+  const loginTime = loginTimeStr ? parseInt(loginTimeStr, 10) : null;
+  const MAX_SESSION_MS = 6 * 60 * 60 * 1000; // 6 hours
+  const isExpired = loginTime ? (Date.now() - loginTime > MAX_SESSION_MS) : false;
+
   let session = null;
-  if (sanitizedUrl && anonKey && isValidUrl) {
+  let isAuthenticated = (adminCookie === 'true') && !isExpired;
+
+  // Only make remote Supabase Auth network call if not already authenticated via fast cookie
+  if (!isAuthenticated && !isExpired && sanitizedUrl && anonKey && isValidUrl) {
     try {
       const supabase = createServerClient(
         sanitizedUrl,
@@ -74,18 +83,13 @@ export async function proxy(request: NextRequest) {
       );
       const { data } = await supabase.auth.getSession();
       session = data.session;
+      if (session) {
+        isAuthenticated = true;
+      }
     } catch (e) {
       console.warn('[proxy] Supabase auth session check failed:', e);
     }
   }
-
-  const MAX_SESSION_MS = 6 * 60 * 60 * 1000; // 6 hours
-  const loginTimeStr = request.cookies.get('admin_login_time')?.value;
-  const loginTime = loginTimeStr ? parseInt(loginTimeStr, 10) : null;
-  const isExpired = loginTime ? (Date.now() - loginTime > MAX_SESSION_MS) : false;
-
-  const adminCookie = request.cookies.get('admin_logged_in')?.value;
-  const isAuthenticated = (!!session || adminCookie === 'true') && !isExpired;
 
   if (isExpired && isAdminRoute && !isLoginRoute) {
     const redirectUrl = request.nextUrl.clone();
